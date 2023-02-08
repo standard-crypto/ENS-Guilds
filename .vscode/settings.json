@@ -12,5 +12,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true,
-  "liveServer.settings.root": "/coverage"
+  "liveServer.settings.root": "/coverage",
+  // only use words from .cspell.json
+  "cSpell.userWords": [],
+  "cSpell.enabled": true
 }

@@ -1,13 +1,17 @@
 extends:
+  - "standard-with-typescript"
   - "eslint:recommended"
   - "plugin:@typescript-eslint/eslint-recommended"
   - "plugin:@typescript-eslint/recommended"
+  - "plugin:eslint-comments/recommended"
   - "prettier"
 parser: "@typescript-eslint/parser"
 parserOptions:
   project: "tsconfig.json"
 plugins:
   - "@typescript-eslint"
+  - "import"
+  - "no-only-tests"
 root: true
 rules:
   "@typescript-eslint/no-floating-promises":
@@ -19,3 +23,9 @@ rules:
     - error
     - argsIgnorePattern: "_"
       varsIgnorePattern: "_"
+  "@typescript-eslint/explicit-function-return-type": "error"
+  "@typescript-eslint/no-explicit-any": "error"
+  "no-only-tests/no-only-tests": "error"
+  "no-console": "error"
+  "@typescript-eslint/key-spacing": "off"
+  "eslint-comments/no-unused-disable": "error"

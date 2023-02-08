@@ -1,0 +1,25 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "arbitrum",
+    "arrayify",
+    "bignumber",
+    "bytecode",
+    "esbuild",
+    "ethersproject",
+    "gavi",
+    "keccak",
+    "merkle",
+    "millis",
+    "Networkish",
+    "nomicfoundation",
+    "nomiclabs",
+    "rmrf",
+    "sepolia",
+    "typechain"
+  ],
+  "flagWords": [],
+  "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json"],
+  "useGitignore": true
+}

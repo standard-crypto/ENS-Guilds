@@ -1,3 +1,8 @@
 {
-  "recommendations": ["esbenp.prettier-vscode", "NomicFoundation.hardhat-solidity"]
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "NomicFoundation.hardhat-solidity",
+    "dbaeumer.vscode-eslint",
+    "streetsidesoftware.code-spell-checker"
+  ]
 }
