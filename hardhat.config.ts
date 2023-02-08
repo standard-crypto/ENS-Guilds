@@ -13,12 +13,12 @@ dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 // Ensure that we have all the environment variables we need.
 const mnemonic: string | undefined = process.env.MNEMONIC;
-if (!mnemonic) {
+if (mnemonic === undefined || mnemonic.length === 0) {
   throw new Error("Please set your MNEMONIC in a .env file");
 }
 
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
-if (!infuraApiKey) {
+if (infuraApiKey === undefined || infuraApiKey.length === 0) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
@@ -44,7 +44,8 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      jsonRpcUrl = `https://${chain}.infura.io/v3/${infuraApiKey!}`;
   }
   return {
     accounts: {

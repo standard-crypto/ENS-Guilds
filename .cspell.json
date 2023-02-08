@@ -6,6 +6,7 @@
     "arrayify",
     "bignumber",
     "bytecode",
+    "ensdomains",
     "esbuild",
     "ethersproject",
     "gavi",
