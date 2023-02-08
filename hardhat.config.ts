@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-dependency-compiler";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
@@ -7,7 +8,7 @@ import { resolve } from "path";
 import "./tasks/accounts";
 import "./tasks/deploy";
 
-const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
+const dotenvConfigPath: string = "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 // Ensure that we have all the environment variables we need.
@@ -61,20 +62,20 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       /* spell-checker: disable */
-      arbitrumOne: process.env.ARBISCAN_API_KEY || "",
-      avalanche: process.env.SNOWTRACE_API_KEY || "",
-      bsc: process.env.BSCSCAN_API_KEY || "",
-      mainnet: process.env.ETHERSCAN_API_KEY || "",
-      optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
-      polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
-      sepolia: process.env.ETHERSCAN_API_KEY || "",
+      arbitrumOne: process.env.ARBISCAN_API_KEY ?? "",
+      avalanche: process.env.SNOWTRACE_API_KEY ?? "",
+      bsc: process.env.BSCSCAN_API_KEY ?? "",
+      mainnet: process.env.ETHERSCAN_API_KEY ?? "",
+      optimisticEthereum: process.env.OPTIMISM_API_KEY ?? "",
+      polygon: process.env.POLYGONSCAN_API_KEY ?? "",
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY ?? "",
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
       /* spell-checker: enable */
     },
   },
   gasReporter: {
     currency: "USD",
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: !(process.env.REPORT_GAS == null),
     excludeContracts: [],
     src: "./contracts",
   },
@@ -119,6 +120,9 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "types",
     target: "ethers-v5",
+  },
+  dependencyCompiler: {
+    paths: ["@ensdomains/ens-contracts/contracts/registry/ENS.sol"],
   },
 };
 
