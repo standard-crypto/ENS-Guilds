@@ -18,7 +18,7 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
         address admin;
         IFeePolicy feePolicy;
         ITagsAuthPolicy tagsAuthPolicy;
-        bool paused;
+        bool active;
     }
 
     // NOTE: reference for ERC1155 NFT here: https://github.com/enjin/erc-1155/blob/master/contracts/ERC1155MixedFungible.sol
@@ -76,6 +76,9 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
         address feePolicy,
         address tagsAuthPolicy
     ) external override {
+        // Check caller is owner of domain
+        require(ensRegistry.owner(guildHash) == _msgSender());
+
         // Check guild not yet registered
         if (address(guilds[guildHash].feePolicy) != address(0)) {
             revert GuildRegistration_AlreadyRegistered();
@@ -98,15 +101,19 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
             admin: guildAdmin,
             feePolicy: IFeePolicy(feePolicy),
             tagsAuthPolicy: ITagsAuthPolicy(tagsAuthPolicy),
-            paused: false
+            active: true
         });
 
         emit Registered(guildHash);
-
-        // TODO: ?????? what did I forget to todo?
     }
 
-    function deregisterGuild(bytes32 guildHash) external override {}
+    function deregisterGuild(bytes32 guildHash) external override {
+        require(guilds[guildHash].admin == _msgSender());
+
+        delete guilds[guildHash];
+
+        emit Deregistered(guildHash);
+    }
 
     function claimGuildTag(
         bytes32 guildHash,
