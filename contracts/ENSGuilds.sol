@@ -8,12 +8,14 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
 import "./IENSGuilds.sol";
 import "./IFeePolicy.sol";
 import "./ITagsAuthPolicy.sol";
+import "./ENSResolver.sol";
 
-contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
+contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds, ENSResolver {
     struct GuildInfo {
         address admin;
         IFeePolicy feePolicy;
@@ -35,7 +37,11 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
     error GuildRegistration_IncorrectENSResolver();
     error GuildRegistration_InvalidPolicy(address);
 
-    constructor(string memory uri, ENS _ensRegistry) ERC1155(uri) {
+    constructor(
+        string memory uri,
+        ENS _ensRegistry,
+        IAddressResolver _fallbackEnsResolver
+    ) ERC1155(uri) ENSResolver(_fallbackEnsResolver) {
         _setupRole(PAUSER_ROLE, _msgSender());
         ensRegistry = _ensRegistry;
     }
@@ -55,8 +61,11 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControlEnumerable, ERC1155, IERC165) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    ) public view virtual override(AccessControlEnumerable, ENSResolver, ERC1155, IERC165) returns (bool) {
+        return
+            ENSResolver.supportsInterface(interfaceId) ||
+            ERC1155.supportsInterface(interfaceId) ||
+            AccessControlEnumerable.supportsInterface(interfaceId);
     }
 
     function _beforeTokenTransfer(
@@ -136,7 +145,7 @@ contract ENSGuilds is AccessControlEnumerable, ERC1155, Pausable, IENSGuilds {
     function updateGuildTagsAuthPolicy(bytes32 guildHash, address tagsAuthPolicy) external override {}
 
     function transferGuildAdmin(bytes32 guildHash, address newAdmin) external override {
-        // TODO: can it be 0?
+        // TODO: can admin be 0?
     }
 
     // TODO: helper view for calculating guild's token ID prefix?
