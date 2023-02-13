@@ -46,5 +46,7 @@ interface IENSGuilds is IERC1155 {
 
     function updateGuildTagsAuthPolicy(bytes32 guildHash, address tagsAuthPolicy) external;
 
+    function setGuildTokenUriTemplate(bytes32 guildHash, string calldata uriTemplate) external;
+
     function transferGuildAdmin(bytes32 guildHash, address newAdmin) external;
 }
