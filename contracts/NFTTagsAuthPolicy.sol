@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import "./ITagsAuthPolicy.sol";
-import "./IENSGuilds.sol";
+import "./interfaces/ITagsAuthPolicy.sol";
+import "./interfaces/IENSGuilds.sol";
 
 contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
     using ERC165Checker for address;

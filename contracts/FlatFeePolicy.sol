@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import "./IFeePolicy.sol";
-import "./IENSGuilds.sol";
+import "./interfaces/IFeePolicy.sol";
+import "./interfaces/IENSGuilds.sol";
 
 contract FlatFeePolicy is Context, IFeePolicy {
     using ERC165Checker for address;

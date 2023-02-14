@@ -11,9 +11,9 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
-import "./IENSGuilds.sol";
-import "./IFeePolicy.sol";
-import "./ITagsAuthPolicy.sol";
+import "./interfaces/IENSGuilds.sol";
+import "./interfaces/IFeePolicy.sol";
+import "./interfaces/ITagsAuthPolicy.sol";
 import "./ENSResolver.sol";
 import "./ENSGuildsToken.sol";
 
