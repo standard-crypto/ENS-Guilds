@@ -4,10 +4,12 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 import "./ITagsAuthPolicy.sol";
+import "./IENSGuilds.sol";
 
-contract NFTTagsAuthPolicy is ITagsAuthPolicy {
+contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
     using ERC165Checker for address;
 
     enum TokenStandard {
@@ -24,6 +26,28 @@ contract NFTTagsAuthPolicy is ITagsAuthPolicy {
         mapping(uint256 => TagClaim) tagClaims;
     }
     mapping(bytes32 => GuildInfo) guilds;
+    IENSGuilds private ensGuilds;
+
+    constructor(address _ensGuilds) {
+        require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
+        ensGuilds = IENSGuilds(_ensGuilds);
+    }
+
+    function setTokenContract(bytes32 guildHash, address tokenContract) external {
+        // caller must be guild admin
+        require(ensGuilds.guildAdmin(guildHash) == _msgSender());
+
+        // token contract must be ERC721 or ERC1155
+        if (tokenContract.supportsInterface(type(IERC721).interfaceId)) {
+            guilds[guildHash].tokenStandard = TokenStandard.ERC721;
+        } else if (tokenContract.supportsInterface(type(IERC1155).interfaceId)) {
+            guilds[guildHash].tokenStandard = TokenStandard.ERC1155;
+        } else {
+            revert();
+        }
+
+        guilds[guildHash].tokenContract = tokenContract;
+    }
 
     function canClaimTag(
         bytes32 guildHash,

@@ -4,7 +4,9 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
@@ -15,7 +17,7 @@ import "./ITagsAuthPolicy.sol";
 import "./ENSResolver.sol";
 import "./ENSGuildsToken.sol";
 
-contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGuilds, ENSResolver {
+contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGuilds, ENSResolver, ReentrancyGuard {
     struct GuildInfo {
         address admin;
         IFeePolicy feePolicy;
@@ -39,6 +41,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
     error ClaimUnauthorized();
     error GuildAdminOnly();
     error TagAlreadyClaimed();
+    error FeeError();
 
     modifier onlyGuildAdmin(bytes32 guildHash) {
         if (guilds[guildHash].admin != _msgSender()) {
@@ -80,9 +83,9 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
 
     function registerGuild(
         bytes32 guildHash,
-        address guildAdmin,
-        address feePolicy,
-        address tagsAuthPolicy
+        address admin,
+        address feePolicy, // 0 is valid
+        address tagsAuthPolicy // 0 is invalid
     ) external override {
         // Check caller is owner of domain
         require(ensRegistry.owner(guildHash) == _msgSender());
@@ -98,7 +101,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         }
 
         // Check for valid fee/tagsAuth policies
-        if (!feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
+        if (feePolicy != address(0) && !feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
             revert GuildRegistration_InvalidPolicy(feePolicy);
         }
         if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
@@ -106,7 +109,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         }
 
         guilds[guildHash] = GuildInfo({
-            admin: guildAdmin,
+            admin: admin,
             feePolicy: IFeePolicy(feePolicy),
             tagsAuthPolicy: ITagsAuthPolicy(tagsAuthPolicy),
             active: true
@@ -125,7 +128,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         bytes32 tagHash,
         address recipient,
         bytes calldata extraClaimArgs
-    ) external payable override {
+    ) external payable override nonReentrant {
         // assert guild is not frozen
         if (!guilds[guildHash].active) {
             revert GuildNotActive();
@@ -143,7 +146,27 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
             revert ClaimUnauthorized();
         }
 
-        // TODO: fees
+        // fees
+        if (guilds[guildHash].feePolicy != IFeePolicy(address(0))) {
+            (address feeToken, uint256 fee, address feePaidTo) = guilds[guildHash].feePolicy.tagClaimFee(
+                guildHash,
+                tagHash,
+                recipient,
+                extraClaimArgs
+            );
+            if (fee != 0) {
+                if (feeToken == address(0)) {
+                    if (msg.value != fee) {
+                        revert FeeError();
+                    }
+                    (bool sent, ) = feePaidTo.call{ value: msg.value }("");
+                    if (!sent) revert FeeError();
+                } else {
+                    bool sent = IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee);
+                    if (!sent) revert FeeError();
+                }
+            }
+        }
 
         // NFT mint
         _mintNewGuildToken(guildHash, recipient);
@@ -165,21 +188,34 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         bytes[] calldata extraClaimArgs
     ) external payable override {}
 
+    function guildAdmin(bytes32 guildHash) external view returns (address) {
+        return guilds[guildHash].admin;
+    }
+
     function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) public override {
         ITagsAuthPolicy auth = guilds[guildHash].tagsAuthPolicy;
         require(auth.tagCanBeRevoked(guildHash, tagHash, extraData));
         _revokeTag(guildHash, tagHash);
     }
 
-    function updateGuildFeePolicy(bytes32 guildHash, address feePolicy) external override onlyGuildAdmin(guildHash) {}
+    function updateGuildFeePolicy(bytes32 guildHash, address feePolicy) external override onlyGuildAdmin(guildHash) {
+        require(feePolicy.supportsInterface(type(IFeePolicy).interfaceId));
+        guilds[guildHash].feePolicy = IFeePolicy(feePolicy);
+        emit FeePolicyUpdated(guildHash, feePolicy);
+    }
 
     function updateGuildTagsAuthPolicy(
         bytes32 guildHash,
         address tagsAuthPolicy
-    ) external override onlyGuildAdmin(guildHash) {}
+    ) external override onlyGuildAdmin(guildHash) {
+        require(tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId));
+        guilds[guildHash].tagsAuthPolicy = ITagsAuthPolicy(tagsAuthPolicy);
+        emit TagsAuthPolicyUpdated(guildHash, tagsAuthPolicy);
+    }
 
     function transferGuildAdmin(bytes32 guildHash, address newAdmin) external override onlyGuildAdmin(guildHash) {
-        // TODO: can admin be 0?
+        guilds[guildHash].admin = newAdmin;
+        emit AdminTransferred(guildHash, newAdmin);
     }
 
     function setGuildTokenUriTemplate(

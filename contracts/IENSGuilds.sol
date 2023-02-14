@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
-interface IENSGuilds is IERC1155, IAddrResolver, IAddressResolver {
+interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155 {
     /** Events */
     event Registered(bytes32 indexed guildHash);
     event Deregistered(bytes32 indexed guildHash);
@@ -52,6 +52,8 @@ interface IENSGuilds is IERC1155, IAddrResolver, IAddressResolver {
     function setGuildTokenUriTemplate(bytes32 guildHash, string calldata uriTemplate) external;
 
     function setGuildActive(bytes32 guildHash, bool active) external;
+
+    function guildAdmin(bytes32 guildHash) external view returns (address);
 
     function transferGuildAdmin(bytes32 guildHash, address newAdmin) external;
 }
