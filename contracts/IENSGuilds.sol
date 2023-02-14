@@ -2,15 +2,18 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
-interface IENSGuilds is IERC1155 {
+interface IENSGuilds is IERC1155, IAddrResolver, IAddressResolver {
     /** Events */
     event Registered(bytes32 indexed guildHash);
     event Deregistered(bytes32 indexed guildHash);
     event TagClaimed(bytes32 indexed guildId, bytes32 indexed tagHash, address recipient);
     event FeePolicyUpdated(bytes32 indexed guildId, address feePolicy);
     event TagsAuthPolicyUpdated(bytes32 indexed guildId, address tagsAuthPolicy);
-    event GuildAdminTransferred(bytes32 indexed guildId, address newAdmin);
+    event AdminTransferred(bytes32 indexed guildId, address newAdmin);
+    event SetActive(bytes32 indexed guildId, bool active);
 
     /** Functions */
 
@@ -40,13 +43,15 @@ interface IENSGuilds is IERC1155 {
         bytes[] calldata extraClaimArgs
     ) external payable;
 
-    function revokeGuildTag(bytes32 guildHash, bytes32 tagHash) external;
+    function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) external;
 
     function updateGuildFeePolicy(bytes32 guildHash, address feePolicy) external;
 
     function updateGuildTagsAuthPolicy(bytes32 guildHash, address tagsAuthPolicy) external;
 
     function setGuildTokenUriTemplate(bytes32 guildHash, string calldata uriTemplate) external;
+
+    function setGuildActive(bytes32 guildHash, bool active) external;
 
     function transferGuildAdmin(bytes32 guildHash, address newAdmin) external;
 }

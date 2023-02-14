@@ -38,6 +38,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
     error GuildNotActive();
     error ClaimUnauthorized();
     error GuildAdminOnly();
+    error TagAlreadyClaimed();
 
     modifier onlyGuildAdmin(bytes32 guildHash) {
         if (guilds[guildHash].admin != _msgSender()) {
@@ -125,10 +126,18 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         address recipient,
         bytes calldata extraClaimArgs
     ) external payable override {
+        // assert guild is not frozen
         if (!guilds[guildHash].active) {
             revert GuildNotActive();
         }
 
+        // check tag not already claimed
+        bytes32 ensNode = keccak256(abi.encodePacked(tagHash, guildHash));
+        if (addr(ensNode) != address(0)) {
+            revert TagAlreadyClaimed();
+        }
+
+        // check caller is authorized to claim tag
         ITagsAuthPolicy auth = guilds[guildHash].tagsAuthPolicy;
         if (!auth.canClaimTag(guildHash, tagHash, _msgSender(), recipient, extraClaimArgs)) {
             revert ClaimUnauthorized();
@@ -136,13 +145,16 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
 
         // TODO: fees
 
-        // TODO: revocation
-
         // NFT mint
         _mintNewGuildToken(guildHash, recipient);
 
+        // inform auth contract that tag was claimed, optionally revoking an existing tag in the process
+        bytes32 tagToRevoke = auth.onTagClaimed(guildHash, tagHash, _msgSender(), recipient, extraClaimArgs);
+        if (tagToRevoke != bytes32(0)) {
+            _revokeTag(guildHash, tagToRevoke);
+        }
+
         // Set forward record in ENS resolver
-        bytes32 ensNode = keccak256(abi.encodePacked(tagHash, guildHash));
         _setEnsForwardRecord(ensNode, recipient);
     }
 
@@ -153,7 +165,11 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         bytes[] calldata extraClaimArgs
     ) external payable override {}
 
-    function revokeGuildTag(bytes32 guildHash, bytes32 tagHash) public override {}
+    function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) public override {
+        ITagsAuthPolicy auth = guilds[guildHash].tagsAuthPolicy;
+        require(auth.tagCanBeRevoked(guildHash, tagHash, extraData));
+        _revokeTag(guildHash, tagHash);
+    }
 
     function updateGuildFeePolicy(bytes32 guildHash, address feePolicy) external override onlyGuildAdmin(guildHash) {}
 
@@ -171,5 +187,18 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
         string calldata uriTemplate
     ) external override onlyGuildAdmin(guildHash) {
         _setGuildTokenURITemplate(guildHash, uriTemplate);
+    }
+
+    function setGuildActive(bytes32 guildHash, bool active) external override onlyGuildAdmin(guildHash) {
+        guilds[guildHash].active = active;
+        emit SetActive(guildHash, active);
+    }
+
+    function _revokeTag(bytes32 guildHash, bytes32 tagHash) private {
+        bytes32 ensNode = keccak256(abi.encodePacked(tagHash, guildHash));
+        // erase ENS forward record
+        _setEnsForwardRecord(ensNode, address(0));
+        // TODO: burn NFT
+        // TODO: erase ENS reverse record?
     }
 }

@@ -15,4 +15,18 @@ abstract contract ITagsAuthPolicy is IERC165 {
         address recipient,
         bytes calldata extraClaimArgs
     ) external virtual returns (bool);
+
+    function onTagClaimed(
+        bytes32 guildHash,
+        bytes32 tagHash,
+        address claimant,
+        address recipient,
+        bytes calldata extraClaimArgs
+    ) external virtual returns (bytes32 tagToRevoke);
+
+    function tagCanBeRevoked(
+        bytes32 guildHash,
+        bytes32 tagHash,
+        bytes calldata extraRevokeArgs
+    ) external virtual returns (bool);
 }
