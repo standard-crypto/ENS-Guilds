@@ -3,9 +3,9 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-abstract contract ITagsAuthPolicy is ERC165 {
+abstract contract TagsAuthPolicy is ERC165 {
     function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {
-        return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);
+        return interfaceID == type(TagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);
     }
 
     function canClaimTag(

@@ -10,11 +10,11 @@ import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
 import "./interfaces/IENSGuilds.sol";
-import "./interfaces/IFeePolicy.sol";
-import "./interfaces/ITagsAuthPolicy.sol";
-import "./ENSResolver.sol";
-import "./ENSGuildsToken.sol";
-import "./ENSGuildsHumanized.sol";
+import "../feePolicies/FeePolicy.sol";
+import "../tagsAuthPolicies/TagsAuthPolicy.sol";
+import "./mixins/ENSResolver.sol";
+import "./mixins/ENSGuildsToken.sol";
+import "./mixins/ENSGuildsHumanized.sol";
 
 contract ENSGuilds is
     AccessControlEnumerable,
@@ -27,8 +27,8 @@ contract ENSGuilds is
 {
     struct GuildInfo {
         address admin;
-        IFeePolicy feePolicy;
-        ITagsAuthPolicy tagsAuthPolicy;
+        FeePolicy feePolicy;
+        TagsAuthPolicy tagsAuthPolicy;
         bool active;
     }
 
@@ -114,17 +114,17 @@ contract ENSGuilds is
         }
 
         // Check for valid fee/tagsAuth policies
-        if (feePolicy != address(0) && !feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
+        if (feePolicy != address(0) && !feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
-        if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
+        if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
 
         guilds[ensNode] = GuildInfo({
             admin: admin,
-            feePolicy: IFeePolicy(feePolicy),
-            tagsAuthPolicy: ITagsAuthPolicy(tagsAuthPolicy),
+            feePolicy: FeePolicy(feePolicy),
+            tagsAuthPolicy: TagsAuthPolicy(tagsAuthPolicy),
             active: true
         });
 
@@ -154,13 +154,13 @@ contract ENSGuilds is
         }
 
         // check caller is authorized to claim tagguildEnsNode
-        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
         if (!auth.canClaimTag(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs)) {
             revert ClaimUnauthorized();
         }
 
         // fees
-        if (guilds[guildEnsNode].feePolicy != IFeePolicy(address(0))) {
+        if (guilds[guildEnsNode].feePolicy != FeePolicy(address(0))) {
             (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
                 guildEnsNode,
                 tagHash,
@@ -207,7 +207,7 @@ contract ENSGuilds is
     }
 
     function revokeGuildTag(bytes32 guildEnsNode, bytes32 tagHash, bytes calldata extraData) public override {
-        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
         if (!auth.tagCanBeRevoked(guildEnsNode, tagHash, extraData)) {
             revert RevokeUnauthorized();
         }
@@ -218,10 +218,10 @@ contract ENSGuilds is
         bytes32 guildEnsNode,
         address feePolicy
     ) external override onlyGuildAdmin(guildEnsNode) {
-        if (!feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
+        if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
-        guilds[guildEnsNode].feePolicy = IFeePolicy(feePolicy);
+        guilds[guildEnsNode].feePolicy = FeePolicy(feePolicy);
         emit FeePolicyUpdated(guildEnsNode, feePolicy);
     }
 
@@ -229,10 +229,10 @@ contract ENSGuilds is
         bytes32 guildEnsNode,
         address tagsAuthPolicy
     ) external override onlyGuildAdmin(guildEnsNode) {
-        if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
+        if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
-        guilds[guildEnsNode].tagsAuthPolicy = ITagsAuthPolicy(tagsAuthPolicy);
+        guilds[guildEnsNode].tagsAuthPolicy = TagsAuthPolicy(tagsAuthPolicy);
         emit TagsAuthPolicyUpdated(guildEnsNode, tagsAuthPolicy);
     }
 

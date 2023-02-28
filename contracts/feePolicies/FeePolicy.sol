@@ -3,9 +3,9 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-abstract contract IFeePolicy is ERC165 {
+abstract contract FeePolicy is ERC165 {
     function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {
-        return interfaceID == type(IFeePolicy).interfaceId || super.supportsInterface(interfaceID);
+        return interfaceID == type(FeePolicy).interfaceId || super.supportsInterface(interfaceID);
     }
 
     // tokenContract(0) == ETH

@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import "./interfaces/ITagsAuthPolicy.sol";
-import "./interfaces/IENSGuilds.sol";
+import "./TagsAuthPolicy.sol";
+import "../ensGuilds/interfaces/IENSGuilds.sol";
 
-contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
+contract NFTTagsAuthPolicy is Context, TagsAuthPolicy {
     using ERC165Checker for address;
 
     enum TokenStandard {
