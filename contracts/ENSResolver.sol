@@ -3,9 +3,9 @@ pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-abstract contract ENSResolver is IAddrResolver, IAddressResolver, IERC165 {
+abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
     uint256 private constant COIN_TYPE_ETH = 60;
     IAddressResolver private fallbackResolver;
 
@@ -39,13 +39,15 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, IERC165 {
         return addressToBytes(a);
     }
 
-    function supportsInterface(bytes4 interfaceID) public view virtual override returns (bool) {
-        return interfaceID == type(IAddrResolver).interfaceId || interfaceID == type(IAddressResolver).interfaceId;
+    function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {
+        return
+            interfaceID == type(IAddrResolver).interfaceId ||
+            interfaceID == type(IAddressResolver).interfaceId ||
+            super.supportsInterface(interfaceID);
     }
 
-    /**
-     * Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol#L85
-     */
+    // solhint-disable
+    // Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol#L85
     function bytesToAddress(bytes memory b) internal pure returns (address payable a) {
         require(b.length == 20);
         assembly {
@@ -53,13 +55,12 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, IERC165 {
         }
     }
 
-    /**
-     * Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol#L96
-     */
+    // Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol#L96
     function addressToBytes(address a) internal pure returns (bytes memory b) {
         b = new bytes(20);
         assembly {
             mstore(add(b, 32), mul(a, exp(256, 12)))
         }
     }
+    // solhint-enable
 }

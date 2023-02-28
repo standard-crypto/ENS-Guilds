@@ -25,16 +25,18 @@ contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
         TokenStandard tokenStandard;
         mapping(uint256 => TagClaim) tagClaims;
     }
-    mapping(bytes32 => GuildInfo) guilds;
+    mapping(bytes32 => GuildInfo) public guilds;
     IENSGuilds private ensGuilds;
 
     constructor(address _ensGuilds) {
+        // solhint-disable-next-line reason-string
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = IENSGuilds(_ensGuilds);
     }
 
     function setTokenContract(bytes32 guildHash, address tokenContract) external {
         // caller must be guild admin
+        // solhint-disable-next-line reason-string
         require(ensGuilds.guildAdmin(guildHash) == _msgSender());
 
         // token contract must be ERC721 or ERC1155
@@ -43,6 +45,7 @@ contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
         } else if (tokenContract.supportsInterface(type(IERC1155).interfaceId)) {
             guilds[guildHash].tokenStandard = TokenStandard.ERC1155;
         } else {
+            // solhint-disable-next-line reason-string
             revert();
         }
 
@@ -51,9 +54,9 @@ contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
 
     function canClaimTag(
         bytes32 guildHash,
-        bytes32 tagHash,
+        bytes32,
         address claimant,
-        address recipient,
+        address,
         bytes calldata extraClaimArgs
     ) external virtual override returns (bool) {
         GuildInfo storage guildInfo = guilds[guildHash];
@@ -83,7 +86,7 @@ contract NFTTagsAuthPolicy is Context, ITagsAuthPolicy {
         bytes32 guildHash,
         bytes32 tagHash,
         address claimant,
-        address recipient,
+        address,
         bytes calldata extraClaimArgs
     ) external virtual override returns (bytes32 tagToRevoke) {
         uint256 nftTokenId = uint256(bytes32(extraClaimArgs));

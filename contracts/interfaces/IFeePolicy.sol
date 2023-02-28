@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/interfaces/IERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-abstract contract IFeePolicy is IERC165 {
-    function supportsInterface(bytes4 interfaceID) public view virtual override returns (bool) {
-        return interfaceID == type(IFeePolicy).interfaceId;
+abstract contract IFeePolicy is ERC165 {
+    function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {
+        return interfaceID == type(IFeePolicy).interfaceId || super.supportsInterface(interfaceID);
     }
 
     // tokenContract(0) == ETH

@@ -37,7 +37,7 @@ abstract contract ENSGuildsToken is ERC1155 {
 
     function _mintNewGuildToken(bytes32 guildHash, address to) internal {
         uint256 tokenCounterCurrent = guilds[guildHash].tokenIdTracker.current();
-        require(tokenCounterCurrent < type(uint128).max);
+        require(tokenCounterCurrent < type(uint128).max, "tokenCounterOverflow");
 
         guilds[guildHash].tokenIdTracker.increment();
 

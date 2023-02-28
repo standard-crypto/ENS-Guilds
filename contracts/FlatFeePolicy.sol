@@ -17,15 +17,17 @@ contract FlatFeePolicy is Context, IFeePolicy {
         uint256 fee;
         address feePaidTo;
     }
-    mapping(bytes32 => FeeInfo) guildFees;
+    mapping(bytes32 => FeeInfo) public guildFees;
 
     constructor(address _ensGuilds) {
+        // solhint-disable-next-line reason-string
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = IENSGuilds(_ensGuilds);
     }
 
     function setFlatFee(bytes32 guildHash, address feeToken, uint256 fee, address feePaidTo) external {
         // caller must be guild admin
+        // solhint-disable-next-line reason-string
         require(ensGuilds.guildAdmin(guildHash) == _msgSender());
 
         guildFees[guildHash] = FeeInfo({ feeToken: feeToken, fee: fee, feePaidTo: feePaidTo });
@@ -33,9 +35,9 @@ contract FlatFeePolicy is Context, IFeePolicy {
 
     function tagClaimFee(
         bytes32 guildHash,
-        bytes32 tagHash,
-        address recipient,
-        bytes calldata extraClaimArgs
+        bytes32,
+        address,
+        bytes calldata
     ) external view virtual override returns (address tokenContract, uint256 fee, address feePaidTo) {
         FeeInfo storage feeInfo = guildFees[guildHash];
         return (feeInfo.feeToken, feeInfo.fee, feeInfo.feePaidTo);

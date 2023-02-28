@@ -1,11 +1,11 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-deploy";
 import type { HardhatUserConfig } from "hardhat/config";
-import type { NetworkUserConfig } from "hardhat/types";
+import type { HttpNetworkUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 
 import "./tasks/accounts";
-import "./tasks/deploy";
 
 const dotenvConfigPath: string = "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -79,12 +79,33 @@ const config: HardhatUserConfig = {
     excludeContracts: [],
     src: "./contracts",
   },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+    ensRegistrar: {
+      default: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
+    },
+    ensRegistry: {
+      default: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+    },
+    ensDefaultResolver: {
+      default: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+    },
+  },
   networks: {
     hardhat: {
-      accounts: {
-        mnemonic,
-      },
+      // accounts: {
+      //   mnemonic,
+      // },
       chainId: chainIds.hardhat,
+      tags: ["test"],
+      hardfork: "london",
+      forking: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        url: (getChainConfig("mainnet") as HttpNetworkUserConfig).url!,
+        blockNumber: 16644091,
+      },
     },
     arbitrum: getChainConfig("arbitrum-mainnet"),
     avalanche: getChainConfig("avalanche"),
