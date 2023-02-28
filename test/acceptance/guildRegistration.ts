@@ -55,7 +55,7 @@ export function testGuildRegistration(): void {
         const tx = ensGuilds
           .connect(signer)
           .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
-        await expect(tx).to.be.revertedWithCustomError(ensGuilds, "AlreadyRegistered");
+        await this.expectRevertedWithCustomError(tx, "AlreadyRegistered");
       });
     });
 
@@ -73,7 +73,7 @@ export function testGuildRegistration(): void {
         const tx = ensGuilds
           .connect(signer)
           .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
-        await expect(tx).to.be.revertedWithCustomError(ensGuilds, "NotDomainOwner");
+        await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
 
@@ -88,7 +88,7 @@ export function testGuildRegistration(): void {
         const tx = ensGuilds
           .connect(signer)
           .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
-        await expect(tx).to.be.revertedWithCustomError(ensGuilds, "NotDomainOwner");
+        await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
 
@@ -101,7 +101,7 @@ export function testGuildRegistration(): void {
         const tx = ensGuilds
           .connect(signer)
           .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
-        await expect(tx).to.be.revertedWithCustomError(ensGuilds, "IncorrectENSResolver");
+        await this.expectRevertedWithCustomError(tx, "IncorrectENSResolver");
       });
     });
   });

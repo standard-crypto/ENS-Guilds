@@ -14,8 +14,17 @@ import "./interfaces/IFeePolicy.sol";
 import "./interfaces/ITagsAuthPolicy.sol";
 import "./ENSResolver.sol";
 import "./ENSGuildsToken.sol";
+import "./ENSGuildsHumanized.sol";
 
-contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGuilds, ENSResolver, ReentrancyGuard {
+contract ENSGuilds is
+    AccessControlEnumerable,
+    IENSGuilds,
+    ENSGuildsHumanized,
+    ENSGuildsToken,
+    Pausable,
+    ENSResolver,
+    ReentrancyGuard
+{
     struct GuildInfo {
         address admin;
         IFeePolicy feePolicy;

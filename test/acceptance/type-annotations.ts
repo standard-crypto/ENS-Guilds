@@ -1,13 +1,14 @@
-import type { ENS, ENSGuilds, FlatFeePolicy, IBaseRegistrar, NFTTagsAuthPolicy } from "../../types";
+import type { ContractTransaction } from "ethers";
+
+import type { ENS, FlatFeePolicy, IENSGuilds, NFTTagsAuthPolicy } from "../../types";
 
 declare module "mocha" {
   export interface Context {
     deployedContracts: {
-      ensGuilds: ENSGuilds;
+      ensGuilds: IENSGuilds;
       nftAuthPolicy: NFTTagsAuthPolicy;
       flatFeePolicy: FlatFeePolicy;
       ensRegistry: ENS;
-      ensRegistrar: IBaseRegistrar;
     };
 
     guildInfo: {
@@ -20,5 +21,7 @@ declare module "mocha" {
     addresses: {
       unauthorizedThirdParty: string;
     };
+
+    expectRevertedWithCustomError: (tx: Promise<ContractTransaction>, customErrorName: string) => Promise<void>;
   }
 }
