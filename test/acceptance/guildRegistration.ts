@@ -7,7 +7,7 @@ import { asAccount } from "../utils";
 export function testGuildRegistration(): void {
   describe("Guild Registration", function () {
     it("A domain owner can register their domain for minting", async function () {
-      const { ensRegistry, ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
@@ -15,12 +15,12 @@ export function testGuildRegistration(): void {
         await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
 
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
       });
     });
 
     it("A subdomain owner can register their domain for minting", async function () {
-      const { ensRegistry, ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { domain, ensNameOwner, ensNode, admin } = this.guildInfo;
 
       const subdomain = "test-subdomain";
@@ -36,12 +36,12 @@ export function testGuildRegistration(): void {
         expect(owner).eq(ensNameOwner);
 
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(guildHash, admin, flatFeePolicy.address, nftAuthPolicy.address);
+        await ensGuilds.connect(signer).registerGuild(guildHash, admin, flatFeePolicy.address, openAuthPolicy.address);
       });
     });
 
     it("A domain owner cannot register an already registered domain", async function () {
-      const { ensRegistry, ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
@@ -49,18 +49,18 @@ export function testGuildRegistration(): void {
         await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
 
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
 
         // Register the guild again
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
         await this.expectRevertedWithCustomError(tx, "AlreadyRegistered");
       });
     });
 
     it("A guild cannot be registered by a non-owner of that domain", async function () {
-      const { ensRegistry, ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { unauthorizedThirdParty } = this.addresses;
 
@@ -72,13 +72,13 @@ export function testGuildRegistration(): void {
       await asAccount(unauthorizedThirdParty, async (signer) => {
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
         await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
 
     it("A guild cannot be registered for a non-existent ENS name", async function () {
-      const { ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { admin } = this.guildInfo;
       const { unauthorizedThirdParty } = this.addresses;
 
@@ -87,20 +87,20 @@ export function testGuildRegistration(): void {
       await asAccount(unauthorizedThirdParty, async (signer) => {
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
         await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
 
     it("A guild cannot be registered until the domain owner has set ENSGuilds as its resolver", async function () {
-      const { ensGuilds, flatFeePolicy, nftAuthPolicy } = this.deployedContracts;
+      const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, nftAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
         await this.expectRevertedWithCustomError(tx, "IncorrectENSResolver");
       });
     });

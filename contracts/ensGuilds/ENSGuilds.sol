@@ -95,8 +95,8 @@ contract ENSGuilds is
     function registerGuild(
         bytes32 ensNode,
         address admin,
-        address feePolicy, // 0 is valid
-        address tagsAuthPolicy // 0 is invalid
+        address feePolicy,
+        address tagsAuthPolicy
     ) external override {
         // Check caller is owner of domain
         if (ensRegistry.owner(ensNode) != _msgSender()) {
@@ -114,7 +114,7 @@ contract ENSGuilds is
         }
 
         // Check for valid fee/tagsAuth policies
-        if (feePolicy != address(0) && !feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
+        if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
         if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
@@ -160,25 +160,23 @@ contract ENSGuilds is
         }
 
         // fees
-        if (guilds[guildEnsNode].feePolicy != FeePolicy(address(0))) {
-            (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
-                guildEnsNode,
-                tagHash,
-                recipient,
-                extraClaimArgs
-            );
-            if (fee != 0) {
-                if (feeToken == address(0)) {
-                    if (msg.value != fee) {
-                        revert FeeError();
-                    }
-                    // solhint-disable-next-line avoid-low-level-calls
-                    (bool sent, ) = feePaidTo.call{ value: msg.value }("");
-                    if (!sent) revert FeeError();
-                } else {
-                    bool sent = IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee);
-                    if (!sent) revert FeeError();
+        (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
+            guildEnsNode,
+            tagHash,
+            recipient,
+            extraClaimArgs
+        );
+        if (fee != 0) {
+            if (feeToken == address(0)) {
+                if (msg.value != fee) {
+                    revert FeeError();
                 }
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool sent, ) = feePaidTo.call{ value: msg.value }("");
+                if (!sent) revert FeeError();
+            } else {
+                bool sent = IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee);
+                if (!sent) revert FeeError();
             }
         }
 

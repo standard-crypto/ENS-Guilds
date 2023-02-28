@@ -5,7 +5,7 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, ensRegistry, ensDefaultResolver } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
 
   const baseDeployArgs = {
     from: deployer,
@@ -14,17 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deterministicDeployment: !hre.network.tags.test,
   };
 
-  // ENSGuilds
-  const ensGuildsDeployment = await deploy("ENSGuilds", {
-    ...baseDeployArgs,
-    args: ["stubMetadataUri", ensRegistry, ensDefaultResolver],
-  });
-
-  // NFTTagsAuthPolicy
-  await deploy("NFTTagsAuthPolicy", {
-    ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
-  });
+  const ensGuildsDeployment = await deployments.get("ENSGuilds");
 
   // FlatFeePolicy
   await deploy("FlatFeePolicy", {
@@ -34,5 +24,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   return true;
 };
-func.id = "001_deploy_contracts";
+func.id = "002_deploy_fee_policies";
 export default func;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -9,7 +10,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "./TagsAuthPolicy.sol";
 import "../ensGuilds/interfaces/IENSGuilds.sol";
 
-contract NFTTagsAuthPolicy is Context, TagsAuthPolicy {
+contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
     using ERC165Checker for address;
 
     enum TokenStandard {
@@ -88,7 +89,11 @@ contract NFTTagsAuthPolicy is Context, TagsAuthPolicy {
         address claimant,
         address,
         bytes calldata extraClaimArgs
-    ) external virtual override returns (bytes32 tagToRevoke) {
+    ) external virtual override nonReentrant returns (bytes32 tagToRevoke) {
+        // Caller must be ENSGuilds contract
+        // solhint-disable-next-line reason-string
+        require(_msgSender() == address(ensGuilds));
+
         uint256 nftTokenId = uint256(bytes32(extraClaimArgs));
 
         tagToRevoke = guilds[guildHash].tagClaims[nftTokenId].tagHash;

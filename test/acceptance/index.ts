@@ -6,6 +6,7 @@ import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardh
 import { IENSGuilds__factory } from "../../types";
 import { setBalance } from "../utils";
 import { testGuildRegistration } from "./guildRegistration";
+import { testMintAuthorization } from "./mintAuthorization";
 
 describe("Acceptance Tests", function () {
   beforeEach("Base setup", async function () {
@@ -15,6 +16,8 @@ describe("Acceptance Tests", function () {
     const { ensRegistry } = await getNamedAccounts();
     const ensGuildsDeployment = await deployments.get("ENSGuilds");
     const nftAuthPolicyDeployment = await deployments.get("NFTTagsAuthPolicy");
+    const allowlistAuthPolicyDeployment = await deployments.get("AllowlistTagsAuthPolicy");
+    const openAuthPolicyDeployment = await deployments.get("OpenTagsAuthPolicy");
     const flatFeePolicyDeployment = await deployments.get("FlatFeePolicy");
 
     const ensGuildsImpl = await ethers.getContractAt("ENSGuilds", ensGuildsDeployment.address);
@@ -26,14 +29,16 @@ describe("Acceptance Tests", function () {
 
       ensGuilds: IENSGuilds__factory.connect(ensGuildsDeployment.address, ethers.provider),
       flatFeePolicy: await ethers.getContractAt("FlatFeePolicy", flatFeePolicyDeployment.address),
+      openAuthPolicy: await ethers.getContractAt("OpenTagsAuthPolicy", openAuthPolicyDeployment.address),
       nftAuthPolicy: await ethers.getContractAt("NFTTagsAuthPolicy", nftAuthPolicyDeployment.address),
+      allowlistAuthPolicy: await ethers.getContractAt("AllowlistTagsAuthPolicy", allowlistAuthPolicyDeployment.address),
     };
 
     // Setup basic info for a guild that is / will be registered
     const ensName = "standard-crypto.eth";
     const guildHash = namehash(ensName);
     const ensNameOwner = await ens.owner(guildHash);
-    const [guildAdmin, unauthorizedThirdParty] = await getUnnamedAccounts();
+    const [guildAdmin, minter, unauthorizedThirdParty] = await getUnnamedAccounts();
 
     this.guildInfo = {
       domain: ensName,
@@ -43,12 +48,14 @@ describe("Acceptance Tests", function () {
     };
 
     this.addresses = {
+      minter,
       unauthorizedThirdParty,
     };
 
     // Fund plenty of gas for some important accounts
     await setBalance(ensNameOwner, parseEther("100000000"));
     await setBalance(guildAdmin, parseEther("100000000"));
+    await setBalance(minter, parseEther("100000000"));
     await setBalance(unauthorizedThirdParty, parseEther("100000000"));
 
     this.expectRevertedWithCustomError = async (
@@ -60,4 +67,5 @@ describe("Acceptance Tests", function () {
   });
 
   testGuildRegistration.bind(this)();
+  testMintAuthorization.bind(this)();
 });
