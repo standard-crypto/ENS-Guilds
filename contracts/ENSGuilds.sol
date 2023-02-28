@@ -34,7 +34,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
     /** Errors */
     error AlreadyRegistered();
     error IncorrectENSResolver();
-    error NotDomainOwner(address);
+    error NotDomainOwner();
     error InvalidPolicy(address);
     error GuildNotActive();
     error ClaimUnauthorized();
@@ -91,7 +91,7 @@ contract ENSGuilds is AccessControlEnumerable, ENSGuildsToken, Pausable, IENSGui
     ) external override {
         // Check caller is owner of domain
         if (ensRegistry.owner(ensNode) != _msgSender()) {
-            revert NotDomainOwner(_msgSender());
+            revert NotDomainOwner();
         }
 
         // Check guild not yet registered

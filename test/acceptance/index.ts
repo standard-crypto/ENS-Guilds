@@ -10,15 +10,17 @@ describe("Acceptance Tests", function () {
     await deployments.fixture();
 
     // Grab handles to all deployed contracts
-    const { ensRegistry } = await getNamedAccounts();
+    const { ensRegistry, ensRegistrar } = await getNamedAccounts();
     const ensGuildsDeployment = await deployments.get("ENSGuilds");
     const nftAuthPolicyDeployment = await deployments.get("NFTTagsAuthPolicy");
     const flatFeePolicyDeployment = await deployments.get("FlatFeePolicy");
 
     const ens = await ethers.getContractAt("ENS", ensRegistry);
+    const ensRegistrarContract = await ethers.getContractAt("IBaseRegistrar", ensRegistrar);
 
     this.deployedContracts = {
       ensRegistry: ens,
+      ensRegistrar: ensRegistrarContract,
 
       ensGuilds: await ethers.getContractAt("ENSGuilds", ensGuildsDeployment.address),
       flatFeePolicy: await ethers.getContractAt("FlatFeePolicy", flatFeePolicyDeployment.address),
@@ -29,7 +31,7 @@ describe("Acceptance Tests", function () {
     const ensName = "standard-crypto.eth";
     const guildHash = namehash(ensName);
     const ensNameOwner = await ens.owner(guildHash);
-    const [guildAdmin] = await getUnnamedAccounts();
+    const [guildAdmin, unauthorizedThirdParty] = await getUnnamedAccounts();
 
     this.guildInfo = {
       domain: ensName,
@@ -38,9 +40,14 @@ describe("Acceptance Tests", function () {
       admin: guildAdmin,
     };
 
+    this.addresses = {
+      unauthorizedThirdParty,
+    };
+
     // Fund plenty of gas for some important accounts
     await setBalance(ensNameOwner, parseEther("100000000"));
     await setBalance(guildAdmin, parseEther("100000000"));
+    await setBalance(unauthorizedThirdParty, parseEther("100000000"));
   });
 
   testGuildRegistration.bind(this)();

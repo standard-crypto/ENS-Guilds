@@ -84,7 +84,7 @@ const config: HardhatUserConfig = {
       default: 0,
     },
     ensRegistrar: {
-      default: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
+      default: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
     },
     ensRegistry: {
       default: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
