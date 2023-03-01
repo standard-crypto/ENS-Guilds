@@ -1,10 +1,11 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import type { ContractTransaction } from "ethers";
 import { namehash, parseEther } from "ethers/lib/utils";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import { IENSGuilds__factory } from "../../types";
-import { setBalance } from "../utils";
+import { testEnsRecords } from "./ensRecords";
 import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
 
@@ -68,4 +69,5 @@ describe("Acceptance Tests", function () {
 
   testGuildRegistration.bind(this)();
   testMintAuthorization.bind(this)();
+  testEnsRecords.bind(this)();
 });

@@ -8,11 +8,11 @@ export function testMintAuthorization(): void {
   describe("Mint Authorization", function () {
     beforeEach("Set ENSGuilds contract as the ENS resolver for the domain", async function () {
       const { ensRegistry, ensGuilds } = this.deployedContracts;
-      const { ensNameOwner, ensNode } = this.guildInfo;
+      const { ensNameOwner } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as the new ENS resolver
-        await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
+        // Set ENSGuilds contract as an approved operator
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
       });
     });
 
@@ -176,6 +176,24 @@ export function testMintAuthorization(): void {
       await asAccount(minter2, async (signer) => {
         const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, []);
         await this.expectRevertedWithCustomError(tx, "TagAlreadyClaimed");
+      });
+    });
+
+    it("Caller can specify different address to receive the tag if authz policy allows", async function () {
+      const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
+      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { minter, unauthorizedThirdParty: tagRecipient } = this.addresses;
+
+      const tagToMint = ensLabelHash("test");
+
+      // Register guild
+      await asAccount(ensNameOwner, async (signer) => {
+        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+      });
+
+      // claim a tag for a separate recipient
+      await asAccount(minter, async (signer) => {
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, tagRecipient, []);
       });
     });
   });

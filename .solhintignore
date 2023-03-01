@@ -1,3 +1,6 @@
 # directories
 **/artifacts
 **/node_modules
+
+# Third party libraries
+contracts/libraries/ENSNamehash.sol

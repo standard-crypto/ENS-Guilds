@@ -42,7 +42,7 @@ contract ENSGuilds is
 
     /** Errors */
     error AlreadyRegistered();
-    error IncorrectENSResolver();
+    error ENSGuildsIsNotRegisteredOperator();
     error NotDomainOwner();
     error InvalidPolicy(address);
     error GuildNotActive();
@@ -109,8 +109,8 @@ contract ENSGuilds is
         }
 
         // Check ENSGuilds contract has been configured as ENS resolver for the guild
-        if (ensRegistry.resolver(ensNode) != address(this)) {
-            revert IncorrectENSResolver();
+        if (!ensRegistry.isApprovedForAll(_msgSender(), address(this))) {
+            revert ENSGuildsIsNotRegisteredOperator();
         }
 
         // Check for valid fee/tagsAuth policies
@@ -148,7 +148,7 @@ contract ENSGuilds is
         }
 
         // check tag not already claimed
-        bytes32 ensNode = keccak256(abi.encodePacked(tagHash, guildEnsNode));
+        bytes32 ensNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
         if (addr(ensNode) != address(0)) {
             revert TagAlreadyClaimed();
         }
@@ -188,6 +188,9 @@ contract ENSGuilds is
         if (tagToRevoke != bytes32(0)) {
             _revokeTag(guildEnsNode, tagToRevoke);
         }
+
+        // Register this new name in ENS
+        ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(this), address(this), 0);
 
         // Set forward record in ENS resolver
         _setEnsForwardRecord(ensNode, recipient);

@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { namehash } from "ethers/lib/utils";
 
 import { ensLabelHash } from "../../utils";
@@ -11,9 +10,8 @@ export function testGuildRegistration(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as the new ENS resolver
-        await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
-
+        // Set ENSGuilds contract as an ENS operator
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
         // Register guild
         await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
       });
@@ -31,9 +29,10 @@ export function testGuildRegistration(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register subdomain in ENS
-        await ensRegistry.connect(signer).setSubnodeRecord(ensNode, subdomainHash, ensNameOwner, ensGuilds.address, 0);
-        const owner = await ensRegistry.owner(guildHash);
-        expect(owner).eq(ensNameOwner);
+        await ensRegistry.connect(signer).setSubnodeOwner(ensNode, subdomainHash, ensNameOwner);
+
+        // Set ENSGuilds contract as an ENS operator
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
 
         // Register guild
         await ensGuilds.connect(signer).registerGuild(guildHash, admin, flatFeePolicy.address, openAuthPolicy.address);
@@ -45,8 +44,8 @@ export function testGuildRegistration(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as the new ENS resolver
-        await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
+        // Set ENSGuilds contract as an ENS operator
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
 
         // Register guild
         await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
@@ -65,8 +64,8 @@ export function testGuildRegistration(): void {
       const { unauthorizedThirdParty } = this.addresses;
 
       await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as the new ENS resolver
-        await ensRegistry.connect(signer).setResolver(ensNode, ensGuilds.address);
+        // Set ENSGuilds contract as an ENS operator
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
       });
 
       await asAccount(unauthorizedThirdParty, async (signer) => {
@@ -92,7 +91,7 @@ export function testGuildRegistration(): void {
       });
     });
 
-    it("A guild cannot be registered until the domain owner has set ENSGuilds as its resolver", async function () {
+    it("A guild cannot be registered until the domain owner has set ENSGuilds as its operator", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
@@ -101,7 +100,7 @@ export function testGuildRegistration(): void {
         const tx = ensGuilds
           .connect(signer)
           .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
-        await this.expectRevertedWithCustomError(tx, "IncorrectENSResolver");
+        await this.expectRevertedWithCustomError(tx, "ENSGuildsIsNotRegisteredOperator");
       });
     });
   });

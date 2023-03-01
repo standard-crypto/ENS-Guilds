@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-dependency-compiler";
 import "hardhat-deploy";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkUserConfig, NetworkUserConfig } from "hardhat/types";
@@ -95,9 +96,6 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      // accounts: {
-      //   mnemonic,
-      // },
       chainId: chainIds.hardhat,
       tags: ["test"],
       hardfork: "london",
@@ -141,6 +139,12 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "types",
     target: "ethers-v5",
+  },
+  dependencyCompiler: {
+    paths: [
+      "@ensdomains/ens-contracts/contracts/registry/IReverseRegistrar.sol",
+      "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol",
+    ],
   },
 };
 
