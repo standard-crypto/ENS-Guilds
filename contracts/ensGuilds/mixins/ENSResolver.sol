@@ -17,7 +17,7 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
 
     /**
      * Sets the address associated with an ENS node.
-     * May only be called by descendents of this contract
+     * May only be called by descendants of this contract
      */
     function _setEnsForwardRecord(bytes32 node, address a) internal {
         addresses[node] = a;
@@ -51,7 +51,7 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
     function bytesToAddress(bytes memory b) internal pure returns (address payable a) {
         require(b.length == 20);
         assembly {
-            a := div(mload(add(b, 32)), exp(256, 12))
+            a := div(mload(add(b, 32)), exp(256, 12)) // cspell:disable-line
         }
     }
 
@@ -59,7 +59,7 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
     function addressToBytes(address a) internal pure returns (bytes memory b) {
         b = new bytes(20);
         assembly {
-            mstore(add(b, 32), mul(a, exp(256, 12)))
+            mstore(add(b, 32), mul(a, exp(256, 12))) // cspell:disable-line
         }
     }
     // solhint-enable

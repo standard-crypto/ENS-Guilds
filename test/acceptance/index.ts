@@ -8,6 +8,7 @@ import { IENSGuilds__factory } from "../../types";
 import { testEnsRecords } from "./ensRecords";
 import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
+import "./type-annotations";
 
 describe("Acceptance Tests", function () {
   beforeEach("Base setup", async function () {

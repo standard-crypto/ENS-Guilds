@@ -97,7 +97,7 @@ contract ENSGuilds is
         address admin,
         address feePolicy,
         address tagsAuthPolicy
-    ) external override {
+    ) public override(ENSGuildsHumanized, IENSGuilds) {
         // Check caller is owner of domain
         if (ensRegistry.owner(ensNode) != _msgSender()) {
             revert NotDomainOwner();
@@ -131,7 +131,7 @@ contract ENSGuilds is
         emit Registered(ensNode);
     }
 
-    function deregisterGuild(bytes32 ensNode) external override onlyGuildAdmin(ensNode) {
+    function deregisterGuild(bytes32 ensNode) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) {
         delete guilds[ensNode];
         emit Deregistered(ensNode);
     }
@@ -141,7 +141,7 @@ contract ENSGuilds is
         bytes32 tagHash,
         address recipient,
         bytes calldata extraClaimArgs
-    ) external payable override nonReentrant {
+    ) public payable override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
         // assert guild is not frozen
         if (!guilds[guildEnsNode].active) {
             revert GuildNotActive();
@@ -153,7 +153,7 @@ contract ENSGuilds is
             revert TagAlreadyClaimed();
         }
 
-        // check caller is authorized to claim tagguildEnsNode
+        // check caller is authorized to claim tag
         TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
         if (!auth.canClaimTag(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs)) {
             revert ClaimUnauthorized();
@@ -203,11 +203,15 @@ contract ENSGuilds is
         bytes[] calldata extraClaimArgs
     ) external payable override {}
 
-    function guildAdmin(bytes32 guildHash) external view returns (address) {
+    function guildAdmin(bytes32 guildHash) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         return guilds[guildHash].admin;
     }
 
-    function revokeGuildTag(bytes32 guildEnsNode, bytes32 tagHash, bytes calldata extraData) public override {
+    function revokeGuildTag(
+        bytes32 guildEnsNode,
+        bytes32 tagHash,
+        bytes calldata extraData
+    ) public override(ENSGuildsHumanized, IENSGuilds) {
         TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
         if (!auth.tagCanBeRevoked(guildEnsNode, tagHash, extraData)) {
             revert RevokeUnauthorized();
@@ -218,7 +222,7 @@ contract ENSGuilds is
     function updateGuildFeePolicy(
         bytes32 guildEnsNode,
         address feePolicy
-    ) external override onlyGuildAdmin(guildEnsNode) {
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
@@ -229,7 +233,7 @@ contract ENSGuilds is
     function updateGuildTagsAuthPolicy(
         bytes32 guildEnsNode,
         address tagsAuthPolicy
-    ) external override onlyGuildAdmin(guildEnsNode) {
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
@@ -237,7 +241,10 @@ contract ENSGuilds is
         emit TagsAuthPolicyUpdated(guildEnsNode, tagsAuthPolicy);
     }
 
-    function transferGuildAdmin(bytes32 guildEnsNode, address newAdmin) external override onlyGuildAdmin(guildEnsNode) {
+    function transferGuildAdmin(
+        bytes32 guildEnsNode,
+        address newAdmin
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         guilds[guildEnsNode].admin = newAdmin;
         emit AdminTransferred(guildEnsNode, newAdmin);
     }
@@ -245,11 +252,14 @@ contract ENSGuilds is
     function setGuildTokenUriTemplate(
         bytes32 guildEnsNode,
         string calldata uriTemplate
-    ) external override onlyGuildAdmin(guildEnsNode) {
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         _setGuildTokenURITemplate(guildEnsNode, uriTemplate);
     }
 
-    function setGuildActive(bytes32 guildEnsNode, bool active) external override onlyGuildAdmin(guildEnsNode) {
+    function setGuildActive(
+        bytes32 guildEnsNode,
+        bool active
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         guilds[guildEnsNode].active = active;
         emit SetActive(guildEnsNode, active);
     }
