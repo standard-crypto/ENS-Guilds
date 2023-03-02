@@ -9,6 +9,7 @@ import { testEnsRecords } from "./ensRecords";
 import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
+import { testNFTFeatures } from "./nftFeatures";
 import "./type-annotations";
 
 describe("Acceptance Tests", function () {
@@ -73,4 +74,5 @@ describe("Acceptance Tests", function () {
   testMintAuthorization.bind(this)();
   testEnsRecords.bind(this)();
   testMintFees.bind(this)();
+  testNFTFeatures.bind(this)();
 });

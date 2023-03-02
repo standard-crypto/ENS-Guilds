@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { namehash } from "ethers/lib/utils";
 
 import { ensLabelHash, getReverseName, getReverseRegistrar, resolveName } from "../../utils";
 import { asAccount } from "../utils";
@@ -57,6 +58,27 @@ export function testEnsRecords(): void {
       // lookup the reverse record
       const reverseName = await getReverseName(ensRegistry, minter);
       expect(reverseName).to.eq(fullTagName);
+    });
+
+    it("Tag owner cannot change any ENS records for their tag", async function () {
+      const { ensGuilds, ensRegistry } = this.deployedContracts;
+      const { ensNode, domain } = this.guildInfo;
+      const { minter, unauthorizedThirdParty } = this.addresses;
+
+      const tagToMint = "test";
+      const tagHash = ensLabelHash(tagToMint);
+      const fullTagName = `${tagToMint}.${domain}`;
+
+      await asAccount(minter, async (signer) => {
+        // claim the tag
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+
+        // attempt to change owner of the tag's ENS node
+        let tx = ensRegistry.connect(signer).setOwner(namehash(fullTagName), unauthorizedThirdParty);
+        await expect(tx).to.be.revertedWithoutReason();
+        tx = ensRegistry.connect(signer).setSubnodeOwner(ensNode, tagHash, unauthorizedThirdParty);
+        await expect(tx).to.be.revertedWithoutReason();
+      });
     });
   });
 }

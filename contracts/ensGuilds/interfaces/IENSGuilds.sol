@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
-interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155 {
+interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /** Events */
     event Registered(bytes32 indexed guildHash);
     event Deregistered(bytes32 indexed guildHash);

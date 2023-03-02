@@ -1,9 +1,8 @@
-import { type EnsProvider, type EnsResolver, type Log } from "@ethersproject/providers";
+import { type EnsProvider, type EnsResolver } from "@ethersproject/providers";
 import { keccak256, namehash, toUtf8Bytes } from "ethers/lib/utils";
 
-import { findTypedEvent } from ".";
-import { ENS__factory, INameResolver__factory, type IReverseRegistrar, IReverseRegistrar__factory } from "../types";
-import type { ENS, NewOwnerEvent, NewResolverEvent } from "../types/@ensdomains/ens-contracts/contracts/registry/ENS";
+import { INameResolver__factory, type IReverseRegistrar, IReverseRegistrar__factory } from "../types";
+import type { ENS } from "../types/@ensdomains/ens-contracts/contracts/registry/ENS";
 
 // Applies the ENS namehash function to a single label within a domain, such as "eth" or "test"
 export function ensLabelHash(label: string): string {
@@ -44,22 +43,4 @@ export async function getReverseName(ensRegistry: ENS, address: string): Promise
   const reverseRecordResolverAddr = await ensRegistry.resolver(reverseRecordNode);
   const reverseRecordResolver = INameResolver__factory.connect(reverseRecordResolverAddr, ensRegistry.provider);
   return await reverseRecordResolver.name(reverseRecordNode);
-}
-
-export function findNewResolverEvent(logs: Log[] | undefined): Log & { args: NewResolverEvent["args"] } {
-  const contractInterface = ENS__factory.createInterface();
-  return findTypedEvent<NewResolverEvent>(
-    logs,
-    contractInterface.events["NewResolver(bytes32,address)"],
-    contractInterface,
-  );
-}
-
-export function findNewOwnerEvent(logs: Log[] | undefined): Log & { args: NewOwnerEvent["args"] } {
-  const contractInterface = ENS__factory.createInterface();
-  return findTypedEvent<NewOwnerEvent>(
-    logs,
-    contractInterface.events["NewOwner(bytes32,bytes32,address)"],
-    contractInterface,
-  );
 }
