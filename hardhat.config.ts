@@ -32,10 +32,16 @@ const chainIds = {
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
   sepolia: 11155111,
+  goerli: 5,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
   let jsonRpcUrl: string;
+  let accounts: NetworkUserConfig["accounts"] = {
+    count: 10,
+    mnemonic,
+    path: "m/44'/60'/0'/0",
+  };
   switch (chain) {
     case "avalanche":
       jsonRpcUrl = "https://api.avax.network/ext/bc/C/rpc";
@@ -43,16 +49,19 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     case "bsc":
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
+    case "goerli":
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      jsonRpcUrl = `https://${chain}.infura.io/v3/${infuraApiKey!}`;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      accounts = [process.env.DEPLOYER_GOERLI_PRIVATE_KEY!];
+      break;
     default:
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       jsonRpcUrl = `https://${chain}.infura.io/v3/${infuraApiKey!}`;
   }
   return {
-    accounts: {
-      count: 10,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    accounts: accounts as any,
     chainId: chainIds[chain],
     url: jsonRpcUrl,
   };
@@ -84,14 +93,12 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
-    ensRegistrar: {
-      default: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
-    },
     ensRegistry: {
       default: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
     },
     ensDefaultResolver: {
       default: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+      goerli: "0x4B1488B7a6B320d2D721406204aBc3eeAa9AD329",
     },
   },
   networks: {
@@ -113,6 +120,7 @@ const config: HardhatUserConfig = {
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
+    goerli: getChainConfig("goerli"),
   },
   paths: {
     artifacts: "./artifacts",

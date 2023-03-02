@@ -1,0 +1,43 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "@openzeppelin/contracts/utils/introspection/ERC165.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)\n\npragma solidity ^0.8.0;\n\nimport \"./IERC165.sol\";\n\n/**\n * @dev Implementation of the {IERC165} interface.\n *\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\n * for the additional interface id that will be supported. For example:\n *\n * ```solidity\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\n * }\n * ```\n *\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\n */\nabstract contract ERC165 is IERC165 {\n    /**\n     * @dev See {IERC165-supportsInterface}.\n     */\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\n        return interfaceId == type(IERC165).interfaceId;\n    }\n}\n"
+    },
+    "@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\n\npragma solidity ^0.8.0;\n\n/**\n * @dev Interface of the ERC165 standard, as defined in the\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\n *\n * Implementers can declare support of contract interfaces, which can then be\n * queried by others ({ERC165Checker}).\n *\n * For an implementation, see {ERC165}.\n */\ninterface IERC165 {\n    /**\n     * @dev Returns true if this contract implements the interface defined by\n     * `interfaceId`. See the corresponding\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\n     * to learn more about how these ids are created.\n     *\n     * This function call must use less than 30 000 gas.\n     */\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\n}\n"
+    },
+    "contracts/tagsAuthPolicies/OpenTagsAuthPolicy.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.4;\n\nimport \"./TagsAuthPolicy.sol\";\n\ncontract OpenTagsAuthPolicy is TagsAuthPolicy {\n    function canClaimTag(bytes32, bytes32, address, address, bytes calldata) external virtual override returns (bool) {\n        return true;\n    }\n\n    function onTagClaimed(\n        bytes32,\n        bytes32,\n        address,\n        address,\n        bytes calldata\n    ) external virtual override returns (bytes32 tagToRevoke) {\n        return 0;\n    }\n\n    function tagCanBeRevoked(bytes32, bytes32, bytes calldata) external virtual override returns (bool) {\n        return false;\n    }\n}\n"
+    },
+    "contracts/tagsAuthPolicies/TagsAuthPolicy.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.4;\n\nimport \"@openzeppelin/contracts/utils/introspection/ERC165.sol\";\n\nabstract contract TagsAuthPolicy is ERC165 {\n    function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {\n        return interfaceID == type(TagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);\n    }\n\n    function canClaimTag(\n        bytes32 guildHash,\n        bytes32 tagHash,\n        address claimant,\n        address recipient,\n        bytes calldata extraClaimArgs\n    ) external virtual returns (bool);\n\n    function onTagClaimed(\n        bytes32 guildHash,\n        bytes32 tagHash,\n        address claimant,\n        address recipient,\n        bytes calldata extraClaimArgs\n    ) external virtual returns (bytes32 tagToRevoke);\n\n    function tagCanBeRevoked(\n        bytes32 guildHash,\n        bytes32 tagHash,\n        bytes calldata extraRevokeArgs\n    ) external virtual returns (bool);\n}\n"
+    }
+  },
+  "settings": {
+    "metadata": {
+      "bytecodeHash": "none",
+      "useLiteralContent": true
+    },
+    "optimizer": {
+      "enabled": true,
+      "runs": 800
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": ["ast"]
+      }
+    }
+  }
+}
