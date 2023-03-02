@@ -36,12 +36,12 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155 {
         bytes calldata extraClaimArgs
     ) external payable;
 
-    function claimGuildTagsBatch(
-        bytes32 guildHash,
-        bytes32[] calldata tagHashes,
-        address[] calldata recipients,
-        bytes[] calldata extraClaimArgs
-    ) external payable;
+    // function claimGuildTagsBatch(
+    //     bytes32 guildHash,
+    //     bytes32[] calldata tagHashes,
+    //     address[] calldata recipients,
+    //     bytes[] calldata extraClaimArgs
+    // ) external payable;
 
     function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) external;
 

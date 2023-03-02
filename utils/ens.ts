@@ -43,7 +43,7 @@ export async function getReverseName(ensRegistry: ENS, address: string): Promise
   const reverseRecordNode = await reverseRegistrar.node(address);
   const reverseRecordResolverAddr = await ensRegistry.resolver(reverseRecordNode);
   const reverseRecordResolver = INameResolver__factory.connect(reverseRecordResolverAddr, ensRegistry.provider);
-  return reverseRecordResolver.name(reverseRecordNode);
+  return await reverseRecordResolver.name(reverseRecordNode);
 }
 
 export function findNewResolverEvent(logs: Log[] | undefined): Log & { args: NewResolverEvent["args"] } {

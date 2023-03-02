@@ -12,7 +12,7 @@ abstract contract FeePolicy is ERC165 {
     function tagClaimFee(
         bytes32 guildHash,
         bytes32 tagHash,
-        address recipient,
+        address claimant,
         bytes calldata extraClaimArgs
     ) external view virtual returns (address tokenContract, uint256 fee, address feePaidTo);
 }

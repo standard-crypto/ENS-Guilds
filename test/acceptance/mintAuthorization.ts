@@ -51,7 +51,7 @@ export function testMintAuthorization(): void {
       });
     });
 
-    it("Domain owner can’t register an nonexistent or invalid contract as the authz policy for a guild", async function () {
+    it("Domain owner can't register an nonexistent or invalid contract as the authz policy for a guild", async function () {
       const { ensGuilds, flatFeePolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 

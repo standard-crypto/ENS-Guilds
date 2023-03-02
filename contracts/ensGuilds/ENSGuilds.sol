@@ -163,7 +163,7 @@ contract ENSGuilds is
         (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
             guildEnsNode,
             tagHash,
-            recipient,
+            _msgSender(),
             extraClaimArgs
         );
         if (fee != 0) {
@@ -175,8 +175,11 @@ contract ENSGuilds is
                 (bool sent, ) = feePaidTo.call{ value: msg.value }("");
                 if (!sent) revert FeeError();
             } else {
-                bool sent = IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee);
-                if (!sent) revert FeeError();
+                try IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee) returns (bool sent) {
+                    if (!sent) revert FeeError();
+                } catch {
+                    revert FeeError();
+                }
             }
         }
 
@@ -196,12 +199,12 @@ contract ENSGuilds is
         _setEnsForwardRecord(ensNode, recipient);
     }
 
-    function claimGuildTagsBatch(
-        bytes32 guildEnsNode,
-        bytes32[] calldata tagHashes,
-        address[] calldata recipients,
-        bytes[] calldata extraClaimArgs
-    ) external payable override {}
+    // function claimGuildTagsBatch(
+    //     bytes32 guildEnsNode,
+    //     bytes32[] calldata tagHashes,
+    //     address[] calldata recipients,
+    //     bytes[] calldata extraClaimArgs
+    // ) external payable override {}
 
     function guildAdmin(bytes32 guildHash) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         return guilds[guildHash].admin;
