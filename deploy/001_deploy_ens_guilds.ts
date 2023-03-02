@@ -17,6 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // ENSGuilds
   const ensGuildsDeployment = await deploy("ENSGuilds", {
     ...baseDeployArgs,
+    // TODO: don't use a stub here
     args: ["stubMetadataUri", ensRegistry, ensDefaultResolver],
   });
 

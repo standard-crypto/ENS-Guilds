@@ -5,7 +5,10 @@ import { namehash, parseEther } from "ethers/lib/utils";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import { IENSGuilds__factory } from "../../types";
+import { testAdminControls } from "./adminControls";
+import { testDomainOwnerControls } from "./domainOwnerControls";
 import { testEnsRecords } from "./ensRecords";
+import { testGuildDeregistration } from "./guildDeregistration";
 import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
@@ -75,4 +78,7 @@ describe("Acceptance Tests", function () {
   testEnsRecords.bind(this)();
   testMintFees.bind(this)();
   testNFTFeatures.bind(this)();
+  testAdminControls.bind(this)();
+  testDomainOwnerControls.bind(this)();
+  testGuildDeregistration.bind(this)();
 });
