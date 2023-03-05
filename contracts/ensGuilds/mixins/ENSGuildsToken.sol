@@ -14,6 +14,7 @@ abstract contract ENSGuildsToken is ERC1155 {
     struct GuildTokenInfo {
         Counters.Counter tokenIdTracker;
         string templateURI;
+        mapping(bytes32 => uint256) guildTagsToTokenIds;
     }
 
     // maps the top 128 bits of each guild's GuildID (ensNode) to its metadataURI and token ID counter
@@ -38,7 +39,7 @@ abstract contract ENSGuildsToken is ERC1155 {
         return ERC1155.uri(tokenId);
     }
 
-    function _mintNewGuildToken(bytes32 guildHash, address to) internal {
+    function _mintNewGuildToken(bytes32 guildHash, bytes32 tagHash, address to) internal {
         bytes16 truncatedGuildHash = bytes16(guildHash);
 
         uint256 tokenCounterCurrent = guilds[truncatedGuildHash].tokenIdTracker.current();
@@ -51,6 +52,15 @@ abstract contract ENSGuildsToken is ERC1155 {
 
         bytes memory emptyData;
         _mint(to, fullTokenId, 1, emptyData);
+
+        guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash] = fullTokenId;
+    }
+
+    function _burnGuildToken(bytes32 guildHash, bytes32 tagHash, address tagOwner) internal {
+        bytes16 truncatedGuildHash = bytes16(guildHash);
+        uint256 tokenId = guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash];
+
+        _burn(tagOwner, tokenId, 1);
     }
 
     function _setGuildTokenURITemplate(bytes32 guildHash, string calldata templateURI) internal {

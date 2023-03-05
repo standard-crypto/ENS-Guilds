@@ -13,6 +13,7 @@ import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
 import { testNFTFeatures } from "./nftFeatures";
+import { testTagRevocation } from "./tagRevocation";
 import "./type-annotations";
 
 describe("Acceptance Tests", function () {
@@ -81,4 +82,5 @@ describe("Acceptance Tests", function () {
   testAdminControls.bind(this)();
   testDomainOwnerControls.bind(this)();
   testGuildDeregistration.bind(this)();
+  testTagRevocation.bind(this)();
 });

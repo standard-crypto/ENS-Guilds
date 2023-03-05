@@ -30,6 +30,7 @@ contract ENSGuilds is
         FeePolicy feePolicy;
         TagsAuthPolicy tagsAuthPolicy;
         bool active;
+        bool deregistered;
     }
 
     using ERC165Checker for address;
@@ -125,7 +126,8 @@ contract ENSGuilds is
             admin: admin,
             feePolicy: FeePolicy(feePolicy),
             tagsAuthPolicy: TagsAuthPolicy(tagsAuthPolicy),
-            active: true
+            active: true,
+            deregistered: false
         });
 
         emit Registered(ensNode);
@@ -133,6 +135,7 @@ contract ENSGuilds is
 
     function deregisterGuild(bytes32 ensNode) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) {
         delete guilds[ensNode];
+        guilds[ensNode].deregistered = true;
         emit Deregistered(ensNode);
     }
 
@@ -184,9 +187,9 @@ contract ENSGuilds is
         }
 
         // NFT mint
-        _mintNewGuildToken(guildEnsNode, recipient);
+        _mintNewGuildToken(guildEnsNode, tagHash, recipient);
 
-        // inform auth contract that tag was claimed, optionally revoking an existing tag in the process
+        // inform auth contract that tag was claimed, then revoke an existing tag if instructed
         bytes32 tagToRevoke = auth.onTagClaimed(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs);
         if (tagToRevoke != bytes32(0)) {
             _revokeTag(guildEnsNode, tagToRevoke);
@@ -210,13 +213,19 @@ contract ENSGuilds is
         return guilds[guildHash].admin;
     }
 
+    // If guild was de-registered, all tags owned by this guild can be revoked
+    // Check if the auth policy allows revocation of this specific tag
+    // Check that the tag exists
     function revokeGuildTag(
         bytes32 guildEnsNode,
         bytes32 tagHash,
         bytes calldata extraData
-    ) public override(ENSGuildsHumanized, IENSGuilds) {
+    ) public override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
+        GuildInfo storage guild = guilds[guildEnsNode];
+
+        // revoke authorized?
         TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!auth.tagCanBeRevoked(guildEnsNode, tagHash, extraData)) {
+        if (!guild.deregistered && !auth.tagCanBeRevoked(guildEnsNode, tagHash, extraData)) {
             revert RevokeUnauthorized();
         }
         _revokeTag(guildEnsNode, tagHash);
@@ -268,10 +277,15 @@ contract ENSGuilds is
     }
 
     function _revokeTag(bytes32 guildEnsNode, bytes32 tagHash) private {
-        bytes32 ensNode = keccak256(abi.encodePacked(tagHash, guildEnsNode));
-        // erase ENS forward record
-        _setEnsForwardRecord(ensNode, address(0));
-        // TODO: burn NFT
-        // TODO: erase ENS reverse record?
+        bytes32 tagEnsNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
+        address tagOwner = addr(tagEnsNode);
+
+        // check that tag exists and is controlled by ENSGuilds
+        if (ensRegistry.owner(tagEnsNode) != address(this)) {
+            revert RevokeUnauthorized();
+        }
+
+        ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(0), address(0), 0);
+        _burnGuildToken(guildEnsNode, tagHash, tagOwner);
     }
 }
