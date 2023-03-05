@@ -38,14 +38,18 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
         bytes calldata extraClaimArgs
     ) external payable;
 
-    // function claimGuildTagsBatch(
-    //     bytes32 guildHash,
-    //     bytes32[] calldata tagHashes,
-    //     address[] calldata recipients,
-    //     bytes[] calldata extraClaimArgs
-    // ) external payable;
+    function claimGuildTagsBatch(
+        bytes32 guildHash,
+        bytes32[] calldata tagHashes,
+        address[] calldata recipients,
+        bytes[] calldata extraClaimArgs
+    ) external payable;
+
+    function tagOwner(bytes32 guildHash, bytes32 tagHash) external view returns (address);
 
     function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) external;
+
+    function revokeGuildTagsBatch(bytes32 guildHash, bytes32[] calldata tagHashes, bytes[] calldata extraData) external;
 
     function updateGuildFeePolicy(bytes32 guildHash, address feePolicy) external;
 

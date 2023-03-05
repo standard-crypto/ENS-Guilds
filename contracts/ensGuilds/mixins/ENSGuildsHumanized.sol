@@ -42,6 +42,12 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
         revokeGuildTag(guildEnsNode, tagHash, extraData);
     }
 
+    function tagOwner(string memory guildEnsName, string memory tag) external view returns (address) {
+        bytes32 guildEnsNode = bytes(guildEnsName).namehash();
+        bytes32 tagHash = keccak256(bytes(tag));
+        return tagOwner(guildEnsNode, tagHash);
+    }
+
     function updateGuildFeePolicy(string memory guildEnsName, address feePolicy) external {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         updateGuildFeePolicy(guildEnsNode, feePolicy);
@@ -81,6 +87,8 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     function claimGuildTag(bytes32, bytes32, address, bytes calldata) public payable virtual;
 
     function revokeGuildTag(bytes32, bytes32, bytes calldata) public virtual;
+
+    function tagOwner(bytes32, bytes32) public view virtual returns (address);
 
     function updateGuildFeePolicy(bytes32, address) public virtual;
 

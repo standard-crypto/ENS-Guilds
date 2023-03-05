@@ -18,6 +18,8 @@ interface IENSGuildsHumanized {
         bytes calldata extraClaimArgs
     ) external payable;
 
+    function tagOwner(string memory guildEnsName, string memory tag) external view returns (address);
+
     function revokeGuildTag(string memory guildEnsName, string memory tag, bytes calldata extraData) external;
 
     function updateGuildFeePolicy(string memory guildEnsName, address feePolicy) external;

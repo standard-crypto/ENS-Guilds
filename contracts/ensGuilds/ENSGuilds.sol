@@ -175,12 +175,16 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit TagClaimed(guildEnsNode, tagHash, recipient);
     }
 
-    // function claimGuildTagsBatch(
-    //     bytes32 guildEnsNode,
-    //     bytes32[] calldata tagHashes,
-    //     address[] calldata recipients,
-    //     bytes[] calldata extraClaimArgs
-    // ) external payable override {}
+    function claimGuildTagsBatch(
+        bytes32 guildEnsNode,
+        bytes32[] calldata tagHashes,
+        address[] calldata recipients,
+        bytes[] calldata extraClaimArgs
+    ) external payable override {
+        for (uint i = 0; i < tagHashes.length; i++) {
+            claimGuildTag(guildEnsNode, tagHashes[i], recipients[i], extraClaimArgs[i]);
+        }
+    }
 
     function guildAdmin(bytes32 guildHash) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         return guilds[guildHash].admin;
@@ -202,6 +206,16 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
             revert RevokeUnauthorized();
         }
         _revokeTag(guildEnsNode, tagHash);
+    }
+
+    function revokeGuildTagsBatch(
+        bytes32 guildHash,
+        bytes32[] calldata tagHashes,
+        bytes[] calldata extraData
+    ) external override {
+        for (uint i = 0; i < tagHashes.length; i++) {
+            revokeGuildTag(guildHash, tagHashes[i], extraData[i]);
+        }
     }
 
     function updateGuildFeePolicy(
@@ -250,17 +264,29 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit SetActive(guildEnsNode, active);
     }
 
-    function _revokeTag(bytes32 guildEnsNode, bytes32 tagHash) private {
+    function tagOwner(
+        bytes32 guildEnsNode,
+        bytes32 tagHash
+    ) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         bytes32 tagEnsNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
-        address tagOwner = addr(tagEnsNode);
-
-        // check that tag exists and is controlled by ENSGuilds
+        // if ENSGuilds is not the owner of the tag's ENS node, then the tag itself is not valid
+        // and therefore has no owner
         if (ensRegistry.owner(tagEnsNode) != address(this)) {
+            return address(0);
+        }
+        return addr(tagEnsNode);
+    }
+
+    function _revokeTag(bytes32 guildEnsNode, bytes32 tagHash) private {
+        address _tagOwner = tagOwner(guildEnsNode, tagHash);
+
+        // check that tag exists
+        if (_tagOwner == address(0)) {
             revert RevokeUnauthorized();
         }
 
         ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(0), address(0), 0);
-        _burnGuildToken(guildEnsNode, tagHash, tagOwner);
+        _burnGuildToken(guildEnsNode, tagHash, _tagOwner);
 
         emit TagRevoked(guildEnsNode, tagHash);
     }

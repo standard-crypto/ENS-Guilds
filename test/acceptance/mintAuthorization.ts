@@ -221,5 +221,27 @@ export function testMintAuthorization(): void {
         await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, tagRecipient, []);
       });
     });
+
+    it("Multiple tags can be minted in batch", async function () {
+      const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
+      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
+
+      const tag1 = ensLabelHash("test1");
+      const tag2 = ensLabelHash("test2");
+
+      // Register guild
+      await asAccount(ensNameOwner, async (signer) => {
+        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+      });
+
+      // claim both tags
+      await asAccount(minter1, async (signer) => {
+        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], [[], []]);
+      });
+
+      await expect(ensGuilds.tagOwner(ensNode, tag1)).to.eventually.eq(minter1);
+      await expect(ensGuilds.tagOwner(ensNode, tag2)).to.eventually.eq(minter2);
+    });
   });
 }

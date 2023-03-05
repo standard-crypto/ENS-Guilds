@@ -198,5 +198,27 @@ export function testTagRevocation(): void {
         await this.expectRevertedWithCustomError(tx, "RevokeUnauthorized");
       });
     });
+
+    it("Multiple subdomains may be revoked in batch", async function () {
+      const { ensGuilds } = this.deployedContracts;
+      const { ensNode } = this.guildInfo;
+      const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
+
+      const tag1 = ensLabelHash("test1");
+      const tag2 = ensLabelHash("test2");
+
+      // claim both tags
+      await asAccount(minter1, async (signer) => {
+        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], [[], []]);
+      });
+
+      // revoke both tags
+      await asAccount(minter1, async (signer) => {
+        await ensGuilds.connect(signer).revokeGuildTagsBatch(ensNode, [tag1, tag2], [[], []]);
+      });
+
+      await expect(ensGuilds.tagOwner(ensNode, tag1)).to.eventually.eq(ethers.constants.AddressZero);
+      await expect(ensGuilds.tagOwner(ensNode, tag2)).to.eventually.eq(ethers.constants.AddressZero);
+    });
   });
 }
