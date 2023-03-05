@@ -7,6 +7,7 @@
     "bignumber",
     "bytecode",
     "denormalized",
+    "Deregistration",
     "ensdomains",
     "esbuild",
     "ethersproject",
