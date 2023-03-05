@@ -10,10 +10,12 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     event Registered(bytes32 indexed guildHash);
     event Deregistered(bytes32 indexed guildHash);
     event TagClaimed(bytes32 indexed guildId, bytes32 indexed tagHash, address recipient);
+    event TagRevoked(bytes32 indexed guildId, bytes32 indexed tagHash);
     event FeePolicyUpdated(bytes32 indexed guildId, address feePolicy);
     event TagsAuthPolicyUpdated(bytes32 indexed guildId, address tagsAuthPolicy);
     event AdminTransferred(bytes32 indexed guildId, address newAdmin);
     event SetActive(bytes32 indexed guildId, bool active);
+    event TokenUriTemplateSet(bytes32 indexed guildId, string uriTemplate);
 
     /** Functions */
 

@@ -171,6 +171,8 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
 
         // Set forward record in ENS resolver
         _setEnsForwardRecord(ensNode, recipient);
+
+        emit TagClaimed(guildEnsNode, tagHash, recipient);
     }
 
     // function claimGuildTagsBatch(
@@ -237,6 +239,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         string calldata uriTemplate
     ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
         _setGuildTokenURITemplate(guildEnsNode, uriTemplate);
+        emit TokenUriTemplateSet(guildEnsNode, uriTemplate);
     }
 
     function setGuildActive(
@@ -258,5 +261,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
 
         ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(0), address(0), 0);
         _burnGuildToken(guildEnsNode, tagHash, tagOwner);
+
+        emit TagRevoked(guildEnsNode, tagHash);
     }
 }
