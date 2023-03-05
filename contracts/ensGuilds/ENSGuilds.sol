@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
@@ -16,15 +14,7 @@ import "./mixins/ENSResolver.sol";
 import "./mixins/ENSGuildsToken.sol";
 import "./mixins/ENSGuildsHumanized.sol";
 
-contract ENSGuilds is
-    AccessControlEnumerable,
-    IENSGuilds,
-    ENSGuildsHumanized,
-    ENSGuildsToken,
-    Pausable,
-    ENSResolver,
-    ReentrancyGuard
-{
+contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolver, ReentrancyGuard {
     struct GuildInfo {
         address admin;
         FeePolicy feePolicy;
@@ -34,8 +24,6 @@ contract ENSGuilds is
     }
 
     using ERC165Checker for address;
-
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /** State */
     ENS public ensRegistry;
@@ -65,18 +53,7 @@ contract ENSGuilds is
         ENS _ensRegistry,
         IAddressResolver _fallbackEnsResolver
     ) ERC1155(defaultTokenMetadataUri) ENSResolver(_fallbackEnsResolver) {
-        _setupRole(PAUSER_ROLE, _msgSender());
         ensRegistry = _ensRegistry;
-    }
-
-    function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ENSGuilds: must have pauser role to pause");
-        _pause();
-    }
-
-    function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ENSGuilds: must have pauser role to unpause");
-        _unpause();
     }
 
     /**
@@ -84,12 +61,11 @@ contract ENSGuilds is
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControlEnumerable, ENSResolver, ENSGuildsToken, IERC165) returns (bool) {
+    ) public view virtual override(ENSResolver, ENSGuildsToken, IERC165) returns (bool) {
         return
             interfaceId == type(IENSGuilds).interfaceId ||
             ENSResolver.supportsInterface(interfaceId) ||
             ENSGuildsToken.supportsInterface(interfaceId) ||
-            AccessControlEnumerable.supportsInterface(interfaceId) ||
             ERC165.supportsInterface(interfaceId);
     }
 
