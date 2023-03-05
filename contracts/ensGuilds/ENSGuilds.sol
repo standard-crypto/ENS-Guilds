@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 
 import "./interfaces/IENSGuilds.sol";
 import "../feePolicies/FeePolicy.sol";
@@ -48,11 +47,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         _;
     }
 
-    constructor(
-        string memory defaultTokenMetadataUri,
-        ENS _ensRegistry,
-        IAddressResolver _fallbackEnsResolver
-    ) ERC1155(defaultTokenMetadataUri) ENSResolver(_fallbackEnsResolver) {
+    constructor(string memory defaultTokenMetadataUri, ENS _ensRegistry) ERC1155(defaultTokenMetadataUri) {
         ensRegistry = _ensRegistry;
     }
 

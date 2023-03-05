@@ -7,13 +7,8 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
     uint256 private constant COIN_TYPE_ETH = 60;
-    IAddressResolver private fallbackResolver;
 
     mapping(bytes32 => address) public addresses;
-
-    constructor(IAddressResolver _fallbackResolver) {
-        fallbackResolver = _fallbackResolver;
-    }
 
     /**
      * Sets the address associated with an ENS node.
@@ -21,6 +16,8 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
      */
     function _setEnsForwardRecord(bytes32 node, address a) internal {
         addresses[node] = a;
+        emit AddrChanged(node, a);
+        emit AddressChanged(node, COIN_TYPE_ETH, addressToBytes(a));
     }
 
     function addr(bytes32 node) public view override returns (address payable) {
@@ -31,10 +28,11 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
         return bytesToAddress(a);
     }
 
-    function addr(bytes32 node, uint256 coinType) public view override returns (bytes memory) {
+    function addr(bytes32 node, uint256) public view override returns (bytes memory) {
         address a = addresses[node];
         if (a == address(0)) {
-            return fallbackResolver.addr(node, coinType);
+            bytes memory emptyBytes;
+            return emptyBytes;
         }
         return addressToBytes(a);
     }
