@@ -179,6 +179,31 @@ export function testMintAuthorization(): void {
       });
     });
 
+    it("User cannot mint a tag if its domain name was already registered in ENS", async function () {
+      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
+      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
+      const { minter } = this.addresses;
+
+      const tagToMint = ensLabelHash("test");
+
+      // Register a subdomain using the default resolver, before the guild is even registered
+      await asAccount(ensNameOwner, async (signer) => {
+        await ensRegistry.connect(signer).setSubnodeRecord(ensNode, tagToMint, ensNameOwner, ensDefaultResolverAddr, 0);
+      });
+
+      // Register guild
+      await asAccount(ensNameOwner, async (signer) => {
+        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+      });
+
+      // minter should fail when trying to claim this tag
+      await asAccount(minter, async (signer) => {
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await this.expectRevertedWithCustomError(tx, "TagAlreadyClaimed");
+      });
+    });
+
     it("Caller can specify different address to receive the tag if authz policy allows", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;

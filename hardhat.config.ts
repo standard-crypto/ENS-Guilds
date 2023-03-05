@@ -152,6 +152,7 @@ const config: HardhatUserConfig = {
     paths: [
       "@ensdomains/ens-contracts/contracts/registry/IReverseRegistrar.sol",
       "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol",
+      "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol",
     ],
   },
 };

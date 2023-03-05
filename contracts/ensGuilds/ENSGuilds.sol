@@ -147,9 +147,9 @@ contract ENSGuilds is
             revert GuildNotActive();
         }
 
-        // check tag not already claimed
+        // check tag not already registered
         bytes32 ensNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
-        if (addr(ensNode) != address(0)) {
+        if (ensRegistry.owner(ensNode) != address(0)) {
             revert TagAlreadyClaimed();
         }
 
