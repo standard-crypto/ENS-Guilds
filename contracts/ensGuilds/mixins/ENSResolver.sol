@@ -20,6 +20,11 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
         emit AddressChanged(node, COIN_TYPE_ETH, addressToBytes(a));
     }
 
+    /**
+     * @notice Returns the address associated with an ENS node.
+     * @param node The ENS node to query.
+     * @return The associated address.
+     */
     function addr(bytes32 node) public view override returns (address payable) {
         bytes memory a = addr(node, COIN_TYPE_ETH);
         if (a.length == 0) {
@@ -28,10 +33,21 @@ abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
         return bytesToAddress(a);
     }
 
-    function addr(bytes32 node, uint256) public view override returns (bytes memory) {
+    /**
+     * @notice Returns the address associated with an ENS node.
+     * @param node The ENS node to query.
+     * @param coinType The coin type
+     * @return The associated address.
+     */
+    function addr(bytes32 node, uint256 coinType) public view override returns (bytes memory) {
+        bytes memory emptyBytes;
+
+        if (coinType != COIN_TYPE_ETH) {
+            return emptyBytes;
+        }
+
         address a = addresses[node];
         if (a == address(0)) {
-            bytes memory emptyBytes;
             return emptyBytes;
         }
         return addressToBytes(a);

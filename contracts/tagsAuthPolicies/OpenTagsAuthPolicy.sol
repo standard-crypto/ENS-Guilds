@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./TagsAuthPolicy.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-contract OpenTagsAuthPolicy is TagsAuthPolicy {
+import "./ITagsAuthPolicy.sol";
+
+contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {
+    function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {
+        return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);
+    }
+
     function canClaimTag(bytes32, bytes32, address, address, bytes calldata) external virtual override returns (bool) {
         return true;
     }
@@ -18,7 +24,7 @@ contract OpenTagsAuthPolicy is TagsAuthPolicy {
         return 0;
     }
 
-    function tagCanBeRevoked(bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
+    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
         return false;
     }
 }

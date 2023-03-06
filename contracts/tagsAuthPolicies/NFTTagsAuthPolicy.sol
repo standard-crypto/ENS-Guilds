@@ -2,15 +2,21 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
 
-import "./TagsAuthPolicy.sol";
-import "../ensGuilds/interfaces/IENSGuilds.sol";
+import "./BaseTagsAuthPolicy.sol";
 
-contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
+/**
+ * @title NFTTagsAuthPolicy
+ * @notice A common implementation of TagsAuthPolicy that can be used to restrict minting guild tags to only addresses
+ * that own an NFT from a given collection, configured per-guild by each guild's admin. An address may mint a tag once
+ * per each item in the collection that it owns. Minting two tags from the same TokenID will result in the first being
+ * revoked once the second is minted, regardless of whether ownership of that TokenID has changed.
+ *
+ * A user's guild tag is eligible for revocation once that user ceases to own the TokenID used in minting that tag.
+ */
+contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     using ERC165Checker for address;
 
     enum TokenStandard {
@@ -27,18 +33,18 @@ contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
         mapping(uint256 => TagClaim) tagClaims;
     }
     mapping(bytes32 => GuildInfo) public guilds;
-    IENSGuilds private ensGuilds;
 
-    constructor(address _ensGuilds) {
-        // solhint-disable-next-line reason-string
-        require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
-        ensGuilds = IENSGuilds(_ensGuilds);
-    }
+    constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
 
+    /**
+     * Registers the specific NFT collection that a user must be a member of to mint a guild tag
+     * @param guildHash The ENS namehash of the guild's domain
+     * @param tokenContract The ERC721 or ERC1155 collection to use
+     */
     function setTokenContract(bytes32 guildHash, address tokenContract) external {
         // caller must be guild admin
         // solhint-disable-next-line reason-string
-        require(ensGuilds.guildAdmin(guildHash) == _msgSender());
+        require(_ensGuilds.guildAdmin(guildHash) == _msgSender());
 
         // token contract must be ERC721 or ERC1155
         if (tokenContract.supportsInterface(type(IERC721).interfaceId)) {
@@ -53,6 +59,11 @@ contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
         guilds[guildHash].tokenContract = tokenContract;
     }
 
+    /**
+     * @inheritdoc ITagsAuthPolicy
+     * @dev Expects that the caller will supply the NFT's TokenID in `extraClaimArgs`.
+     * The caller must own the given TokenID.
+     */
     function canClaimTag(
         bytes32 guildHash,
         bytes32,
@@ -83,17 +94,17 @@ contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
         return true;
     }
 
-    function onTagClaimed(
+    /**
+     * @dev records the latest tag minted from the given TokenID (via extraClaimArgs), and returns whichever
+     * tag was last minted from the same TokenID.
+     */
+    function _onTagClaimed(
         bytes32 guildHash,
         bytes32 tagHash,
         address claimant,
         address,
         bytes calldata extraClaimArgs
-    ) external virtual override nonReentrant returns (bytes32 tagToRevoke) {
-        // Caller must be ENSGuilds contract
-        // solhint-disable-next-line reason-string
-        require(_msgSender() == address(ensGuilds));
-
+    ) internal virtual override returns (bytes32 tagToRevoke) {
         uint256 nftTokenId = uint256(bytes32(extraClaimArgs));
 
         tagToRevoke = guilds[guildHash].tagClaims[nftTokenId].tagHash;
@@ -104,7 +115,11 @@ contract NFTTagsAuthPolicy is Context, TagsAuthPolicy, ReentrancyGuard {
         return tagToRevoke;
     }
 
+    /**
+     * @inheritdoc ITagsAuthPolicy
+     */
     function tagCanBeRevoked(
+        address,
         bytes32 guildHash,
         bytes32 tagHash,
         bytes calldata extraRevokeArgs

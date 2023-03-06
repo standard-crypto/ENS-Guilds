@@ -24,6 +24,10 @@ abstract contract ENSGuildsToken is ERC1155 {
         return ERC1155.supportsInterface(interfaceId);
     }
 
+    /**
+     * @dev See {IERC1155MetadataURI-uri}.
+     * @param tokenId The token whose URI is returned
+     */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
         // calculate truncated guildHash from first 128 bits of tokenId
         uint256 truncatedGuildHashUint = tokenId & GUILD_ID_MASK;
@@ -68,6 +72,10 @@ abstract contract ENSGuildsToken is ERC1155 {
         guilds[truncatedGuildHash].templateURI = templateURI;
     }
 
+    /**
+     * @dev ENSGuilds NFTs are non-transferrable and may only be directly minted and burned
+     * with their corresonding guild tags.
+     */
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
         revert GuildsTokenTransferNotAllowed();
     }

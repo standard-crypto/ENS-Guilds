@@ -8,7 +8,7 @@ import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 
 import "./interfaces/IENSGuilds.sol";
 import "../feePolicies/FeePolicy.sol";
-import "../tagsAuthPolicies/TagsAuthPolicy.sol";
+import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
 import "./mixins/ENSResolver.sol";
 import "./mixins/ENSGuildsToken.sol";
 import "./mixins/ENSGuildsHumanized.sol";
@@ -17,7 +17,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
     struct GuildInfo {
         address admin;
         FeePolicy feePolicy;
-        TagsAuthPolicy tagsAuthPolicy;
+        ITagsAuthPolicy tagsAuthPolicy;
         bool active;
         bool deregistered;
     }
@@ -64,6 +64,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
             ERC165.supportsInterface(interfaceId);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function registerGuild(
         bytes32 ensNode,
         address admin,
@@ -89,14 +92,14 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
-        if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
+        if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
 
         guilds[ensNode] = GuildInfo({
             admin: admin,
             feePolicy: FeePolicy(feePolicy),
-            tagsAuthPolicy: TagsAuthPolicy(tagsAuthPolicy),
+            tagsAuthPolicy: ITagsAuthPolicy(tagsAuthPolicy),
             active: true,
             deregistered: false
         });
@@ -104,12 +107,18 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit Registered(ensNode);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function deregisterGuild(bytes32 ensNode) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) {
         delete guilds[ensNode];
         guilds[ensNode].deregistered = true;
         emit Deregistered(ensNode);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function claimGuildTag(
         bytes32 guildEnsNode,
         bytes32 tagHash,
@@ -128,7 +137,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         }
 
         // check caller is authorized to claim tag
-        TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
         if (!auth.canClaimTag(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs)) {
             revert ClaimUnauthorized();
         }
@@ -175,6 +184,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit TagClaimed(guildEnsNode, tagHash, recipient);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function claimGuildTagsBatch(
         bytes32 guildEnsNode,
         bytes32[] calldata tagHashes,
@@ -186,13 +198,16 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         }
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function guildAdmin(bytes32 guildHash) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         return guilds[guildHash].admin;
     }
 
-    // If guild was de-registered, all tags owned by this guild can be revoked
-    // Check if the auth policy allows revocation of this specific tag
-    // Check that the tag exists
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function revokeGuildTag(
         bytes32 guildEnsNode,
         bytes32 tagHash,
@@ -201,13 +216,16 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         GuildInfo storage guild = guilds[guildEnsNode];
 
         // revoke authorized?
-        TagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!guild.deregistered && !auth.tagCanBeRevoked(guildEnsNode, tagHash, extraData)) {
+        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        if (!guild.deregistered && !auth.tagCanBeRevoked(_msgSender(), guildEnsNode, tagHash, extraData)) {
             revert RevokeUnauthorized();
         }
         _revokeTag(guildEnsNode, tagHash);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function revokeGuildTagsBatch(
         bytes32 guildHash,
         bytes32[] calldata tagHashes,
@@ -218,6 +236,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         }
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function updateGuildFeePolicy(
         bytes32 guildEnsNode,
         address feePolicy
@@ -229,17 +250,23 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit FeePolicyUpdated(guildEnsNode, feePolicy);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function updateGuildTagsAuthPolicy(
         bytes32 guildEnsNode,
         address tagsAuthPolicy
     ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
-        if (!tagsAuthPolicy.supportsInterface(type(TagsAuthPolicy).interfaceId)) {
+        if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
-        guilds[guildEnsNode].tagsAuthPolicy = TagsAuthPolicy(tagsAuthPolicy);
+        guilds[guildEnsNode].tagsAuthPolicy = ITagsAuthPolicy(tagsAuthPolicy);
         emit TagsAuthPolicyUpdated(guildEnsNode, tagsAuthPolicy);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function transferGuildAdmin(
         bytes32 guildEnsNode,
         address newAdmin
@@ -248,6 +275,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit AdminTransferred(guildEnsNode, newAdmin);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function setGuildTokenUriTemplate(
         bytes32 guildEnsNode,
         string calldata uriTemplate
@@ -256,6 +286,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit TokenUriTemplateSet(guildEnsNode, uriTemplate);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function setGuildActive(
         bytes32 guildEnsNode,
         bool active
@@ -264,6 +297,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         emit SetActive(guildEnsNode, active);
     }
 
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function tagOwner(
         bytes32 guildEnsNode,
         bytes32 tagHash

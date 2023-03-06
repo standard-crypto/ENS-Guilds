@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../../tagsAuthPolicies/TagsAuthPolicy.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
+import "../../tagsAuthPolicies/ITagsAuthPolicy.sol";
 import "./IClaimGuildTagReentrancyAttacker.sol";
 
 /**
@@ -12,11 +14,15 @@ import "./IClaimGuildTagReentrancyAttacker.sol";
  * That separate contract exposes an apparently benign lookup function that
  * will re-invoke `claimGuildTag`.
  */
-contract ReentrancyAttackAuthPolicy is TagsAuthPolicy {
+contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
     IClaimGuildTagReentrancyAttacker private attacker;
 
     constructor(IClaimGuildTagReentrancyAttacker _attacker) {
         attacker = _attacker;
+    }
+
+    function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {
+        return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);
     }
 
     function canClaimTag(bytes32, bytes32, address, address, bytes calldata) external virtual override returns (bool) {
@@ -34,7 +40,7 @@ contract ReentrancyAttackAuthPolicy is TagsAuthPolicy {
         return bytes32(0);
     }
 
-    function tagCanBeRevoked(bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
+    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
         return false;
     }
 }
