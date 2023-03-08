@@ -2,13 +2,12 @@
 pragma solidity ^0.8.4;
 
 import "../../ensGuilds/interfaces/IENSGuilds.sol";
-import "./IClaimGuildTagReentrancyAttacker.sol";
 
 /**
  * ClaimGuildTagReentrancyAttacker is a contract that exposes an apparently
  * benign lookup function that will re-invoke `claimGuildTag`.
  */
-contract ClaimGuildTagReentrancyAttacker is IClaimGuildTagReentrancyAttacker {
+contract ClaimGuildTagReentrancyAttacker {
     IENSGuilds private ensGuilds;
 
     bytes32 private guildEnsNode;
@@ -31,7 +30,7 @@ contract ClaimGuildTagReentrancyAttacker is IClaimGuildTagReentrancyAttacker {
         extraClaimArgs = _extraClaimArgs;
     }
 
-    function insidiousLookupFunction() external override returns (bool) {
+    function insidiousLookupFunction() external returns (bool) {
         ensGuilds.claimGuildTag(guildEnsNode, tagHash, recipient, extraClaimArgs);
         return true;
     }

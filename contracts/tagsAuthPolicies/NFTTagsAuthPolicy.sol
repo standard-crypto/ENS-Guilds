@@ -37,7 +37,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
 
     /**
-     * Registers the specific NFT collection that a user must be a member of to mint a guild tag
+     * @notice Registers the specific NFT collection that a user must be a member of to mint a guild tag
      * @param guildHash The ENS namehash of the guild's domain
      * @param tokenContract The ERC721 or ERC1155 collection to use
      */
@@ -70,7 +70,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
         address claimant,
         address,
         bytes calldata extraClaimArgs
-    ) external virtual override returns (bool) {
+    ) external view virtual override returns (bool) {
         GuildInfo storage guildInfo = guilds[guildHash];
         address tokenContract = guildInfo.tokenContract;
 
@@ -123,7 +123,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
         bytes32 guildHash,
         bytes32 tagHash,
         bytes calldata extraRevokeArgs
-    ) external virtual override returns (bool) {
+    ) external view virtual override returns (bool) {
         if (extraRevokeArgs.length != 32) {
             return false;
         }

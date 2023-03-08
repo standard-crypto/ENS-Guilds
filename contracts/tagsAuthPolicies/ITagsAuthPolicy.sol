@@ -22,7 +22,7 @@ interface ITagsAuthPolicy is IERC165 {
         address claimant,
         address recipient,
         bytes calldata extraClaimArgs
-    ) external returns (bool);
+    ) external view returns (bool);
 
     /**
      * @dev Called by ENSGuilds once a tag has been claimed.
@@ -54,5 +54,5 @@ interface ITagsAuthPolicy is IERC165 {
         bytes32 guildHash,
         bytes32 tagHash,
         bytes calldata extraRevokeArgs
-    ) external returns (bool);
+    ) external view returns (bool);
 }

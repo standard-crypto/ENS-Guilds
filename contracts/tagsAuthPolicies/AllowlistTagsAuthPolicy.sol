@@ -36,7 +36,7 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
         address claimant,
         address,
         bytes calldata
-    ) external virtual override returns (bool) {
+    ) external view virtual override returns (bool) {
         return guildAllowlists[guildHash][claimant];
     }
 
@@ -57,7 +57,7 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
     /**
      * @inheritdoc ITagsAuthPolicy
      */
-    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
+    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external view virtual override returns (bool) {
         return false;
     }
 }

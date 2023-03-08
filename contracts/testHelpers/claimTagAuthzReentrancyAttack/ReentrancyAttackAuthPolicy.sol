@@ -25,7 +25,13 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);
     }
 
-    function canClaimTag(bytes32, bytes32, address, address, bytes calldata) external virtual override returns (bool) {
+    function canClaimTag(
+        bytes32,
+        bytes32,
+        address,
+        address,
+        bytes calldata
+    ) external view virtual override returns (bool) {
         bool canMint = attacker.insidiousLookupFunction();
         return canMint;
     }
@@ -40,7 +46,7 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         return bytes32(0);
     }
 
-    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external virtual override returns (bool) {
+    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external view virtual override returns (bool) {
         return false;
     }
 }
