@@ -150,7 +150,7 @@ const config: HardhatUserConfig = {
   },
   dependencyCompiler: {
     paths: [
-      "@ensdomains/ens-contracts/contracts/registry/IReverseRegistrar.sol",
+      "@ensdomains/ens-contracts/contracts/reverseRegistrar/IReverseRegistrar.sol",
       "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol",
       "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol",
     ],
