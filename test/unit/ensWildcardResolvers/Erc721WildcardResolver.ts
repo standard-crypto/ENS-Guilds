@@ -45,7 +45,8 @@ export function testErc721WildcardResolver(): void {
       const fullNameBytes = ethers.utils.dnsEncode(`${tokenId}.${ensParentName}`);
 
       const resolveResult = await resolver.resolve(fullNameBytes, []);
-      expect(resolveResult.toLowerCase()).to.eq(tokenOwner.toLowerCase());
+      const [addr] = ethers.utils.defaultAbiCoder.decode(["address"], resolveResult);
+      expect(addr.toLowerCase()).to.eq(tokenOwner.toLowerCase());
     });
   });
 }
