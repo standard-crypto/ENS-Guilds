@@ -74,7 +74,7 @@ abstract contract ENSGuildsToken is ERC1155 {
 
     /**
      * @dev ENSGuilds NFTs are non-transferrable and may only be directly minted and burned
-     * with their corresonding guild tags.
+     * with their corresponding guild tags.
      */
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
         revert GuildsTokenTransferNotAllowed();

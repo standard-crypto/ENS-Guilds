@@ -16,7 +16,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param ensName The guild's full domain name (e.g. 'my-guild.eth')
      * @param admin The address that will administrate this guild
      * @param feePolicy The address of an implementation of FeePolicy to use for minting new tags within this guild
-     * @param tagsAuthPolicy The address of an implementaition of TagsAuthPolicy to use for minting new tags
+     * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for minting new tags
      * within this guild
      */
     function registerGuild(
@@ -30,7 +30,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     }
 
     /**
-     * @notice Deregisters a registered guild.
+     * @notice De-registers a registered guild.
      * Designates guild as inactive and marks all tags previously minted for that guild as eligible for revocation.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      */
@@ -96,7 +96,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     /**
      * @notice Updates the TagsAuthPolicy for an existing guild. May only be called by the guild's registered admin.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
-     * @param tagsAuthPolicy The address of an implementaition of TagsAuthPolicy to use for
+     * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for
      * minting new tags within this guild
      */
     function updateGuildTagsAuthPolicy(string memory guildEnsName, address tagsAuthPolicy) external {
