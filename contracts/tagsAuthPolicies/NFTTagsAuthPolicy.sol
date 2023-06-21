@@ -34,6 +34,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     }
     mapping(bytes32 => GuildInfo) public guilds;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
 
     /**

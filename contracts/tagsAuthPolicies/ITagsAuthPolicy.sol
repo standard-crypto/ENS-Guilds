@@ -43,7 +43,7 @@ interface ITagsAuthPolicy is IERC165 {
     ) external returns (bytes32 tagToRevoke);
 
     /**
-     * @notice Checks whether a given guild tag is elligible to be revoked
+     * @notice Checks whether a given guild tag is eligible to be revoked
      * @param revokedBy The address that would attempt to revoke it
      * @param guildHash The ENS namehash of the guild's domain
      * @param tagHash The ENS namehash of the tag being claimed (e.g. keccak256('foo') for foo.my-guild.eth)

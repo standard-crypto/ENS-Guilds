@@ -19,6 +19,7 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
     IENSGuilds internal _ensGuilds;
 
     constructor(IENSGuilds ensGuilds) {
+        // solhint-disable-next-line reason-string
         require(ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         _ensGuilds = ensGuilds;
     }

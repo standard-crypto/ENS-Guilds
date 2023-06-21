@@ -25,12 +25,13 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
      * @param guildHash The ENS namehash of the guild's domain
      * @param guildAdmin The address that will administrate this guild
      * @param feePolicy The address of an implementation of FeePolicy to use for minting new tags within this guild
-     * @param tagsAuthPolicy The address of an implementaition of TagsAuthPolicy to use for minting new tags within this guild
+     * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for minting new tags
+     * within this guild
      */
     function registerGuild(bytes32 guildHash, address guildAdmin, address feePolicy, address tagsAuthPolicy) external;
 
     /**
-     * @notice Deregisters a registered guild.
+     * @notice De-registers a registered guild.
      * Designates guild as inactive and marks all tags previously minted for that guild as eligible for revocation.
      * @param guildHash The ENS namehash of the guild's domain
      */
@@ -101,7 +102,8 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /**
      * @notice Updates the TagsAuthPolicy for an existing guild. May only be called by the guild's registered admin.
      * @param guildHash The ENS namehash of the guild's domain
-     * @param tagsAuthPolicy The address of an implementaition of TagsAuthPolicy to use for minting new tags within this guild
+     * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for
+     * minting new tags within this guild
      */
     function updateGuildTagsAuthPolicy(bytes32 guildHash, address tagsAuthPolicy) external;
 
@@ -127,7 +129,8 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     function guildAdmin(bytes32 guildHash) external view returns (address);
 
     /**
-     * @notice Transfers the role of guild admin to the given address. May only be called by the guild's registered admin.
+     * @notice Transfers the role of guild admin to the given address.
+     * May only be called by the guild's registered admin.
      * @param guildHash The ENS namehash of the guild's domain
      * @param newAdmin The new admin
      */

@@ -27,9 +27,14 @@
     "sepolia",
     "solhint",
     "struct",
-    "typechain"
+    "typechain",
+    "inheritdoc",
+    "namehash",
+    "namehashes",
+    "mixedcase",
+    "ENSIP"
   ],
   "flagWords": [],
-  "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json"],
+  "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "deployments"],
   "useGitignore": true
 }

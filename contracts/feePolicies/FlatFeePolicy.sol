@@ -10,7 +10,8 @@ import "../ensGuilds/interfaces/IENSGuilds.sol";
 
 /**
  * @title FlatFeePolicy
- * @notice A common implementation of FeePolicy that can be used to configure flat-rate fees for multiple guilds simultaneously
+ * @notice A common implementation of FeePolicy that can be used to configure
+ * flat-rate fees for multiple guilds simultaneously
  */
 contract FlatFeePolicy is Context, FeePolicy {
     using ERC165Checker for address;

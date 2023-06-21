@@ -12,9 +12,9 @@ import {
   type IENSGuildsHumanized,
   IENSGuildsHumanized__factory,
   IENSGuilds__factory,
-} from "../../types";
-import { resolveName } from "../../utils";
-import { asAccount } from "../utils";
+} from "../../../../types";
+import { resolveName } from "../../../../utils";
+import { asAccount } from "../../../utils";
 
 export function testENSGuildsHumanized(): void {
   describe("ENSGuildsHumanized", () => {

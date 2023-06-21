@@ -5,12 +5,14 @@ import "./BaseTagsAuthPolicy.sol";
 
 /**
  * @title AllowlistTagsAuthPolicy
- * @notice A common implementation of TagsAuthPolicy that can be used to restrict minting guild tags to only allowlisted addresses.
+ * @notice A common implementation of TagsAuthPolicy that can be used to restrict minting
+ * guild tags to only allowlisted addresses.
  * A separate allowlist is maintained per each guild, and may only be updated by that guild's registered admin.
  */
 contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
     mapping(bytes32 => mapping(address => bool)) public guildAllowlists;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
 
     modifier onlyGuildAdmin(bytes32 guildHash) {
