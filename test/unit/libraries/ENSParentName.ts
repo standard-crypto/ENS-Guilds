@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import dnsPacket from "dns-packet";
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 import { type ENSParentNameTestHelper, ENSParentNameTestHelper__factory } from "../../../types";
@@ -19,9 +20,9 @@ export function testENSParentName(): void {
     });
 
     async function _test(name: string, expectedChild: string, expectedParent: string): Promise<void> {
-      const nameBytes = ethers.utils.toUtf8Bytes(name);
-      const [childBytes, parentBytes] = await parentNameTestHelper.splitParentChildNames(nameBytes);
-      const parent = ethers.utils.toUtf8String(parentBytes);
+      const nameEncoded = ethers.utils.dnsEncode(name);
+      const [childBytes, parentBytes] = await parentNameTestHelper.splitParentChildNames(nameEncoded);
+      const parent = dnsPacket.name.decode(Buffer.from(parentBytes.slice(2), "hex"));
       const child = ethers.utils.toUtf8String(childBytes);
       expect(parent).to.eq(expectedParent);
       expect(child).to.eq(expectedChild);
@@ -30,8 +31,7 @@ export function testENSParentName(): void {
     for (const [name, expectedChild, expectedParent] of [
       ["foo.bar", "foo", "bar"],
       ["one.two.three", "one", "two.three"],
-      ["tld", "tld", ""],
-      [".", "", ""],
+      ["tld", "tld", "."],
     ]) {
       it(`resolves '${name}' to '${expectedParent}'`, async function () {
         await _test(name, expectedChild, expectedParent);

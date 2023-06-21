@@ -36,14 +36,13 @@ export function testErc721WildcardResolver(): void {
 
     it("resolve - happy path", async function () {
       const ensParentName = "test.eth";
-      const ensParentNameBytes = ethers.utils.toUtf8Bytes(ensParentName);
       const [tokenOwner] = await getUnnamedAccounts();
       const tokenId = 123;
 
-      await resolver.setTokenContract(ensParentNameBytes, tokenContract.address);
+      await resolver.setTokenContract(ensParentName, tokenContract.address);
       await tokenContract.mint(tokenOwner, tokenId);
 
-      const fullNameBytes = ethers.utils.toUtf8Bytes(`${tokenId}.${ensParentName}`);
+      const fullNameBytes = ethers.utils.dnsEncode(`${tokenId}.${ensParentName}`);
 
       const resolveResult = await resolver.resolve(fullNameBytes, []);
       expect(resolveResult.toLowerCase()).to.eq(tokenOwner.toLowerCase());

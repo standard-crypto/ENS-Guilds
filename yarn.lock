@@ -2083,6 +2083,7 @@ __metadata:
     cross-env: ^7.0.3
     cspell: ^6.22.0
     cz-conventional-changelog: ^3.3.0
+    dns-packet: ^5.6.0
     dotenv: ^16.0.3
     eslint: ^8.33.0
     eslint-config-prettier: ^8.5.0
@@ -4682,6 +4683,15 @@ __metadata:
   dependencies:
     "@leichtgewicht/ip-codec": ^2.0.1
   checksum: a169963848e8539dfd8a19058562f9e1c15c0f82cbf76fa98942f11c46f3c74e7e7c82e3a8a5182d4c9e6ff19e21be738dbd098a876dde755d3aedd2cc730880
+  languageName: node
+  linkType: hard
+
+"dns-packet@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "dns-packet@npm:5.6.0"
+  dependencies:
+    "@leichtgewicht/ip-codec": ^2.0.1
+  checksum: 1b643814e5947a87620f8a906287079347492282964ce1c236d52c414e3e3941126b96581376b180ba6e66899e70b86b587bc1aa23e3acd9957765be952d83fc
   languageName: node
   linkType: hard
 
