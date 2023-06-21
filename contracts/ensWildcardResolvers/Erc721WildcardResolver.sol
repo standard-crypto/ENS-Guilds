@@ -20,12 +20,12 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
 
     // TODO: requires auth, or should be abstract function
     function setTokenContract(string calldata ensName, address tokenContract) external {
-        require(tokenContract.supportsInterface(type(IERC721).interfaceId));
+        require(tokenContract.supportsInterface(type(IERC721).interfaceId), "Does not implement ERC721");
         (bytes memory encodedName, ) = ensName.dnsEncodeName();
         tokens[encodedName] = IERC721(tokenContract);
     }
 
-    function resolve(bytes calldata name, bytes calldata data) public view override returns (bytes memory) {
+    function resolve(bytes calldata name, bytes calldata) public view override returns (bytes memory) {
         bytes memory emptyBytes;
 
         // TODO: check the `data` param equals ABI encoding of addr(namehash(name))

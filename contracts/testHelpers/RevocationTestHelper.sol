@@ -37,6 +37,7 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
         return _tagCanBeRevokedRetVal;
     }
 
+    // solhint-disable func-name-mixedcase
     function stub_tagCanBeRevokedReturnVal(bool retVal) external {
         _tagCanBeRevokedRetVal = retVal;
     }
@@ -44,4 +45,5 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
     function stub_onTagClaimedReturnVal(bytes32 retVal) external {
         _onTagClaimedRetVal = retVal;
     }
+    // solhint-enable func-name-mixedcase
 }
