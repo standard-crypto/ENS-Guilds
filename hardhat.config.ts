@@ -44,6 +44,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     mnemonic,
     path: "m/44'/60'/0'/0",
   };
+  let deployerPrivKey: string | undefined;
   switch (chain) {
     case "avalanche":
       jsonRpcUrl = "https://api.avax.network/ext/bc/C/rpc";
@@ -52,8 +53,16 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
     case "goerli":
-      // eslint-disable-next-line no-case-declarations
-      const deployerPrivKey = process.env.DEPLOYER_GOERLI_PRIVATE_KEY;
+      deployerPrivKey = process.env.DEPLOYER_GOERLI_PRIVATE_KEY;
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      jsonRpcUrl = `https://${chain}.infura.io/v3/${infuraApiKey!}`;
+
+      // eslint-disable-next-line no-extra-boolean-cast, @typescript-eslint/strict-boolean-expressions
+      accounts = !!deployerPrivKey ? [deployerPrivKey] : [];
+      break;
+    case "mainnet":
+      deployerPrivKey = process.env.DEPLOYER_MAINNET_PRIVATE_KEY;
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       jsonRpcUrl = `https://${chain}.infura.io/v3/${infuraApiKey!}`;
@@ -159,6 +168,8 @@ const config: HardhatUserConfig = {
       "@ensdomains/ens-contracts/contracts/reverseRegistrar/IReverseRegistrar.sol",
       "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol",
       "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol",
+      "@ensdomains/ens-contracts/contracts/resolvers/profiles/ITextResolver.sol",
+      "@ensdomains/ens-contracts/contracts/resolvers/profiles/IPubkeyResolver.sol",
     ],
   },
 };
