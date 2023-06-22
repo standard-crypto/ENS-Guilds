@@ -123,6 +123,17 @@ export function testErc721WildcardResolver(): void {
         expect(observed).to.eq(expected);
       });
 
+      it("resolves token URIs for url records", async function () {
+        const givenURI = `https://example.com/${tokenId}`;
+        await tokenContract.setTokenURI(tokenId, givenURI);
+
+        const data = textResolverIface.encodeFunctionData("text", [ethers.utils.namehash(fullName), "url"]);
+        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const [observed] = ethers.utils.defaultAbiCoder.decode(["string"], resolveResult);
+
+        expect(observed).to.eq(givenURI);
+      });
+
       it("returns empty string when subdomain not found", async function () {
         const data = textResolverIface.encodeFunctionData("text", [ethers.utils.namehash(fullName), "avatar"]);
 

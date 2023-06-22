@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "../libraries/ENSParentName.sol";
 
 contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
@@ -118,6 +118,14 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
             // Standard described here:
             // https://docs.ens.domains/ens-improvement-proposals/ensip-12-avatar-text-records
             return string.concat("eip155:1/erc721:", address(tokenContract).toHexString(), "/", tokenId.toString());
+        } else if (key.equal("url")) {
+            string memory url;
+            try IERC721Metadata(address(tokenContract)).tokenURI(tokenId) returns (string memory _url) {
+                url = _url;
+            } catch {
+                url = "";
+            }
+            return url;
         }
 
         // unsupported key
