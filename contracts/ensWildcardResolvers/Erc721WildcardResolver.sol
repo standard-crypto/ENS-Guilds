@@ -109,6 +109,7 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
         }
 
         // Don't bother returning anything if this tokenId has never been minted
+        // solhint-disable-next-line no-empty-blocks
         try tokenContract.ownerOf(tokenId) {} catch {
             return "";
         }

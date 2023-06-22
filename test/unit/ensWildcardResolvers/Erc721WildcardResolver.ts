@@ -13,7 +13,7 @@ import {
 import { getSigner } from "../../utils";
 
 export function testErc721WildcardResolver(): void {
-  describe.only("Erc721WildcardResolver", function () {
+  describe("Erc721WildcardResolver", function () {
     let resolver: Erc721WildcardResolver;
     let tokenContract: TestERC721;
     let tokenOwner: string;

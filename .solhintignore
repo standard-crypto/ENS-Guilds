@@ -4,3 +4,6 @@
 
 # Third party libraries
 contracts/libraries/ENSNamehash.sol
+
+# hardhat-dependency-compiler
+contracts/hardhat-dependency-compiler/**
