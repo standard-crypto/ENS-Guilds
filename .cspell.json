@@ -32,7 +32,10 @@
     "namehash",
     "namehashes",
     "mixedcase",
-    "ENSIP"
+    "ENSIP",
+    "COINTYPE",
+    "sighash",
+    "concat"
   ],
   "flagWords": [],
   "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "deployments"],
