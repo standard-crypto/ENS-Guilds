@@ -50,6 +50,11 @@ export function testErc721WildcardResolver(): void {
       await tokenContract.mint(tokenOwner, tokenId);
     });
 
+    it("implements ENSIP 10 interface", async function () {
+      // Source: https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution
+      await expect(resolver.supportsInterface("0x9061b923")).to.eventually.be.true;
+    });
+
     describe("address records", function () {
       it("resolves addr(bytes32 node) records", async function () {
         const data = addrResolverIface.encodeFunctionData("addr", [ethers.utils.namehash(fullName)]);

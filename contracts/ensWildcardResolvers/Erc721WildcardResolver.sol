@@ -3,15 +3,18 @@ pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
 import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "../libraries/ENSByteUtils.sol";
 import "../libraries/ENSParentName.sol";
 
-contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
+contract Erc721WildcardResolver is Ownable, IExtendedResolver, ERC165 {
     using ENSParentName for bytes;
+    using ENSByteUtils for address;
     using ERC165Checker for address;
     using NameEncoder for string;
     using Strings for string;
@@ -30,8 +33,7 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
     // ex: key for "test.eth" is `0x04746573740365746800`
     mapping(bytes => IERC721) public tokens;
 
-    // TODO: requires auth, or should be abstract function
-    function setTokenContract(string calldata ensName, address tokenContract) external {
+    function setTokenContract(string calldata ensName, address tokenContract) external onlyOwner {
         require(tokenContract.supportsInterface(type(IERC721).interfaceId), "Does not implement ERC721");
         (bytes memory encodedName, ) = ensName.dnsEncodeName();
         tokens[encodedName] = IERC721(tokenContract);
@@ -47,7 +49,7 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
             (, uint256 coinType) = abi.decode(data[4:], (bytes32, uint256));
             if (coinType == COIN_TYPE_ETH) {
                 address tokenOwner = _resolveEthAddr(name);
-                return abi.encode(addressToBytes(tokenOwner));
+                return abi.encode(tokenOwner.toBytes());
             } else {
                 // Unsupported COIN_TYPE
                 bytes memory emptyBytes;
@@ -132,7 +134,6 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
         return "";
     }
 
-    // TODO: move to separate library and unit test
     function _parseTokenIdFromName(bytes calldata name) internal pure returns (bool valid, uint256 tokenId) {
         uint i;
         tokenId = 0;
@@ -145,14 +146,4 @@ contract Erc721WildcardResolver is IExtendedResolver, ERC165 {
         }
         return (true, tokenId);
     }
-
-    // solhint-disable
-    // Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol#L96
-    function addressToBytes(address a) internal pure returns (bytes memory b) {
-        b = new bytes(20);
-        assembly {
-            mstore(add(b, 32), mul(a, exp(256, 12))) // cspell:disable-line
-        }
-    }
-    // solhint-enable
 }
