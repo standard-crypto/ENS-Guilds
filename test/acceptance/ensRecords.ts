@@ -24,12 +24,11 @@ export function testEnsRecords(): void {
       const { minter } = this.addresses;
 
       const tagToMint = "test";
-      const tagHash = ensLabelHash(tagToMint);
       const fullTagName = `${tagToMint}.${domain}`;
 
       // claim the tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
 
       const registeredAddress = await resolveName(ensRegistry, fullTagName);
@@ -43,12 +42,11 @@ export function testEnsRecords(): void {
       const reverseRegistrar = await getReverseRegistrar(ensRegistry);
 
       const tagToMint = "test";
-      const tagHash = ensLabelHash(tagToMint);
       const fullTagName = `${tagToMint}.${domain}`;
 
       await asAccount(minter, async (signer) => {
         // claim the tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
 
         // set the reverse record
         const tx = await reverseRegistrar.connect(signer).setName(fullTagName);
@@ -71,7 +69,7 @@ export function testEnsRecords(): void {
 
       await asAccount(minter, async (signer) => {
         // claim the tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
 
         // attempt to change owner of the tag's ENS node
         let tx = ensRegistry.connect(signer).setOwner(namehash(fullTagName), unauthorizedThirdParty);

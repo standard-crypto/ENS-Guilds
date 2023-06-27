@@ -40,14 +40,15 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /**
      * @notice Claims a guild tag
      * @param guildHash The namehash of the guild for which the tag should be claimed (e.g. namehash('my-guild.eth'))
-     * @param tagHash The ENS namehash of the tag being claimed (e.g. keccak256('foo') for foo.my-guild.eth)
+     * @param tag The tag name to claim (e.g. 'foo' for foo.my-guild.eth). Assumes `tag` is already normalized per
+     *            ENS Name Processing rules
      * @param recipient The address that will receive this guild tag (usually same as the caller)
      * @param extraClaimArgs [Optional] Any additional arguments necessary for guild-specific logic,
      *  such as authorization
      */
     function claimGuildTag(
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         address recipient,
         bytes calldata extraClaimArgs
     ) external payable;
@@ -55,14 +56,14 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /**
      * @notice Claims multiple tags for a guild at once
      * @param guildHash The ENS namehash of the guild's domain
-     * @param tagHashes Namehashes of each tag to be claimed
+     * @param tags Tags to be claimed
      * @param recipients Recipients of each tag to be claimed
      * @param extraClaimArgs Per-tag extra arguments required for guild-specific logic, such as authorization.
      * Must have same length as array of tagHashes, even if each array element is itself empty bytes
      */
     function claimGuildTagsBatch(
         bytes32 guildHash,
-        bytes32[] calldata tagHashes,
+        string[] calldata tags,
         address[] calldata recipients,
         bytes[] calldata extraClaimArgs
     ) external payable;
@@ -79,10 +80,10 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
      * @notice Attempts to revoke an existing guild tag, if authorized by the guild's AuthPolicy.
      * Deregistered guilds will bypass auth checks for revocation of all tags.
      * @param guildHash The ENS namehash of the guild's domain
-     * @param tagHash The ENS namehash of the tag (e.g. keccak256('foo') for foo.my-guild.eth)
+     * @param tag The tag to revoke
      * @param extraData [Optional] Any additional arguments necessary for assessing whether a tag may be revoked
      */
-    function revokeGuildTag(bytes32 guildHash, bytes32 tagHash, bytes calldata extraData) external;
+    function revokeGuildTag(bytes32 guildHash, string calldata tag, bytes calldata extraData) external;
 
     /**
      * @notice Attempts to revoke multiple guild tags
@@ -90,7 +91,7 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
      * @param tagHashes ENS namehashes of all tags to revoke
      * @param extraData Additional arguments necessary for assessing whether a tag may be revoked
      */
-    function revokeGuildTagsBatch(bytes32 guildHash, bytes32[] calldata tagHashes, bytes[] calldata extraData) external;
+    function revokeGuildTagsBatch(bytes32 guildHash, string[] calldata tagHashes, bytes[] calldata extraData) external;
 
     /**
      * @notice Updates the FeePolicy for an existing guild. May only be called by the guild's registered admin.

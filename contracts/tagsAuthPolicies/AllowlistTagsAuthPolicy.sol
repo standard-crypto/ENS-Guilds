@@ -34,7 +34,7 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function canClaimTag(
         bytes32 guildHash,
-        bytes32,
+        string calldata,
         address claimant,
         address,
         bytes calldata
@@ -47,7 +47,7 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function _onTagClaimed(
         bytes32 guildHash,
-        bytes32,
+        string calldata,
         address claimant,
         address,
         bytes calldata
@@ -59,7 +59,12 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
     /**
      * @inheritdoc ITagsAuthPolicy
      */
-    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external view virtual override returns (bool) {
+    function tagCanBeRevoked(
+        address,
+        bytes32,
+        string calldata,
+        bytes calldata
+    ) external view virtual override returns (bool) {
         return false;
     }
 }

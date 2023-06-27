@@ -1,4 +1,3 @@
-import { ensLabelHash } from "../../utils";
 import { asAccount } from "../utils";
 
 export function testGuildDeregistration(): void {
@@ -23,7 +22,7 @@ export function testGuildDeregistration(): void {
       // mint a tag
       const tagToMint = "test";
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, ensLabelHash(tagToMint), minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
 
       // deregister the guild
@@ -33,7 +32,7 @@ export function testGuildDeregistration(): void {
 
       // verify anyone can now revoke the existing tag on the deregistered guild
       await asAccount(thirdParty, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, ensLabelHash(tagToMint), []);
+        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
       });
     });
 
@@ -50,7 +49,7 @@ export function testGuildDeregistration(): void {
       // minting a tag should fail
       const tagToMint = "test";
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, ensLabelHash(tagToMint), minter, []);
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
         await this.expectRevertedWithCustomError(tx, "GuildNotActive");
       });
     });

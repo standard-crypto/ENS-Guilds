@@ -15,7 +15,7 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
 
     function canClaimTag(
         bytes32,
-        bytes32,
+        string calldata,
         address,
         address,
         bytes calldata
@@ -25,7 +25,7 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
 
     function onTagClaimed(
         bytes32,
-        bytes32,
+        string calldata,
         address,
         address,
         bytes calldata
@@ -33,7 +33,12 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
         return _onTagClaimedRetVal;
     }
 
-    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external view virtual override returns (bool) {
+    function tagCanBeRevoked(
+        address,
+        bytes32,
+        string calldata,
+        bytes calldata
+    ) external view virtual override returns (bool) {
         return _tagCanBeRevokedRetVal;
     }
 

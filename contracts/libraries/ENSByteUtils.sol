@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
+
+// solhint-disable-next-line max-line-length
 // Source: https://github.com/ensdomains/ens-contracts/blob/340a6d05cd00d078ae40edbc58c139eb7048189a/contracts/resolvers/profiles/AddrResolver.sol
 
 pragma solidity ^0.8.4;
 
 /*
- * @dev Converts addresses to and from their bytestring represtations
+ * @dev Converts addresses to and from their byte-string representations
  */
 library ENSByteUtils {
+    // solhint-disable
     function toAddress(bytes memory b) internal pure returns (address payable a) {
         require(b.length == 20);
         assembly {
@@ -20,4 +23,5 @@ library ENSByteUtils {
             mstore(add(b, 32), mul(a, exp(256, 12))) // cspell:disable-line
         }
     }
+    // solhint-enable
 }

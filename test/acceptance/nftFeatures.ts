@@ -1,6 +1,5 @@
 import { expect } from "chai";
 
-import { ensLabelHash } from "../../utils";
 import { asAccount } from "../utils";
 import { findTransferSingleEvent } from "../utils/erc1155";
 
@@ -24,11 +23,10 @@ export function testNFTFeatures(): void {
       const { minter } = this.addresses;
 
       const tagToMint = "test";
-      const tagHash = ensLabelHash(tagToMint);
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
 
       // look for the event that was logged for the new token mint
@@ -50,11 +48,10 @@ export function testNFTFeatures(): void {
       const metadataURITemplate = "https://test-domain/{id}.json";
 
       const tagToMint = "test";
-      const tagHash = ensLabelHash(tagToMint);
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
 
       // guild admin updates metadata URI for their guild's NFTs
@@ -90,11 +87,10 @@ export function testNFTFeatures(): void {
       const { minter, unauthorizedThirdParty } = this.addresses;
 
       const tagToMint = "test";
-      const tagHash = ensLabelHash(tagToMint);
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
 
       // look for the event that was logged for the new token mint

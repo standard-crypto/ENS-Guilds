@@ -121,10 +121,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
      */
     function claimGuildTag(
         bytes32 guildEnsNode,
-        bytes32 tagHash,
+        string calldata tag,
         address recipient,
         bytes calldata extraClaimArgs
     ) public payable override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
+        bytes32 tagHash = keccak256(bytes(tag));
+
         // assert guild is not frozen
         if (!guilds[guildEnsNode].active) {
             revert GuildNotActive();
@@ -138,14 +140,14 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
 
         // check caller is authorized to claim tag
         ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!auth.canClaimTag(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs)) {
+        if (!auth.canClaimTag(guildEnsNode, tag, _msgSender(), recipient, extraClaimArgs)) {
             revert ClaimUnauthorized();
         }
 
         // fees
         (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
             guildEnsNode,
-            tagHash,
+            tag,
             _msgSender(),
             extraClaimArgs
         );
@@ -170,7 +172,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
         _mintNewGuildToken(guildEnsNode, tagHash, recipient);
 
         // inform auth contract that tag was claimed, then revoke an existing tag if instructed
-        bytes32 tagToRevoke = auth.onTagClaimed(guildEnsNode, tagHash, _msgSender(), recipient, extraClaimArgs);
+        bytes32 tagToRevoke = auth.onTagClaimed(guildEnsNode, tag, _msgSender(), recipient, extraClaimArgs);
         if (tagToRevoke != bytes32(0)) {
             _revokeTag(guildEnsNode, tagToRevoke);
         }
@@ -189,12 +191,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
      */
     function claimGuildTagsBatch(
         bytes32 guildEnsNode,
-        bytes32[] calldata tagHashes,
+        string[] calldata tags,
         address[] calldata recipients,
         bytes[] calldata extraClaimArgs
     ) external payable override {
-        for (uint i = 0; i < tagHashes.length; i++) {
-            claimGuildTag(guildEnsNode, tagHashes[i], recipients[i], extraClaimArgs[i]);
+        for (uint i = 0; i < tags.length; i++) {
+            claimGuildTag(guildEnsNode, tags[i], recipients[i], extraClaimArgs[i]);
         }
     }
 
@@ -210,16 +212,18 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
      */
     function revokeGuildTag(
         bytes32 guildEnsNode,
-        bytes32 tagHash,
+        string calldata tag,
         bytes calldata extraData
     ) public override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
         GuildInfo storage guild = guilds[guildEnsNode];
 
         // revoke authorized?
         ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!guild.deregistered && !auth.tagCanBeRevoked(_msgSender(), guildEnsNode, tagHash, extraData)) {
+        if (!guild.deregistered && !auth.tagCanBeRevoked(_msgSender(), guildEnsNode, tag, extraData)) {
             revert RevokeUnauthorized();
         }
+
+        bytes32 tagHash = keccak256(bytes(tag));
         _revokeTag(guildEnsNode, tagHash);
     }
 
@@ -228,11 +232,11 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
      */
     function revokeGuildTagsBatch(
         bytes32 guildHash,
-        bytes32[] calldata tagHashes,
+        string[] calldata tags,
         bytes[] calldata extraData
     ) external override {
-        for (uint i = 0; i < tagHashes.length; i++) {
-            revokeGuildTag(guildHash, tagHashes[i], extraData[i]);
+        for (uint i = 0; i < tags.length; i++) {
+            revokeGuildTag(guildHash, tags[i], extraData[i]);
         }
     }
 

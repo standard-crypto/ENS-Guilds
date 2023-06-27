@@ -67,7 +67,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function canClaimTag(
         bytes32 guildHash,
-        bytes32,
+        string calldata,
         address claimant,
         address,
         bytes calldata extraClaimArgs
@@ -101,11 +101,12 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function _onTagClaimed(
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         address claimant,
         address,
         bytes calldata extraClaimArgs
     ) internal virtual override returns (bytes32 tagToRevoke) {
+        bytes32 tagHash = keccak256(bytes(tag));
         uint256 nftTokenId = uint256(bytes32(extraClaimArgs));
 
         tagToRevoke = guilds[guildHash].tagClaims[nftTokenId].tagHash;
@@ -122,9 +123,11 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     function tagCanBeRevoked(
         address,
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         bytes calldata extraRevokeArgs
     ) external view virtual override returns (bool) {
+        bytes32 tagHash = keccak256(bytes(tag));
+
         if (extraRevokeArgs.length != 32) {
             return false;
         }

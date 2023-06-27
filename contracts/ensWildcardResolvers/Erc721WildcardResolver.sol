@@ -11,12 +11,14 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "../libraries/ENSByteUtils.sol";
 import "../libraries/ENSParentName.sol";
+import "../libraries/StringParsing.sol";
 
 contract Erc721WildcardResolver is Ownable, IExtendedResolver, ERC165 {
     using ENSParentName for bytes;
     using ENSByteUtils for address;
     using ERC165Checker for address;
     using NameEncoder for string;
+    using StringParsing for bytes;
     using Strings for string;
     using Strings for address;
     using Strings for uint256;
@@ -79,7 +81,7 @@ contract Erc721WildcardResolver is Ownable, IExtendedResolver, ERC165 {
         }
 
         // Extract tokenId from child name
-        (bool valid, uint256 tokenId) = _parseTokenIdFromName(childUtf8Encoded);
+        (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
         if (!valid) {
             return address(0);
         }
@@ -105,7 +107,7 @@ contract Erc721WildcardResolver is Ownable, IExtendedResolver, ERC165 {
         }
 
         // Extract tokenId from child name
-        (bool valid, uint256 tokenId) = _parseTokenIdFromName(childUtf8Encoded);
+        (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
         if (!valid) {
             return "";
         }
@@ -132,18 +134,5 @@ contract Erc721WildcardResolver is Ownable, IExtendedResolver, ERC165 {
 
         // unsupported key
         return "";
-    }
-
-    function _parseTokenIdFromName(bytes calldata name) internal pure returns (bool valid, uint256 tokenId) {
-        uint i;
-        tokenId = 0;
-        for (i = 0; i < name.length; i++) {
-            if (name[i] < bytes1(0x30) || name[i] > bytes1(0x39)) {
-                return (false, 0);
-            }
-            uint c = uint(uint8(name[i])) - 48;
-            tokenId = tokenId * 10 + c;
-        }
-        return (true, tokenId);
     }
 }

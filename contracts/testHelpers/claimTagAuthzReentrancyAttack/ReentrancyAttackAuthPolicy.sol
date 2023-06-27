@@ -27,7 +27,7 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
 
     function canClaimTag(
         bytes32,
-        bytes32,
+        string calldata,
         address,
         address,
         bytes calldata
@@ -38,7 +38,7 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
 
     function onTagClaimed(
         bytes32,
-        bytes32,
+        string calldata,
         address,
         address,
         bytes calldata
@@ -46,7 +46,12 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         return bytes32(0);
     }
 
-    function tagCanBeRevoked(address, bytes32, bytes32, bytes calldata) external view virtual override returns (bool) {
+    function tagCanBeRevoked(
+        address,
+        bytes32,
+        string calldata,
+        bytes calldata
+    ) external view virtual override returns (bool) {
         return false;
     }
 }

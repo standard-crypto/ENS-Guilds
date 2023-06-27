@@ -50,7 +50,7 @@ contract FlatFeePolicy is Context, FeePolicy {
      */
     function tagClaimFee(
         bytes32 guildHash,
-        bytes32,
+        string calldata,
         address,
         bytes calldata
     ) external view virtual override returns (address tokenContract, uint256 fee, address feePaidTo) {

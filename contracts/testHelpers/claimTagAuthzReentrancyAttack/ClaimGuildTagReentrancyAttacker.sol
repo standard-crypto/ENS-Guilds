@@ -11,27 +11,27 @@ contract ClaimGuildTagReentrancyAttacker {
     IENSGuilds private ensGuilds;
 
     bytes32 private guildEnsNode;
-    bytes32 private tagHash;
+    string private tag;
     address private recipient;
     bytes private extraClaimArgs;
 
     constructor(
         IENSGuilds _ensGuilds,
         bytes32 _guildEnsNode,
-        bytes32 _tagHash,
+        string memory _tag,
         address _recipient,
         bytes memory _extraClaimArgs
     ) {
         ensGuilds = _ensGuilds;
 
         guildEnsNode = _guildEnsNode;
-        tagHash = _tagHash;
+        tag = _tag;
         recipient = _recipient;
         extraClaimArgs = _extraClaimArgs;
     }
 
     function insidiousLookupFunction() external returns (bool) {
-        ensGuilds.claimGuildTag(guildEnsNode, tagHash, recipient, extraClaimArgs);
+        ensGuilds.claimGuildTag(guildEnsNode, tag, recipient, extraClaimArgs);
         return true;
     }
 }

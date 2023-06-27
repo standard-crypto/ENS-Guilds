@@ -35,7 +35,7 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
      */
     function onTagClaimed(
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         address claimant,
         address recipient,
         bytes calldata extraClaimArgs
@@ -44,7 +44,7 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
         // solhint-disable-next-line reason-string
         require(_msgSender() == address(_ensGuilds));
 
-        return _onTagClaimed(guildHash, tagHash, claimant, recipient, extraClaimArgs);
+        return _onTagClaimed(guildHash, tag, claimant, recipient, extraClaimArgs);
     }
 
     /**
@@ -52,7 +52,7 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
      */
     function _onTagClaimed(
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         address claimant,
         address recipient,
         bytes calldata extraClaimArgs

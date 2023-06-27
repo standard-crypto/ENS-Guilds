@@ -3,7 +3,6 @@ import { parseEther } from "ethers/lib/utils";
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 import { IERC20__factory } from "../../types";
-import { ensLabelHash } from "../../utils";
 import { asAccount } from "../utils";
 
 const WETH_ADDR = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -12,7 +11,6 @@ const ethAddr = ethers.constants.AddressZero;
 export function testMintFees(): void {
   describe("Mint Fees", function () {
     const tagToMint = "test";
-    const tagHash = ensLabelHash(tagToMint);
 
     beforeEach("setup", async function () {
       const { ensRegistry, ensGuilds } = this.deployedContracts;
@@ -54,7 +52,7 @@ export function testMintFees(): void {
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -82,7 +80,7 @@ export function testMintFees(): void {
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -121,7 +119,7 @@ export function testMintFees(): void {
         await weth.connect(signer).approve(ensGuilds.address, fee);
 
         // mint
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -149,7 +147,7 @@ export function testMintFees(): void {
 
       // mint a tag with no ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
     });
 
@@ -172,11 +170,11 @@ export function testMintFees(): void {
       });
 
       // get a quote for the fee
-      const quote = await flatFeePolicy.tagClaimFee(ensNode, tagHash, minter, []);
+      const quote = await flatFeePolicy.tagClaimFee(ensNode, tagToMint, minter, []);
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary was paid the quoted fee
@@ -204,7 +202,7 @@ export function testMintFees(): void {
 
       // mint a tag with ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary got the ETH fee
@@ -243,7 +241,7 @@ export function testMintFees(): void {
         await weth.connect(signer).approve(ensGuilds.address, fee);
 
         // mint
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -271,7 +269,7 @@ export function testMintFees(): void {
 
       // mint a tag with no ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
       });
     });
 
@@ -322,7 +320,7 @@ export function testMintFees(): void {
 
           // mint a tag but pay only half the fee
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee.div(2) });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee.div(2) });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -349,7 +347,7 @@ export function testMintFees(): void {
 
           // mint a tag but try to pay double the fee
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee.mul(2) });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee.mul(2) });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -386,7 +384,7 @@ export function testMintFees(): void {
 
           // attempt to mint a tag with ETH attached to the tx
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
 
@@ -395,7 +393,7 @@ export function testMintFees(): void {
             await flatFeePolicy.connect(signer).setFlatFee(ensNode, ethAddr, fee, payableContractDeployment.address);
           });
           await asAccount(minter, async (signer) => {
-            await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+            await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
           });
           const beneficiaryBalance = await ethers.provider.getBalance(payableContractDeployment.address);
           expect(beneficiaryBalance.toString()).to.eq(fee.toString());
@@ -435,7 +433,7 @@ export function testMintFees(): void {
             await weth.connect(signer).approve(ensGuilds.address, fee.div(2));
 
             // mint
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -472,7 +470,7 @@ export function testMintFees(): void {
             await weth.connect(signer).approve(ensGuilds.address, fee);
 
             // mint
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });

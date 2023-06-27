@@ -15,7 +15,7 @@ abstract contract FeePolicy is ERC165 {
     /**
      * @notice Returns the fee required to mint the given guild tag by the given minter
      * @param guildHash The ENS namehash of the guild's domain
-     * @param tagHash The ENS namehash of the tag being claimed (e.g. keccak256('foo') for foo.my-guild.eth)
+     * @param tag The tag being claimed (e.g. 'foo' for foo.my-guild.eth)
      * @param claimant The address attempting to claim the tag (not necessarily the address that will receive it)
      * @param extraClaimArgs Any additional arguments that would be passed by the minter to the claimGuildTag() function
      * @return tokenContract The token contract the fee must be paid in (if any). Address(0) designates native Ether.
@@ -24,7 +24,7 @@ abstract contract FeePolicy is ERC165 {
      */
     function tagClaimFee(
         bytes32 guildHash,
-        bytes32 tagHash,
+        string calldata tag,
         address claimant,
         bytes calldata extraClaimArgs
     ) external view virtual returns (address tokenContract, uint256 fee, address feePaidTo);

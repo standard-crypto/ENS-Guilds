@@ -31,7 +31,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -79,7 +79,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Deploy a naive AuthPolicy that can trigger a reentrancy attack, along with the attacker itself
       const { deploy } = deployments;
@@ -115,7 +115,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -136,7 +136,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -160,7 +160,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -185,11 +185,13 @@ export function testMintAuthorization(): void {
       const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
       const { minter } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register a subdomain using the default resolver, before the guild is even registered
       await asAccount(ensNameOwner, async (signer) => {
-        await ensRegistry.connect(signer).setSubnodeRecord(ensNode, tagToMint, ensNameOwner, ensDefaultResolverAddr, 0);
+        await ensRegistry
+          .connect(signer)
+          .setSubnodeRecord(ensNode, ensLabelHash(tagToMint), ensNameOwner, ensDefaultResolverAddr, 0);
       });
 
       // Register guild
@@ -209,7 +211,7 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter, unauthorizedThirdParty: tagRecipient } = this.addresses;
 
-      const tagToMint = ensLabelHash("test");
+      const tagToMint = "test";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -227,8 +229,8 @@ export function testMintAuthorization(): void {
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
 
-      const tag1 = ensLabelHash("test1");
-      const tag2 = ensLabelHash("test2");
+      const tag1 = "test1";
+      const tag2 = "test2";
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
@@ -240,8 +242,8 @@ export function testMintAuthorization(): void {
         await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], [[], []]);
       });
 
-      await expect(ensGuilds.tagOwner(ensNode, tag1)).to.eventually.eq(minter1);
-      await expect(ensGuilds.tagOwner(ensNode, tag2)).to.eventually.eq(minter2);
+      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag1))).to.eventually.eq(minter1);
+      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag2))).to.eventually.eq(minter2);
     });
   });
 }
