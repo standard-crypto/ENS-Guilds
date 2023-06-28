@@ -1,9 +1,10 @@
 import { expect } from "chai";
-import { AbiCoder, ZeroAddress, dnsEncode, namehash } from "ethers";
+import { AbiCoder, ZeroAddress, dnsEncode, namehash, parseEther } from "ethers";
 import { deployments, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
-import type { Erc721WildcardResolver, TestERC721 } from "../../../types";
+import type { ENS, Erc721WildcardResolver, TestERC721 } from "../../../types";
 import {
+  ENS__factory,
   Erc721WildcardResolver__factory,
   IAddrResolver__factory,
   IAddressResolver__factory,
@@ -11,13 +12,15 @@ import {
   ITextResolver__factory,
   TestERC721__factory,
 } from "../../../types";
-import { getSigner } from "../../utils";
+import { resolveName, resolveText } from "../../../utils";
+import { asAccount, getSigner } from "../../utils";
 
 export function testErc721WildcardResolver(): void {
   describe("Erc721WildcardResolver", function () {
     let resolver: Erc721WildcardResolver;
     let tokenContract: TestERC721;
     let tokenOwner: string;
+    let ENS: ENS;
 
     const ensParentName = "test.eth";
     const tokenId = 123;
@@ -47,6 +50,15 @@ export function testErc721WildcardResolver(): void {
       });
       tokenContract = TestERC721__factory.connect(tokenDeployment.address, signer);
 
+      ENS = ENS__factory.connect(ensRegistry, signer);
+
+      // Set our wildcard resolver as the resolver for this ENS name
+      const nameOwner = await ENS.owner(namehash(ensParentName));
+      await signer.sendTransaction({ to: nameOwner, value: parseEther("1") });
+      await asAccount(nameOwner, async (signer) => {
+        await ENS.connect(signer).setResolver(namehash(ensParentName), resolver.getAddress());
+      });
+
       [tokenOwner] = await getUnnamedAccounts();
       await resolver.setTokenContract(ensParentName, await tokenContract.getAddress(), ensDefaultResolver);
       await tokenContract.mint(tokenOwner, tokenId);
@@ -59,13 +71,15 @@ export function testErc721WildcardResolver(): void {
 
     describe("address records", function () {
       it("resolves addr(bytes32 node) records", async function () {
+        // Directly invoke the `resolve()` method and check that the result matches what we expect
         const data = addrResolverIface.encodeFunctionData("addr", [namehash(fullName)]);
-
         const resolveResult = await resolver.resolve(fullNameBytes, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr.toLowerCase()).to.eq(tokenOwner.toLowerCase());
 
-        // TODO: use utils.resolveName
+        // Also use ethers.js to try to resolve this name, checking that we've correctly implemented
+        // the standard
+        await expect(resolveName(ENS, fullName)).to.eventually.eq(tokenOwner);
       });
 
       it("resolves addr(bytes32 node, uint256 coinType) records", async function () {
@@ -84,6 +98,9 @@ export function testErc721WildcardResolver(): void {
         const resolveResult = await resolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
+
+        // sanity-check that ethers.js resolver returns null
+        await expect(resolveName(ENS, name)).to.eventually.be.null;
       });
 
       it("returns zero address when token has no owner", async function () {
@@ -94,6 +111,9 @@ export function testErc721WildcardResolver(): void {
         const resolveResult = await resolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
+
+        // sanity-check that ethers.js resolver returns null
+        await expect(resolveName(ENS, name)).to.eventually.be.null;
       });
 
       it("returns zero address malformed token ID", async function () {
@@ -104,6 +124,9 @@ export function testErc721WildcardResolver(): void {
         const resolveResult = await resolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
+
+        // sanity-check that ethers.js resolver returns null
+        await expect(resolveName(ENS, name)).to.eventually.be.null;
       });
 
       it("returns empty bytes for non-ETH addr() call", async function () {
@@ -128,6 +151,9 @@ export function testErc721WildcardResolver(): void {
         const expected = `eip155:1/erc721:${tokenContractAddr}/${tokenId}`;
 
         expect(observed).to.eq(expected);
+
+        // check the above a second time using ethers.js
+        await expect(resolveText(ENS, fullName, "avatar")).to.eventually.eq(expected);
       });
 
       it("resolves token URIs for url records", async function () {
@@ -139,6 +165,9 @@ export function testErc721WildcardResolver(): void {
         const [observed] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
 
         expect(observed).to.eq(givenURI);
+
+        // check the above a second time using ethers.js
+        await expect(resolveText(ENS, fullName, "url")).to.eventually.eq(givenURI);
       });
 
       it("returns empty string when subdomain not found", async function () {
@@ -159,6 +188,9 @@ export function testErc721WildcardResolver(): void {
         const resolveResult = await resolver.resolve(name, data);
         const [value] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         expect(value).to.eq("");
+
+        // check the above a second time using ethers.js
+        await expect(resolveText(ENS, name, "avatar")).to.eventually.be.null;
       });
 
       it("returns empty string malformed token ID", async function () {
@@ -169,6 +201,9 @@ export function testErc721WildcardResolver(): void {
         const resolveResult = await resolver.resolve(name, data);
         const [value] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         expect(value).to.eq("");
+
+        // check the above a second time using ethers.js
+        await expect(resolveText(ENS, name, "avatar")).to.eventually.be.null;
       });
     });
 

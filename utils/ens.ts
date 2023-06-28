@@ -19,6 +19,16 @@ export async function resolveName(ensRegistry: ENS, name: string): Promise<strin
   return await resolver.getAddress();
 }
 
+export async function resolveText(ensRegistry: ENS, name: string, key: string): Promise<string | null> {
+  const resolver = await getResolver(ensRegistry, name);
+
+  if (resolver === null) {
+    return null;
+  }
+
+  return await resolver.getText(key);
+}
+
 export async function getResolver(ensRegistry: ENS, name: string): Promise<EnsResolver | null> {
   const ensRegistryAddress = await ensRegistry.getAddress();
 
