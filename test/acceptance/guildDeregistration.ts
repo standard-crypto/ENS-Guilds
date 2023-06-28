@@ -8,9 +8,11 @@ export function testGuildDeregistration(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -22,7 +24,7 @@ export function testGuildDeregistration(): void {
       // mint a tag
       const tagToMint = "test";
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // deregister the guild
@@ -32,7 +34,7 @@ export function testGuildDeregistration(): void {
 
       // verify anyone can now revoke the existing tag on the deregistered guild
       await asAccount(thirdParty, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
+        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
       });
     });
 
@@ -49,7 +51,7 @@ export function testGuildDeregistration(): void {
       // minting a tag should fail
       const tagToMint = "test";
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
         await this.expectRevertedWithCustomError(tx, "GuildNotActive");
       });
     });
@@ -65,7 +67,9 @@ export function testGuildDeregistration(): void {
 
       // re-register the same guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 

@@ -112,8 +112,12 @@ const config: HardhatUserConfig = {
       default: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
     },
     ensDefaultResolver: {
-      default: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+      default: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
       goerli: "0x4B1488B7a6B320d2D721406204aBc3eeAa9AD329",
+    },
+    ensNameWrapper: {
+      default: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+      goerli: "0x114D4603199df73e7D157787f8778E21fCd13066",
     },
   },
   networks: {
@@ -124,7 +128,7 @@ const config: HardhatUserConfig = {
       forking: {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         url: (getChainConfig("mainnet") as HttpNetworkUserConfig).url!,
-        blockNumber: 16644091,
+        blockNumber: 17575698,
       },
     },
     arbitrum: getChainConfig("arbitrum-mainnet"),
@@ -161,7 +165,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "types",
-    target: "ethers-v5",
+    target: "ethers-v6",
   },
   dependencyCompiler: {
     paths: [

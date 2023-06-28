@@ -1,13 +1,11 @@
-import { type EventFragment } from "@ethersproject/abi";
-import type { Event } from "@ethersproject/contracts";
-import type { Log } from "@ethersproject/providers";
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { impersonateAccount, stopImpersonatingAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { increase, increaseTo } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
-import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import chai from "chai";
-import type { utils } from "ethers";
+import { type EventFragment, EventLog, type Log } from "ethers";
 import { ethers } from "hardhat";
 
+import { type TypedContractEvent, type TypedEventLog } from "../../types/common";
 import { dateToBlockchainTimestamp } from "../../utils";
 
 const { expect } = chai;
@@ -17,13 +15,13 @@ export function expectDefined<T>(arg: T): asserts arg is NonNullable<T> {
   expect(arg).to.not.be.null;
 }
 
-export async function getSigner(address: string): Promise<SignerWithAddress> {
+export async function getSigner(address: string): Promise<HardhatEthersSigner> {
   return await asAccount(address, async () => {
     return await ethers.getSigner(address);
   });
 }
 
-export async function asAccount<T>(address: string, action: (signer: SignerWithAddress) => Promise<T>): Promise<T> {
+export async function asAccount<T>(address: string, action: (signer: HardhatEthersSigner) => Promise<T>): Promise<T> {
   await impersonateAccount(address);
   const signer = await ethers.getSigner(address);
   const result = await action(signer);
@@ -40,15 +38,23 @@ export async function mineBlockAtTimestamp(timestamp: Date): Promise<void> {
   await increaseTo(timestampNumber);
 }
 
-export function findTypedEvent<EventType extends Event>(
-  logs: Log[] | undefined,
+export function findTypedEvent<EventType extends TypedContractEvent>(
+  logs: Array<Log | EventLog> | undefined,
   targetEventFragment: EventFragment,
-  contractInterface: utils.Interface,
-): Log & { args: EventType["args"] } {
+): TypedEventLog<EventType> {
   expectDefined(logs);
-  const targetEventTopic = contractInterface.getEventTopic(contractInterface.events[targetEventFragment.format()]);
-  const foundLog = logs.find((log) => log.topics.includes(targetEventTopic));
+
+  const foundLog = logs.find((log) => {
+    return log instanceof EventLog && log.eventName === targetEventFragment.name;
+  });
+
   expectDefined(foundLog);
-  const logDescription = contractInterface.parseLog(foundLog);
-  return { ...foundLog, args: logDescription.args };
+
+  return foundLog as TypedEventLog<EventType>;
+
+  // const targetEventTopic = contractInterface.getEventTopic(contractInterface.events[targetEventFragment.format()]);
+  // const foundLog = logs.find((log) => log.topics.includes(targetEventTopic));
+
+  // const logDescription = contractInterface.parseLog(foundLog);
+  // return { ...foundLog, args: logDescription?.args };
 }

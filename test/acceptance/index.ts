@@ -1,7 +1,7 @@
 import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import type { ContractTransaction } from "ethers";
-import { namehash, parseEther } from "ethers/lib/utils";
+import type { ContractTransactionResponse } from "ethers";
+import { namehash, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import { IENSGuilds__factory } from "../../types";
@@ -67,7 +67,7 @@ describe("Acceptance Tests", function () {
     await setBalance(unauthorizedThirdParty, parseEther("100000000"));
 
     this.expectRevertedWithCustomError = async (
-      tx: Promise<ContractTransaction>,
+      tx: Promise<ContractTransactionResponse>,
       customErrorName: string,
     ): Promise<void> => {
       await expect(tx).to.be.revertedWithCustomError(ensGuildsImpl, customErrorName);

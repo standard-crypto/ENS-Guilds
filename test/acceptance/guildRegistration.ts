@@ -1,4 +1,4 @@
-import { namehash } from "ethers/lib/utils";
+import { namehash } from "ethers";
 
 import { ensLabelHash } from "../../utils";
 import { asAccount } from "../utils";
@@ -11,9 +11,11 @@ export function testGuildRegistration(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an ENS operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -32,10 +34,12 @@ export function testGuildRegistration(): void {
         await ensRegistry.connect(signer).setSubnodeOwner(ensNode, subdomainHash, ensNameOwner);
 
         // Set ENSGuilds contract as an ENS operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
 
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(guildHash, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(guildHash, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -45,15 +49,17 @@ export function testGuildRegistration(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an ENS operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
 
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
 
         // Register the guild again
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "AlreadyRegistered");
       });
     });
@@ -65,13 +71,13 @@ export function testGuildRegistration(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an ENS operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
       });
 
       await asAccount(unauthorizedThirdParty, async (signer) => {
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
@@ -86,7 +92,7 @@ export function testGuildRegistration(): void {
       await asAccount(unauthorizedThirdParty, async (signer) => {
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
       });
     });
@@ -99,7 +105,7 @@ export function testGuildRegistration(): void {
         // Register guild
         const tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "ENSGuildsIsNotRegisteredOperator");
       });
     });

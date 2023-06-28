@@ -1,7 +1,6 @@
-import { ensNormalize, namehash } from "@ethersproject/hash";
 import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { parseEther } from "ethers/lib/utils";
+import { ZeroAddress, ensNormalize, namehash, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import {
@@ -61,7 +60,7 @@ export function testENSGuildsHumanized(): void {
       await setBalance(minter, parseEther("100000000"));
 
       await asAccount(ensNameOwner, async (signer) => {
-        await ens.connect(signer).setApprovalForAll(ensGuildsHumanized.address, true);
+        await ens.connect(signer).setApprovalForAll(ensGuildsHumanized.getAddress(), true);
       });
     });
 
@@ -89,7 +88,7 @@ export function testENSGuildsHumanized(): void {
 
       // Check that correct guild was deregistered
       const guildAdmin = await ensGuildsOriginal.guildAdmin(guildHash);
-      expect(guildAdmin).to.eq(ethers.constants.AddressZero);
+      expect(guildAdmin).to.eq(ZeroAddress);
     });
 
     it("supports humanized claimGuildTag()", async function () {
@@ -100,7 +99,7 @@ export function testENSGuildsHumanized(): void {
 
       // Mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuildsHumanized.connect(signer).claimGuildTag(ensName, tagToMint, minter, []);
+        await ensGuildsHumanized.connect(signer).claimGuildTag(ensName, tagToMint, minter, "0x");
       });
 
       // Check correct tag owner

@@ -1,4 +1,4 @@
-import type { ContractTransaction } from "ethers";
+import type { ContractTransactionResponse } from "ethers";
 
 import type {
   AllowlistTagsAuthPolicy,
@@ -32,6 +32,6 @@ declare module "mocha" {
       minter: string;
     };
 
-    expectRevertedWithCustomError: (tx: Promise<ContractTransaction>, customErrorName: string) => Promise<void>;
+    expectRevertedWithCustomError: (tx: Promise<ContractTransactionResponse>, customErrorName: string) => Promise<void>;
   }
 }

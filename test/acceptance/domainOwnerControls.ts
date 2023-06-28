@@ -1,5 +1,5 @@
-import { namehash } from "@ethersproject/hash";
 import { expect } from "chai";
+import { namehash } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { AddrResolver__factory } from "../../types";
@@ -14,9 +14,11 @@ export function testDomainOwnerControls(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -32,7 +34,7 @@ export function testDomainOwnerControls(): void {
       const { ensRegistry } = this.deployedContracts;
       const { ensNameOwner, ensNode, domain } = this.guildInfo;
       const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
-      const ensDefaultResolver = AddrResolver__factory.connect(ensDefaultResolverAddr, ensRegistry.provider);
+      const ensDefaultResolver = AddrResolver__factory.connect(ensDefaultResolverAddr, ethers.provider);
       const subdomain = `foo`;
       const subdomainHash = ensLabelHash(subdomain);
       const subdomainNode = namehash(`${subdomain}.${domain}`);
@@ -55,7 +57,9 @@ export function testDomainOwnerControls(): void {
       });
 
       // check that the new forward record was created correctly
+      // console.log(subdomain, domain, ensRegistry.address);
       const subdomainResolvesTo = await resolveName(ensRegistry, `${subdomain}.${domain}`);
+
       expect(subdomainResolvesTo).to.eq(expectedSubdomainResolvesTo);
     });
 
@@ -63,7 +67,7 @@ export function testDomainOwnerControls(): void {
       const { ensRegistry, ensGuilds } = this.deployedContracts;
       const { ensNameOwner, ensNode, domain } = this.guildInfo;
       const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
-      const ensDefaultResolver = AddrResolver__factory.connect(ensDefaultResolverAddr, ensRegistry.provider);
+      const ensDefaultResolver = AddrResolver__factory.connect(ensDefaultResolverAddr, ensRegistry.runner);
       const { minter } = this.addresses;
       const tagToMint = "spicy";
       const tagHash = ensLabelHash(tagToMint);
@@ -72,7 +76,7 @@ export function testDomainOwnerControls(): void {
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagHash, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // domain owner can edit the tag in the ENS registry

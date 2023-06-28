@@ -1,6 +1,6 @@
-import { namehash } from "@ethersproject/hash";
 import { expect } from "chai";
-import { deployments, ethers, getNamedAccounts } from "hardhat";
+import { ZeroAddress, namehash } from "ethers";
+import { deployments, getNamedAccounts } from "hardhat";
 
 import { type RevocationTestHelper, RevocationTestHelper__factory } from "../../types";
 import { ensLabelHash, resolveName } from "../../utils";
@@ -22,16 +22,16 @@ export function testTagRevocation(): void {
       });
       revocationTestHelper = RevocationTestHelper__factory.connect(
         revocationTestHelperDeployment.address,
-        ensRegistry.provider,
+        ensRegistry.runner,
       );
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, revocationTestHelperDeployment.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), revocationTestHelperDeployment.address);
       });
     });
 
@@ -45,7 +45,7 @@ export function testTagRevocation(): void {
       const tagFullDomain = `${tagToMint}.${domain}`;
       const tagEnsNode = namehash(`${tagToMint}.${domain}`);
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // sanity-check the ENS resolution
@@ -53,12 +53,12 @@ export function testTagRevocation(): void {
 
       // now revoke the tag
       await asAccount(revokingParty, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
+        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
       });
 
       // ENS resolution should be reset
       await expect(resolveName(ensRegistry, tagFullDomain)).to.eventually.be.null;
-      await expect(ensRegistry.owner(tagEnsNode)).to.eventually.eq(ethers.constants.AddressZero);
+      await expect(ensRegistry.owner(tagEnsNode)).to.eventually.eq(ZeroAddress);
     });
 
     it("Revoked guild tag also revokes NFT ownership", async function () {
@@ -69,20 +69,20 @@ export function testTagRevocation(): void {
       // mint a tag and grab the corresponding NFT
       const tagToMint = "test";
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
       const claimTxReceipt = await claimTx.wait();
-      const mintEvent = findTransferSingleEvent(claimTxReceipt.logs);
+      const mintEvent = findTransferSingleEvent(claimTxReceipt?.logs);
       const tokenId = mintEvent.args.id;
 
       // revoke the tag
       await asAccount(revokingParty, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
+        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
       });
 
       // minter should no longer own that NFT
       const tokenBalance = await ensGuilds.balanceOf(minter, tokenId);
-      expect(tokenBalance.toNumber()).eq(0);
+      expect(tokenBalance).eq(0n);
     });
 
     it("Revoked guild tag can be minted again at a later time", async function () {
@@ -93,17 +93,17 @@ export function testTagRevocation(): void {
       // mint a tag
       const tagToMint = "test";
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter1, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter1, "0x");
       });
 
       // revoke the tag
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
+        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
       });
 
       // mint the same tag again from a different EOA
       await asAccount(minter2, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, "0x");
       });
 
       await expect(resolveName(ensRegistry, `test.${domain}`)).to.eventually.eq(minter2);
@@ -117,7 +117,7 @@ export function testTagRevocation(): void {
       // mint a tag
       const firstTagToMint = "first";
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, firstTagToMint, minter1, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, firstTagToMint, minter1, "0x");
       });
 
       // configure the stub Auth Policy to have the next mint trigger a revocation of the mint prior
@@ -128,7 +128,7 @@ export function testTagRevocation(): void {
       // mint a new tag
       const secondTagToMint = "second";
       await asAccount(minter2, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, secondTagToMint, minter2, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, secondTagToMint, minter2, "0x");
       });
 
       // check that the first tag got revoked
@@ -146,7 +146,7 @@ export function testTagRevocation(): void {
       const tagToMint = "first";
       await asAccount(minter, async (signer) => {
         // mint a tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
 
         // stub: canRevoke == false
         await revocationTestHelper.connect(signer).stub_tagCanBeRevokedReturnVal(false);
@@ -171,7 +171,7 @@ export function testTagRevocation(): void {
       const tagToMint = "first";
       await asAccount(minter, async (signer) => {
         // mint a tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
 
         // attempt to revoke some other, unrelated tag
         const tx = ensGuilds.connect(signer).revokeGuildTag(ensNode, "something-else", minter);
@@ -196,7 +196,7 @@ export function testTagRevocation(): void {
 
       // verify that subdomain cannot be revoked
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, []);
+        const tx = ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
         await this.expectRevertedWithCustomError(tx, "RevokeUnauthorized");
       });
     });
@@ -211,16 +211,16 @@ export function testTagRevocation(): void {
 
       // claim both tags
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], [[], []]);
+        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], ["0x", "0x"]);
       });
 
       // revoke both tags
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).revokeGuildTagsBatch(ensNode, [tag1, tag2], [[], []]);
+        await ensGuilds.connect(signer).revokeGuildTagsBatch(ensNode, [tag1, tag2], ["0x", "0x"]);
       });
 
-      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag1))).to.eventually.eq(ethers.constants.AddressZero);
-      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag2))).to.eventually.eq(ethers.constants.AddressZero);
+      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag1))).to.eventually.eq(ZeroAddress);
+      await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag2))).to.eventually.eq(ZeroAddress);
     });
   });
 }

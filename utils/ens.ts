@@ -1,5 +1,5 @@
-import { type EnsProvider, type EnsResolver } from "@ethersproject/providers";
-import { keccak256, namehash, toUtf8Bytes } from "ethers/lib/utils";
+import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
+import { type AbstractProvider, EnsPlugin, EnsResolver, type Network, keccak256, namehash, toUtf8Bytes } from "ethers";
 
 import { INameResolver__factory, type IReverseRegistrar, IReverseRegistrar__factory } from "../types";
 import type { ENS } from "../types/@ensdomains/ens-contracts/contracts/registry/ENS";
@@ -10,23 +10,35 @@ export function ensLabelHash(label: string): string {
 }
 
 export async function resolveName(ensRegistry: ENS, name: string): Promise<string | null> {
-  const provider = ensRegistry.provider;
+  const resolver = await getResolver(ensRegistry, name);
 
-  // hack the address of the ENS registry into the ethers provider so that we can directly use
-  // the implementation of ENS lookups provided by ethers.js
-  (provider as any)._network.ensAddress = ensRegistry.address; // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (resolver === null) {
+    return null;
+  }
 
-  return await provider.resolveName(name);
+  return await resolver.getAddress();
 }
 
 export async function getResolver(ensRegistry: ENS, name: string): Promise<EnsResolver | null> {
-  const provider = ensRegistry.provider;
+  const ensRegistryAddress = await ensRegistry.getAddress();
+
+  const provider = ensRegistry.runner?.provider;
+
+  if (provider === null || provider === undefined) {
+    throw new Error("provider not found");
+  }
 
   // hack the address of the ENS registry into the ethers provider so that we can directly use
   // the implementation of ENS lookups provided by ethers.js
-  (provider as any)._network.ensAddress = ensRegistry.address; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  return await (provider as unknown as EnsProvider).getResolver(name);
+  class WrappedProvider extends HardhatEthersProvider {
+    public async getNetwork(): Promise<Network> {
+      const network = await super.getNetwork();
+      network.attachPlugin(new EnsPlugin(ensRegistryAddress));
+      return network;
+    }
+  }
+  Object.setPrototypeOf(provider, WrappedProvider.prototype);
+  return await EnsResolver.fromName(provider as unknown as AbstractProvider, name);
 }
 
 export async function getReverseRegistrar(ensRegistry: ENS): Promise<IReverseRegistrar> {
@@ -34,13 +46,13 @@ export async function getReverseRegistrar(ensRegistry: ENS): Promise<IReverseReg
   if (reverseRegistrarAddr === null) {
     throw Error("addr.reverse not found");
   }
-  return IReverseRegistrar__factory.connect(reverseRegistrarAddr, ensRegistry.provider);
+  return IReverseRegistrar__factory.connect(reverseRegistrarAddr, ensRegistry.runner);
 }
 
 export async function getReverseName(ensRegistry: ENS, address: string): Promise<string> {
   const reverseRegistrar = await getReverseRegistrar(ensRegistry);
   const reverseRecordNode = await reverseRegistrar.node(address);
   const reverseRecordResolverAddr = await ensRegistry.resolver(reverseRecordNode);
-  const reverseRecordResolver = INameResolver__factory.connect(reverseRecordResolverAddr, ensRegistry.provider);
+  const reverseRecordResolver = INameResolver__factory.connect(reverseRecordResolverAddr, ensRegistry.runner);
   return await reverseRecordResolver.name(reverseRecordNode);
 }

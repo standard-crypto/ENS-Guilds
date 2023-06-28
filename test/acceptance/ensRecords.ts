@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { namehash } from "ethers/lib/utils";
+import { namehash } from "ethers";
 
 import { ensLabelHash, getReverseName, getReverseRegistrar, resolveName } from "../../utils";
 import { asAccount } from "../utils";
@@ -12,9 +12,11 @@ export function testEnsRecords(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -28,7 +30,7 @@ export function testEnsRecords(): void {
 
       // claim the tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       const registeredAddress = await resolveName(ensRegistry, fullTagName);
@@ -46,7 +48,7 @@ export function testEnsRecords(): void {
 
       await asAccount(minter, async (signer) => {
         // claim the tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
 
         // set the reverse record
         const tx = await reverseRegistrar.connect(signer).setName(fullTagName);
@@ -69,7 +71,7 @@ export function testEnsRecords(): void {
 
       await asAccount(minter, async (signer) => {
         // claim the tag
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
 
         // attempt to change owner of the tag's ENS node
         let tx = ensRegistry.connect(signer).setOwner(namehash(fullTagName), unauthorizedThirdParty);

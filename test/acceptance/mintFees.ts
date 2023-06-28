@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import { parseEther } from "ethers/lib/utils";
+import { ZeroAddress, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 import { IERC20__factory } from "../../types";
 import { asAccount } from "../utils";
 
 const WETH_ADDR = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-const ethAddr = ethers.constants.AddressZero;
+const ethAddr = ZeroAddress;
 
 export function testMintFees(): void {
   describe("Mint Fees", function () {
@@ -18,7 +18,7 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
       });
     });
 
@@ -28,7 +28,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -42,7 +44,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -52,7 +56,7 @@ export function testMintFees(): void {
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -70,7 +74,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -80,7 +86,7 @@ export function testMintFees(): void {
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -105,7 +111,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -116,10 +124,10 @@ export function testMintFees(): void {
       // mint a tag
       await asAccount(minter, async (signer) => {
         // approve ENSGuilds to take the fee
-        await weth.connect(signer).approve(ensGuilds.address, fee);
+        await weth.connect(signer).approve(ensGuilds.getAddress(), fee);
 
         // mint
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -137,7 +145,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -147,7 +157,7 @@ export function testMintFees(): void {
 
       // mint a tag with no ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
     });
 
@@ -161,7 +171,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -170,11 +182,11 @@ export function testMintFees(): void {
       });
 
       // get a quote for the fee
-      const quote = await flatFeePolicy.tagClaimFee(ensNode, tagToMint, minter, []);
+      const quote = await flatFeePolicy.tagClaimFee(ensNode, tagToMint, minter, "0x");
 
       // mint a tag
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary was paid the quoted fee
@@ -192,7 +204,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -202,7 +216,7 @@ export function testMintFees(): void {
 
       // mint a tag with ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary got the ETH fee
@@ -227,7 +241,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -238,10 +254,10 @@ export function testMintFees(): void {
       // mint a tag
       await asAccount(minter, async (signer) => {
         // approve ENSGuilds to take the fee
-        await weth.connect(signer).approve(ensGuilds.address, fee);
+        await weth.connect(signer).approve(ensGuilds.getAddress(), fee);
 
         // mint
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
       });
 
       // check that beneficiary got the fee
@@ -259,7 +275,9 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -269,7 +287,7 @@ export function testMintFees(): void {
 
       // mint a tag with no ETH attached to the tx
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
     });
 
@@ -279,19 +297,21 @@ export function testMintFees(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Attempt to set zero address as the fee policy should fail
-        let tx = ensGuilds
-          .connect(signer)
-          .registerGuild(ensNode, admin, ethers.constants.AddressZero, openAuthPolicy.address);
+        let tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ZeroAddress, openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an existing contract that doesn't implement FeePolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, openAuthPolicy.address, openAuthPolicy.address);
+        tx = ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, openAuthPolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ensGuilds.address, openAuthPolicy.address);
+        tx = ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, ensGuilds.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an EOA as the FeePolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ensNameOwner, openAuthPolicy.address);
+        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ensNameOwner, openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
       });
     });
@@ -310,7 +330,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -320,7 +340,7 @@ export function testMintFees(): void {
 
           // mint a tag but pay only half the fee
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee.div(2) });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee / 2n });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -337,7 +357,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -347,7 +367,7 @@ export function testMintFees(): void {
 
           // mint a tag but try to pay double the fee
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee.mul(2) });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee * 2n });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -374,7 +394,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy with a non-payable contract as the beneficiary
@@ -384,7 +404,7 @@ export function testMintFees(): void {
 
           // attempt to mint a tag with ETH attached to the tx
           await asAccount(minter, async (signer) => {
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
 
@@ -393,7 +413,7 @@ export function testMintFees(): void {
             await flatFeePolicy.connect(signer).setFlatFee(ensNode, ethAddr, fee, payableContractDeployment.address);
           });
           await asAccount(minter, async (signer) => {
-            await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+            await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
           });
           const beneficiaryBalance = await ethers.provider.getBalance(payableContractDeployment.address);
           expect(beneficiaryBalance.toString()).to.eq(fee.toString());
@@ -419,7 +439,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -430,10 +450,10 @@ export function testMintFees(): void {
           // mint a tag
           await asAccount(minter, async (signer) => {
             // approve ENSGuilds to take the less than the whole fee
-            await weth.connect(signer).approve(ensGuilds.address, fee.div(2));
+            await weth.connect(signer).approve(ensGuilds.getAddress(), fee / 2n);
 
             // mint
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });
@@ -449,14 +469,14 @@ export function testMintFees(): void {
 
           // fund the minter with less than the required amount of WETH
           await asAccount(WETH_ADDR, async (signer) => {
-            await weth.connect(signer).transfer(minter, fee.div(2));
+            await weth.connect(signer).transfer(minter, fee / 2n);
           });
 
           await asAccount(ensNameOwner, async (signer) => {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -467,10 +487,10 @@ export function testMintFees(): void {
           // mint a tag
           await asAccount(minter, async (signer) => {
             // approve ENSGuilds to take the less than the whole fee
-            await weth.connect(signer).approve(ensGuilds.address, fee);
+            await weth.connect(signer).approve(ensGuilds.getAddress(), fee);
 
             // mint
-            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { value: fee });
+            const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { value: fee });
             await this.expectRevertedWithCustomError(tx, "FeeError");
           });
         });

@@ -11,9 +11,11 @@ export function testNFTFeatures(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -26,19 +28,19 @@ export function testNFTFeatures(): void {
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // look for the event that was logged for the new token mint
       const claimTxReceipt = await claimTx.wait();
-      const mintEvent = findTransferSingleEvent(claimTxReceipt.logs);
+      const mintEvent = findTransferSingleEvent(claimTxReceipt?.logs);
       expect(mintEvent.args.to).to.eq(minter);
 
       // from the event, get the tokenID that was minted, and sanity-check that the token
       // contract says the minter owns that token
       const tokenId = mintEvent.args.id;
       const tokenBalance = await ensGuilds.balanceOf(minter, tokenId);
-      expect(tokenBalance.toNumber()).eq(1);
+      expect(tokenBalance).eq(1n);
     });
 
     it("Guild admin can set NFT collection metadata", async function () {
@@ -51,7 +53,7 @@ export function testNFTFeatures(): void {
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // guild admin updates metadata URI for their guild's NFTs
@@ -61,7 +63,7 @@ export function testNFTFeatures(): void {
 
       // look for the event that was logged for the new token mint
       const claimTxReceipt = await claimTx.wait();
-      const mintEvent = findTransferSingleEvent(claimTxReceipt.logs);
+      const mintEvent = findTransferSingleEvent(claimTxReceipt?.logs);
       const tokenId = mintEvent.args.id;
 
       // look up the metadata for that token
@@ -90,17 +92,17 @@ export function testNFTFeatures(): void {
 
       // claim the tag
       const claimTx = await asAccount(minter, async (signer) => {
-        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        return await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
       // look for the event that was logged for the new token mint
       const claimTxReceipt = await claimTx.wait();
-      const mintEvent = findTransferSingleEvent(claimTxReceipt.logs);
+      const mintEvent = findTransferSingleEvent(claimTxReceipt?.logs);
       const tokenId = mintEvent.args.id;
 
       // attempt to transfer the token
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).safeTransferFrom(minter, unauthorizedThirdParty, tokenId, 1, []);
+        const tx = ensGuilds.connect(signer).safeTransferFrom(minter, unauthorizedThirdParty, tokenId, 1, "0x");
         await this.expectRevertedWithCustomError(tx, "GuildsTokenTransferNotAllowed");
       });
     });

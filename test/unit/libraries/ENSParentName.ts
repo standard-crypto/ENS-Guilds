@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import dnsPacket from "dns-packet";
+import { dnsEncode, toUtf8String } from "ethers";
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 import { type ENSParentNameTestHelper, ENSParentNameTestHelper__factory } from "../../../types";
@@ -20,10 +21,10 @@ export function testENSParentName(): void {
     });
 
     async function _test(name: string, expectedChild: string, expectedParent: string): Promise<void> {
-      const nameEncoded = ethers.utils.dnsEncode(name);
+      const nameEncoded = dnsEncode(name);
       const [childBytes, parentBytes] = await parentNameTestHelper.splitParentChildNames(nameEncoded);
       const parent = dnsPacket.name.decode(Buffer.from(parentBytes.slice(2), "hex"));
-      const child = ethers.utils.toUtf8String(childBytes);
+      const child = toUtf8String(childBytes);
       expect(parent).to.eq(expectedParent);
       expect(child).to.eq(expectedChild);
     }

@@ -35,7 +35,12 @@
     "ENSIP",
     "COINTYPE",
     "sighash",
-    "concat"
+    "concat",
+    "IABI",
+    "IDNS",
+    "Pubkey",
+    "Zonehash",
+    "Authorised"
   ],
   "flagWords": [],
   "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "deployments"],

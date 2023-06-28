@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { deployments, ethers, getNamedAccounts } from "hardhat";
+import { ZeroAddress } from "ethers";
+import { deployments, getNamedAccounts } from "hardhat";
 
 import { ensLabelHash } from "../../utils";
 import { asAccount } from "../utils";
@@ -12,7 +13,7 @@ export function testMintAuthorization(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.address, true);
+        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
       });
     });
 
@@ -22,7 +23,9 @@ export function testMintAuthorization(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
@@ -37,7 +40,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, allowlistAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
       // Add allowlist entry for the minter
@@ -47,7 +50,7 @@ export function testMintAuthorization(): void {
 
       // claiming a tag should succeed
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
     });
 
@@ -57,19 +60,21 @@ export function testMintAuthorization(): void {
 
       await asAccount(ensNameOwner, async (signer) => {
         // Attempt to set zero address as the auth policy should fail
-        let tx = ensGuilds
-          .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, ethers.constants.AddressZero);
+        let tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ZeroAddress);
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an existing contract that doesn't implement AuthPolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, flatFeePolicy.address);
+        tx = ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), flatFeePolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, ensGuilds.address);
+        tx = ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ensGuilds.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an EOA as the AuthPolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, ensNameOwner);
+        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ensNameOwner);
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
       });
     });
@@ -87,7 +92,7 @@ export function testMintAuthorization(): void {
       const attackerDeployment = await deploy("ClaimGuildTagReentrancyAttacker", {
         from: deployer,
         autoMine: true,
-        args: [ensGuilds.address, ensNode, tagToMint, minter, []],
+        args: [await ensGuilds.getAddress(), ensNode, tagToMint, minter, "0x"],
       });
       const authPolicyDeployment = await deploy("ReentrancyAttackAuthPolicy", {
         from: deployer,
@@ -100,12 +105,12 @@ export function testMintAuthorization(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, authPolicyDeployment.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), authPolicyDeployment.address);
       });
 
       // Attempt to claim a tag, indirectly triggering a reentrant call on claimGuildTag
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { gasLimit: 30000000 });
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { gasLimit: 30000000 });
         await expect(tx).to.be.revertedWith("ReentrancyGuard: reentrant call");
       });
     });
@@ -121,12 +126,12 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.address, allowlistAuthPolicy.address);
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
       // attempt to claim a tag without first being allowlisted
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { gasLimit: 30000000 });
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { gasLimit: 30000000 });
         await this.expectRevertedWithCustomError(tx, "ClaimUnauthorized");
       });
     });
@@ -140,7 +145,9 @@ export function testMintAuthorization(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // Freeze the guild
@@ -150,7 +157,7 @@ export function testMintAuthorization(): void {
 
       // attempt to claim a tag without first being allowlisted
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, [], { gasLimit: 30000000 });
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x", { gasLimit: 30000000 });
         await this.expectRevertedWithCustomError(tx, "GuildNotActive");
       });
     });
@@ -164,17 +171,19 @@ export function testMintAuthorization(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // minter1 successfully claims this tag
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter1, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter1, "0x");
       });
 
       // minter2 cannot then claim the same tag
       await asAccount(minter2, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, []);
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, "0x");
         await this.expectRevertedWithCustomError(tx, "TagAlreadyClaimed");
       });
     });
@@ -196,12 +205,14 @@ export function testMintAuthorization(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // minter should fail when trying to claim this tag
       await asAccount(minter, async (signer) => {
-        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, []);
+        const tx = ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
         await this.expectRevertedWithCustomError(tx, "TagAlreadyClaimed");
       });
     });
@@ -215,12 +226,14 @@ export function testMintAuthorization(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // claim a tag for a separate recipient
       await asAccount(minter, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, tagRecipient, []);
+        await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, tagRecipient, "0x");
       });
     });
 
@@ -234,12 +247,14 @@ export function testMintAuthorization(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.address, openAuthPolicy.address);
+        await ensGuilds
+          .connect(signer)
+          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // claim both tags
       await asAccount(minter1, async (signer) => {
-        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], [[], []]);
+        await ensGuilds.connect(signer).claimGuildTagsBatch(ensNode, [tag1, tag2], [minter1, minter2], ["0x", "0x"]);
       });
 
       await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tag1))).to.eventually.eq(minter1);
