@@ -9,7 +9,7 @@ export function ensLabelHash(label: string): string {
   return keccak256(toUtf8Bytes(label));
 }
 
-export async function resolveName(ensRegistry: ENS, name: string): Promise<string | null> {
+export async function resolveAddr(ensRegistry: ENS, name: string): Promise<string | null> {
   const resolver = await getResolver(ensRegistry, name);
 
   if (resolver === null) {

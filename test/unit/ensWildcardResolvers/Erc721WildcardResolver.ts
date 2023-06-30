@@ -1,28 +1,31 @@
 import { expect } from "chai";
-import { AbiCoder, ZeroAddress, dnsEncode, namehash, parseEther } from "ethers";
+import { AbiCoder, Wallet, ZeroAddress, dnsEncode, namehash, parseEther } from "ethers";
 import { deployments, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
-import type { ENS, Erc721WildcardResolver, TestERC721 } from "../../../types";
+import type { ENS, Erc721WildcardResolver, IENSLegacyPublicResolver, TestERC721 } from "../../../types";
 import {
   ENS__factory,
   Erc721WildcardResolver__factory,
   IAddrResolver__factory,
   IAddressResolver__factory,
+  IENSLegacyPublicResolver__factory,
   IPubkeyResolver__factory,
   ITextResolver__factory,
   TestERC721__factory,
 } from "../../../types";
-import { resolveName, resolveText } from "../../../utils";
+import { resolveAddr, resolveText } from "../../../utils";
 import { asAccount, getSigner } from "../../utils";
 
 export function testErc721WildcardResolver(): void {
   describe("Erc721WildcardResolver", function () {
-    let resolver: Erc721WildcardResolver;
+    let wildcardResolver: Erc721WildcardResolver;
     let tokenContract: TestERC721;
     let tokenOwner: string;
     let ENS: ENS;
+    let originalResolver: IENSLegacyPublicResolver;
 
-    const ensParentName = "test.eth";
+    const ensParentName = "nouns.eth";
+    const ensParentNode = namehash(ensParentName);
     const tokenId = 123;
     const fullName = `${tokenId}.${ensParentName}`;
     const fullNameBytes = dnsEncode(fullName);
@@ -32,7 +35,7 @@ export function testErc721WildcardResolver(): void {
 
     beforeEach("setup", async function () {
       await deployments.fixture();
-      const { deployer, ensDefaultResolver, ensRegistry, ensNameWrapper } = await getNamedAccounts();
+      const { deployer, ensRegistry, ensNameWrapper } = await getNamedAccounts();
 
       const signer = await getSigner(deployer);
 
@@ -41,7 +44,7 @@ export function testErc721WildcardResolver(): void {
         autoMine: true,
         args: [deployer /* owner */, ensRegistry /* _ens */, ensNameWrapper /* wrapperAddress */],
       });
-      resolver = Erc721WildcardResolver__factory.connect(deployment.address, signer);
+      wildcardResolver = Erc721WildcardResolver__factory.connect(deployment.address, signer);
 
       const tokenDeployment = await deployments.deploy("TestERC721", {
         from: deployer,
@@ -52,40 +55,48 @@ export function testErc721WildcardResolver(): void {
 
       ENS = ENS__factory.connect(ensRegistry, signer);
 
+      originalResolver = IENSLegacyPublicResolver__factory.connect(await ENS.resolver(ensParentNode), ENS.runner);
+
       // Set our wildcard resolver as the resolver for this ENS name
-      const nameOwner = await ENS.owner(namehash(ensParentName));
+      const nameOwner = await ENS.owner(ensParentNode);
       await signer.sendTransaction({ to: nameOwner, value: parseEther("1") });
       await asAccount(nameOwner, async (signer) => {
-        await ENS.connect(signer).setResolver(namehash(ensParentName), resolver.getAddress());
+        await originalResolver.connect(signer).setAuthorisation(ensParentNode, wildcardResolver.getAddress(), true);
+
+        await ENS.connect(signer).setResolver(ensParentNode, wildcardResolver.getAddress());
       });
 
       [tokenOwner] = await getUnnamedAccounts();
-      await resolver.setTokenContract(ensParentName, await tokenContract.getAddress(), ensDefaultResolver);
+      await wildcardResolver.setTokenContract(
+        ensParentName,
+        await tokenContract.getAddress(),
+        originalResolver.getAddress(),
+      );
       await tokenContract.mint(tokenOwner, tokenId);
     });
 
     it("implements ENSIP 10 interface", async function () {
       // Source: https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution
-      await expect(resolver.supportsInterface("0x9061b923")).to.eventually.be.true;
+      await expect(wildcardResolver.supportsInterface("0x9061b923")).to.eventually.be.true;
     });
 
     describe("address records", function () {
       it("resolves addr(bytes32 node) records", async function () {
         // Directly invoke the `resolve()` method and check that the result matches what we expect
         const data = addrResolverIface.encodeFunctionData("addr", [namehash(fullName)]);
-        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const resolveResult = await wildcardResolver.resolve(fullNameBytes, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr.toLowerCase()).to.eq(tokenOwner.toLowerCase());
 
         // Also use ethers.js to try to resolve this name, checking that we've correctly implemented
         // the standard
-        await expect(resolveName(ENS, fullName)).to.eventually.eq(tokenOwner);
+        await expect(resolveAddr(ENS, fullName)).to.eventually.eq(tokenOwner);
       });
 
       it("resolves addr(bytes32 node, uint256 coinType) records", async function () {
         const data = addressResolverIface.encodeFunctionData("addr", [namehash(fullName), 60 /* COINTYPE_ETH */]);
 
-        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const resolveResult = await wildcardResolver.resolve(fullNameBytes, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["bytes"], resolveResult);
         expect(addr.toLowerCase()).to.eq(tokenOwner.toLowerCase());
       });
@@ -95,12 +106,12 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`${tokenId}.unregistered-domain.eth`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
 
         // sanity-check that ethers.js resolver returns null
-        await expect(resolveName(ENS, name)).to.eventually.be.null;
+        await expect(resolveAddr(ENS, name)).to.eventually.be.null;
       });
 
       it("returns zero address when token has no owner", async function () {
@@ -108,12 +119,12 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`99999.${ensParentName}`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
 
         // sanity-check that ethers.js resolver returns null
-        await expect(resolveName(ENS, name)).to.eventually.be.null;
+        await expect(resolveAddr(ENS, name)).to.eventually.be.null;
       });
 
       it("returns zero address malformed token ID", async function () {
@@ -121,12 +132,12 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`notAnInteger.${ensParentName}`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [addr] = AbiCoder.defaultAbiCoder().decode(["address"], resolveResult);
         expect(addr).to.eq(ZeroAddress);
 
         // sanity-check that ethers.js resolver returns null
-        await expect(resolveName(ENS, name)).to.eventually.be.null;
+        await expect(resolveAddr(ENS, name)).to.eventually.be.null;
       });
 
       it("returns empty bytes for non-ETH addr() call", async function () {
@@ -135,7 +146,7 @@ export function testErc721WildcardResolver(): void {
           61 /* COINTYPE_ETH_CLASSIC */,
         ]);
 
-        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const resolveResult = await wildcardResolver.resolve(fullNameBytes, data);
         const [result] = AbiCoder.defaultAbiCoder().decode(["bytes"], resolveResult);
         expect(result).to.eq("0x");
       });
@@ -144,7 +155,7 @@ export function testErc721WildcardResolver(): void {
     describe("text records", function () {
       it("resolves avatar URL from token URL", async function () {
         const data = textResolverIface.encodeFunctionData("text", [namehash(fullName), "avatar"]);
-        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const resolveResult = await wildcardResolver.resolve(fullNameBytes, data);
         const [observed] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         const tokenContractAddr = (await tokenContract.getAddress()).toLowerCase();
 
@@ -161,7 +172,7 @@ export function testErc721WildcardResolver(): void {
         await tokenContract.setTokenURI(tokenId, givenURI);
 
         const data = textResolverIface.encodeFunctionData("text", [namehash(fullName), "url"]);
-        const resolveResult = await resolver.resolve(fullNameBytes, data);
+        const resolveResult = await wildcardResolver.resolve(fullNameBytes, data);
         const [observed] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
 
         expect(observed).to.eq(givenURI);
@@ -175,7 +186,7 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`${tokenId}.unregistered-domain.eth`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [value] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         expect(value).to.eq("");
       });
@@ -185,7 +196,7 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`99999.${ensParentName}`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [value] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         expect(value).to.eq("");
 
@@ -198,7 +209,7 @@ export function testErc721WildcardResolver(): void {
 
         const name = dnsEncode(`notAnInteger.${ensParentName}`);
 
-        const resolveResult = await resolver.resolve(name, data);
+        const resolveResult = await wildcardResolver.resolve(name, data);
         const [value] = AbiCoder.defaultAbiCoder().decode(["string"], resolveResult);
         expect(value).to.eq("");
 
@@ -211,28 +222,65 @@ export function testErc721WildcardResolver(): void {
       const pubkeyResolverIface = IPubkeyResolver__factory.createInterface();
       const data = pubkeyResolverIface.encodeFunctionData("pubkey", [namehash(fullName)]);
 
-      const resolveCall = resolver.resolve(fullNameBytes, data);
-      await expect(resolveCall).to.be.revertedWithCustomError(resolver, "RecordTypeNotSupported");
+      const resolveCall = wildcardResolver.resolve(fullNameBytes, data);
+      await expect(resolveCall).to.be.revertedWithCustomError(wildcardResolver, "RecordTypeNotSupported");
     });
 
     describe("has correct function selector constants", function () {
       it("addr(bytes32 node)", async function () {
         const expected = addrResolverIface.getFunction("addr").selector;
-        const observed = await resolver.RESOLVER_SIGNATURE__ADDR();
+        const observed = await wildcardResolver.RESOLVER_SIGNATURE__ADDR();
         expect(observed).to.eq(expected);
       });
 
       it("addr(bytes32 node, uint256 cointype)", async function () {
         const expected = addressResolverIface.getFunction("addr").selector;
-        const observed = await resolver.RESOLVER_SIGNATURE__ADDR_WITH_COINTYPE();
+        const observed = await wildcardResolver.RESOLVER_SIGNATURE__ADDR_WITH_COINTYPE();
         expect(observed).to.eq(expected);
       });
 
       it("text(bytes32 node, string key)", async function () {
         const expected = textResolverIface.getFunction("text").selector;
-        const observed = await resolver.RESOLVER_SIGNATURE__TEXT();
+        const observed = await wildcardResolver.RESOLVER_SIGNATURE__TEXT();
         expect(observed).to.eq(expected);
       });
+    });
+
+    describe("records on the parent name", function () {
+      it("can still set and resolve regular addr records on the parent name", async function () {
+        // Lookup an existing record
+        await expect(resolveAddr(ENS, ensParentName)).to.eventually.eq("0x0BC3807Ec262cB779b38D65b38158acC3bfedE10");
+
+        // Override existing record
+        const newAddrRecordTarget = Wallet.createRandom().address;
+        await wildcardResolver["setAddr(bytes32,address)"](ensParentNode, newAddrRecordTarget);
+        await expect(resolveAddr(ENS, ensParentName)).to.eventually.eq(newAddrRecordTarget);
+      });
+
+      it("can still set and resolve regular text records on the parent name", async function () {
+        // Lookup an existing record
+        await expect(resolveText(ENS, ensParentName, "snapshot")).to.eventually.eq(
+          // cspell: disable-next-line
+          "ipns://storage.snapshot.page/registry/0x3c8221321441b08C580506e21899E3fa88943672/nouns.eth",
+        );
+
+        // Override existing record
+        const newSnapshotUrl = "dummy-snapshot-url";
+        await wildcardResolver.setText(ensParentNode, "snapshot", newSnapshotUrl);
+
+        // Set a new record
+        const url = "https://test.com";
+        await wildcardResolver.setText(ensParentNode, "url", url);
+        await expect(resolveText(ENS, ensParentName, "url")).to.eventually.eq(url);
+      });
+    });
+
+    describe("authorization", function () {
+      it("owner can set records on the parent name");
+
+      it("delegates can set records on the parent name");
+
+      it("non-owner, non-delegates cannot set records on the parent name");
     });
   });
 }

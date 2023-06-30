@@ -16,7 +16,7 @@ import "../ensGuilds/interfaces/IENSGuilds.sol";
 contract FlatFeePolicy is Context, FeePolicy {
     using ERC165Checker for address;
 
-    IENSGuilds private ensGuilds;
+    IENSGuilds private immutable ensGuilds;
     struct FeeInfo {
         address feeToken;
         uint256 fee;

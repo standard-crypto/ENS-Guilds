@@ -3,7 +3,7 @@ import { ZeroAddress, namehash } from "ethers";
 import { deployments, getNamedAccounts } from "hardhat";
 
 import { type RevocationTestHelper, RevocationTestHelper__factory } from "../../types";
-import { ensLabelHash, resolveName } from "../../utils";
+import { ensLabelHash, resolveAddr } from "../../utils";
 import { asAccount } from "../utils";
 import { findTransferSingleEvent } from "../utils/erc1155";
 
@@ -49,7 +49,7 @@ export function testTagRevocation(): void {
       });
 
       // sanity-check the ENS resolution
-      await expect(resolveName(ensRegistry, tagFullDomain)).to.eventually.eq(minter);
+      await expect(resolveAddr(ensRegistry, tagFullDomain)).to.eventually.eq(minter);
 
       // now revoke the tag
       await asAccount(revokingParty, async (signer) => {
@@ -57,7 +57,7 @@ export function testTagRevocation(): void {
       });
 
       // ENS resolution should be reset
-      await expect(resolveName(ensRegistry, tagFullDomain)).to.eventually.be.null;
+      await expect(resolveAddr(ensRegistry, tagFullDomain)).to.eventually.be.null;
       await expect(ensRegistry.owner(tagEnsNode)).to.eventually.eq(ZeroAddress);
     });
 
@@ -106,7 +106,7 @@ export function testTagRevocation(): void {
         await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter2, "0x");
       });
 
-      await expect(resolveName(ensRegistry, `test.${domain}`)).to.eventually.eq(minter2);
+      await expect(resolveAddr(ensRegistry, `test.${domain}`)).to.eventually.eq(minter2);
     });
 
     it("Minting a new tag might revoke an existing one if the auth policy says so", async function () {
@@ -132,10 +132,10 @@ export function testTagRevocation(): void {
       });
 
       // check that the first tag got revoked
-      await expect(resolveName(ensRegistry, `${firstTagToMint}.${domain}`)).to.eventually.be.null;
+      await expect(resolveAddr(ensRegistry, `${firstTagToMint}.${domain}`)).to.eventually.be.null;
 
       // sanity-check second tag is still OK
-      await expect(resolveName(ensRegistry, `${secondTagToMint}.${domain}`)).to.eventually.eq(minter2);
+      await expect(resolveAddr(ensRegistry, `${secondTagToMint}.${domain}`)).to.eventually.eq(minter2);
     });
 
     it("Tags of a registered guild cannot be revoked if the auth policy does not permit it", async function () {

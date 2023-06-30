@@ -3,7 +3,7 @@ import { namehash } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { AddrResolver__factory } from "../../types";
-import { ensLabelHash, resolveName } from "../../utils";
+import { ensLabelHash, resolveAddr } from "../../utils";
 import { asAccount } from "../utils";
 
 export function testDomainOwnerControls(): void {
@@ -58,7 +58,7 @@ export function testDomainOwnerControls(): void {
 
       // check that the new forward record was created correctly
       // console.log(subdomain, domain, ensRegistry.address);
-      const subdomainResolvesTo = await resolveName(ensRegistry, `${subdomain}.${domain}`);
+      const subdomainResolvesTo = await resolveAddr(ensRegistry, `${subdomain}.${domain}`);
 
       expect(subdomainResolvesTo).to.eq(expectedSubdomainResolvesTo);
     });
@@ -92,7 +92,7 @@ export function testDomainOwnerControls(): void {
       });
 
       // check that the forward record was edited correctly
-      const subdomainResolvesTo = await resolveName(ensRegistry, `${tagToMint}.${domain}`);
+      const subdomainResolvesTo = await resolveAddr(ensRegistry, `${tagToMint}.${domain}`);
       expect(subdomainResolvesTo).to.eq(expectedSubdomainResolvesTo);
     });
   });

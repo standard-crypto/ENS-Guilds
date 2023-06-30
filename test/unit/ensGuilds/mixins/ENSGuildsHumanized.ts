@@ -12,7 +12,7 @@ import {
   IENSGuildsHumanized__factory,
   IENSGuilds__factory,
 } from "../../../../types";
-import { resolveName } from "../../../../utils";
+import { resolveAddr } from "../../../../utils";
 import { asAccount } from "../../../utils";
 
 export function testENSGuildsHumanized(): void {
@@ -103,7 +103,7 @@ export function testENSGuildsHumanized(): void {
       });
 
       // Check correct tag owner
-      const registeredAddress = await resolveName(ens, `${tagToMint}.${ensName}`);
+      const registeredAddress = await resolveAddr(ens, `${tagToMint}.${ensName}`);
       expect(registeredAddress).to.eq(minter);
     });
 

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { namehash } from "ethers";
 
-import { ensLabelHash, getReverseName, getReverseRegistrar, resolveName } from "../../utils";
+import { ensLabelHash, getReverseName, getReverseRegistrar, resolveAddr } from "../../utils";
 import { asAccount } from "../utils";
 
 export function testEnsRecords(): void {
@@ -33,7 +33,7 @@ export function testEnsRecords(): void {
         await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
       });
 
-      const registeredAddress = await resolveName(ensRegistry, fullTagName);
+      const registeredAddress = await resolveAddr(ensRegistry, fullTagName);
       expect(registeredAddress).to.eq(minter);
     });
 

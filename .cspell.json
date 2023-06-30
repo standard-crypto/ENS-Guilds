@@ -40,7 +40,10 @@
     "IDNS",
     "Pubkey",
     "Zonehash",
-    "Authorised"
+    "Authorised",
+    "authorisation",
+    "authorisations",
+    "deauthorised"
   ],
   "flagWords": [],
   "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "deployments"],

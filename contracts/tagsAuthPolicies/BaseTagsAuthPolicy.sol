@@ -16,7 +16,7 @@ import "../ensGuilds/interfaces/IENSGuilds.sol";
 abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, ReentrancyGuard {
     using ERC165Checker for address;
 
-    IENSGuilds internal _ensGuilds;
+    IENSGuilds internal immutable _ensGuilds;
 
     constructor(IENSGuilds ensGuilds) {
         // solhint-disable-next-line reason-string

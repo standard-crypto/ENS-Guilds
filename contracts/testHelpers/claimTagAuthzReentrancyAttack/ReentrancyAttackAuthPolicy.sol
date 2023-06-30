@@ -15,7 +15,7 @@ import "./IClaimGuildTagReentrancyAttacker.sol";
  * will re-invoke `claimGuildTag`.
  */
 contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
-    IClaimGuildTagReentrancyAttacker private attacker;
+    IClaimGuildTagReentrancyAttacker private immutable attacker;
 
     constructor(IClaimGuildTagReentrancyAttacker _attacker) {
         attacker = _attacker;

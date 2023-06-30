@@ -8,7 +8,7 @@ import "../../ensGuilds/interfaces/IENSGuilds.sol";
  * benign lookup function that will re-invoke `claimGuildTag`.
  */
 contract ClaimGuildTagReentrancyAttacker {
-    IENSGuilds private ensGuilds;
+    IENSGuilds private immutable ensGuilds;
 
     bytes32 private guildEnsNode;
     string private tag;
