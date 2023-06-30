@@ -9,11 +9,11 @@ import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "./interfaces/IENSGuilds.sol";
 import "../feePolicies/FeePolicy.sol";
 import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
-import "./mixins/ENSResolver.sol";
-import "./mixins/ENSGuildsToken.sol";
+import "./mixins/GuildTagResolver.sol";
+import "./mixins/GuildTagTokens.sol";
 import "./mixins/ENSGuildsHumanized.sol";
 
-contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolver, ReentrancyGuard {
+contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagResolver, ReentrancyGuard {
     struct GuildInfo {
         address admin;
         FeePolicy feePolicy;
@@ -25,7 +25,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
     using ERC165Checker for address;
 
     /** State */
-    ENS public ensRegistry;
+    ENS public immutable ensRegistry;
     mapping(bytes32 => GuildInfo) public guilds;
 
     /** Errors */
@@ -56,11 +56,11 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ENSResolver, ENSGuildsToken, IERC165) returns (bool) {
+    ) public view virtual override(GuildTagResolver, GuildTagTokens, IERC165) returns (bool) {
         return
             interfaceId == type(IENSGuilds).interfaceId ||
-            ENSResolver.supportsInterface(interfaceId) ||
-            ENSGuildsToken.supportsInterface(interfaceId) ||
+            GuildTagResolver.supportsInterface(interfaceId) ||
+            GuildTagTokens.supportsInterface(interfaceId) ||
             ERC165.supportsInterface(interfaceId);
     }
 
@@ -83,7 +83,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, ENSGuildsToken, ENSResolve
             revert AlreadyRegistered();
         }
 
-        // Check ENSGuilds contract has been configured as ENS resolver for the guild
+        // Check ENSGuilds contract has been approved to edit the ENS registry on behalf of the caller
         if (!ensRegistry.isApprovedForAll(_msgSender(), address(this))) {
             revert ENSGuildsIsNotRegisteredOperator();
         }

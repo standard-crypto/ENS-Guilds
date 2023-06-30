@@ -6,7 +6,7 @@ import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "../../libraries/ENSByteUtils.sol";
 
-abstract contract ENSResolver is IAddrResolver, IAddressResolver, ERC165 {
+abstract contract GuildTagResolver is IAddrResolver, IAddressResolver, ERC165 {
     using ENSByteUtils for address;
     using ENSByteUtils for bytes;
 
