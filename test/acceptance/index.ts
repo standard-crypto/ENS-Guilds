@@ -15,6 +15,7 @@ import { testMintFees } from "./mintFees";
 import { testNFTFeatures } from "./nftFeatures";
 import { testTagRevocation } from "./tagRevocation";
 import "./type-annotations";
+import { testWildcardResolution } from "./wildcardResolution";
 
 describe("Acceptance Tests", function () {
   beforeEach("Base setup", async function () {
@@ -27,6 +28,7 @@ describe("Acceptance Tests", function () {
     const allowlistAuthPolicyDeployment = await deployments.get("AllowlistTagsAuthPolicy");
     const openAuthPolicyDeployment = await deployments.get("OpenTagsAuthPolicy");
     const flatFeePolicyDeployment = await deployments.get("FlatFeePolicy");
+    const erc721WildcardResolverDeployment = await deployments.get("Erc721WildcardResolver");
 
     const ensGuildsImpl = await ethers.getContractAt("ENSGuilds", ensGuildsDeployment.address);
 
@@ -40,6 +42,10 @@ describe("Acceptance Tests", function () {
       openAuthPolicy: await ethers.getContractAt("OpenTagsAuthPolicy", openAuthPolicyDeployment.address),
       nftAuthPolicy: await ethers.getContractAt("NFTTagsAuthPolicy", nftAuthPolicyDeployment.address),
       allowlistAuthPolicy: await ethers.getContractAt("AllowlistTagsAuthPolicy", allowlistAuthPolicyDeployment.address),
+      erc721WildcardResolver: await ethers.getContractAt(
+        "Erc721WildcardResolver",
+        erc721WildcardResolverDeployment.address,
+      ),
     };
 
     // Setup basic info for a guild that is / will be registered
@@ -83,4 +89,5 @@ describe("Acceptance Tests", function () {
   testDomainOwnerControls.bind(this)();
   testGuildDeregistration.bind(this)();
   testTagRevocation.bind(this)();
+  testWildcardResolution.bind(this)();
 });

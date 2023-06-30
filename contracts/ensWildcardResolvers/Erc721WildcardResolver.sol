@@ -3,6 +3,8 @@ pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
 import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -27,12 +29,17 @@ contract Erc721WildcardResolver is Context, PassthroughResolver, IExtendedResolv
     using Strings for uint256;
 
     error RecordTypeNotSupported();
+    error CallerNotAuthorised();
+    error InvalidTokenContract();
 
     bytes4 public constant RESOLVER_SIGNATURE__ADDR = bytes4(keccak256(bytes("addr(bytes32)")));
     bytes4 public constant RESOLVER_SIGNATURE__ADDR_WITH_COINTYPE = bytes4(keccak256(bytes("addr(bytes32,uint256)")));
     bytes4 public constant RESOLVER_SIGNATURE__TEXT = bytes4(keccak256(bytes("text(bytes32,string)")));
 
     uint256 private constant COIN_TYPE_ETH = 60;
+
+    ENS public immutable ens;
+    INameWrapper public immutable nameWrapper;
 
     // dnsEncode(parentName) -> address
     // ex: key for "test.eth" is `0x04746573740365746800`
@@ -46,29 +53,39 @@ contract Erc721WildcardResolver is Context, PassthroughResolver, IExtendedResolv
     // mapping of namehash(parentName) to set of addresses authorized to set records on the parent
     mapping(bytes32 => mapping(address => bool)) public approvedDelegates;
 
-    constructor(address owner, ENS _ens, INameWrapper wrapperAddress) PassthroughResolver(_ens, wrapperAddress) {
-        _transferOwnership(owner);
+    constructor(ENS _ens, INameWrapper wrapperAddress) {
+        ens = _ens;
+        nameWrapper = wrapperAddress;
     }
 
     function setTokenContract(
         string calldata ensName,
         address tokenContract,
         IPublicResolver fallbackResolver
-    ) external onlyOwner {
-        require(tokenContract.supportsInterface(type(IERC721).interfaceId), "Does not implement ERC721");
+    ) external {
+        if (!tokenContract.supportsInterface(type(IERC721).interfaceId)) {
+            revert InvalidTokenContract();
+        }
+
         (bytes memory encodedName, bytes32 ensNode) = ensName.dnsEncodeName();
+
+        if (!isAuthorised(ensNode)) {
+            revert CallerNotAuthorised();
+        }
+
         tokens[encodedName] = IERC721(tokenContract);
-
         parentEnsNodes[encodedName] = ensNode;
-
         passthroughTargets[ensNode] = fallbackResolver;
     }
 
     function isAuthorised(bytes32 node) internal view virtual override returns (bool) {
-        return _msgSender() == owner() || approvedDelegates[node][_msgSender()];
+        return _msgSender() == _nodeOwner(node) || approvedDelegates[node][_msgSender()];
     }
 
-    function setDelegate(bytes32 node, address delegate, bool approved) external onlyOwner {
+    function setDelegate(bytes32 node, address delegate, bool approved) external {
+        if (_msgSender() != _nodeOwner(node)) {
+            revert CallerNotAuthorised();
+        }
         approvedDelegates[node][delegate] = approved;
     }
 
@@ -215,5 +232,13 @@ contract Erc721WildcardResolver is Context, PassthroughResolver, IExtendedResolv
         uint256 keyLength = abi.decode(resolverCalldata[keyLengthOffset:], (uint256));
 
         key = string(resolverCalldata[keyOffset:keyOffset + keyLength]);
+    }
+
+    function _nodeOwner(bytes32 node) internal view returns (address) {
+        address owner = ens.owner(node);
+        if (owner == address(nameWrapper)) {
+            owner = nameWrapper.ownerOf(uint256(node));
+        }
+        return owner;
     }
 }

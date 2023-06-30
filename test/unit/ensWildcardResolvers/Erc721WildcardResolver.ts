@@ -23,6 +23,7 @@ export function testErc721WildcardResolver(): void {
     let tokenOwner: string;
     let ENS: ENS;
     let originalResolver: IENSLegacyPublicResolver;
+    let originalNameOwner: string;
 
     const ensParentName = "nouns.eth";
     const ensParentNode = namehash(ensParentName);
@@ -35,15 +36,11 @@ export function testErc721WildcardResolver(): void {
 
     beforeEach("setup", async function () {
       await deployments.fixture();
-      const { deployer, ensRegistry, ensNameWrapper } = await getNamedAccounts();
+      const { deployer, ensRegistry } = await getNamedAccounts();
 
       const signer = await getSigner(deployer);
 
-      const deployment = await deployments.deploy("Erc721WildcardResolver", {
-        from: deployer,
-        autoMine: true,
-        args: [deployer /* owner */, ensRegistry /* _ens */, ensNameWrapper /* wrapperAddress */],
-      });
+      const deployment = await deployments.get("Erc721WildcardResolver");
       wildcardResolver = Erc721WildcardResolver__factory.connect(deployment.address, signer);
 
       const tokenDeployment = await deployments.deploy("TestERC721", {
@@ -58,20 +55,23 @@ export function testErc721WildcardResolver(): void {
       originalResolver = IENSLegacyPublicResolver__factory.connect(await ENS.resolver(ensParentNode), ENS.runner);
 
       // Set our wildcard resolver as the resolver for this ENS name
-      const nameOwner = await ENS.owner(ensParentNode);
-      await signer.sendTransaction({ to: nameOwner, value: parseEther("1") });
-      await asAccount(nameOwner, async (signer) => {
+      originalNameOwner = await ENS.owner(ensParentNode);
+      await signer.sendTransaction({ to: originalNameOwner, value: parseEther("1") });
+      await asAccount(originalNameOwner, async (signer) => {
+        // Owner tells the original resolver to allow the wildcard resolver to set records
         await originalResolver.connect(signer).setAuthorisation(ensParentNode, wildcardResolver.getAddress(), true);
 
+        // Owner tells ENS registry to use wildcard resolver as the new resolver for their name
         await ENS.connect(signer).setResolver(ensParentNode, wildcardResolver.getAddress());
+
+        // Owner configures the wildcard resolver to refer to the TestERC721 contract for resolving wildcards under
+        // the owner's parent name
+        await wildcardResolver
+          .connect(signer)
+          .setTokenContract(ensParentName, tokenContract.getAddress(), originalResolver.getAddress());
       });
 
       [tokenOwner] = await getUnnamedAccounts();
-      await wildcardResolver.setTokenContract(
-        ensParentName,
-        await tokenContract.getAddress(),
-        originalResolver.getAddress(),
-      );
       await tokenContract.mint(tokenOwner, tokenId);
     });
 
@@ -253,7 +253,9 @@ export function testErc721WildcardResolver(): void {
 
         // Override existing record
         const newAddrRecordTarget = Wallet.createRandom().address;
-        await wildcardResolver["setAddr(bytes32,address)"](ensParentNode, newAddrRecordTarget);
+        await asAccount(originalNameOwner, async (signer) => {
+          await wildcardResolver.connect(signer)["setAddr(bytes32,address)"](ensParentNode, newAddrRecordTarget);
+        });
         await expect(resolveAddr(ENS, ensParentName)).to.eventually.eq(newAddrRecordTarget);
       });
 
@@ -266,16 +268,22 @@ export function testErc721WildcardResolver(): void {
 
         // Override existing record
         const newSnapshotUrl = "dummy-snapshot-url";
-        await wildcardResolver.setText(ensParentNode, "snapshot", newSnapshotUrl);
+        await asAccount(originalNameOwner, async (signer) => {
+          await wildcardResolver.connect(signer).setText(ensParentNode, "snapshot", newSnapshotUrl);
+        });
 
         // Set a new record
         const url = "https://test.com";
-        await wildcardResolver.setText(ensParentNode, "url", url);
+        await asAccount(originalNameOwner, async (signer) => {
+          await wildcardResolver.connect(signer).setText(ensParentNode, "url", url);
+        });
         await expect(resolveText(ENS, ensParentName, "url")).to.eventually.eq(url);
       });
     });
 
     describe("authorization", function () {
+      it("only owner can set token contract for a name");
+
       it("owner can set records on the parent name");
 
       it("delegates can set records on the parent name");

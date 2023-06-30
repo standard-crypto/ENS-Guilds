@@ -3,6 +3,7 @@ import type { ContractTransactionResponse } from "ethers";
 import type {
   AllowlistTagsAuthPolicy,
   ENS,
+  Erc721WildcardResolver,
   FlatFeePolicy,
   IENSGuilds,
   NFTTagsAuthPolicy,
@@ -18,6 +19,7 @@ declare module "mocha" {
       openAuthPolicy: OpenTagsAuthPolicy;
       flatFeePolicy: FlatFeePolicy;
       ensRegistry: ENS;
+      erc721WildcardResolver: Erc721WildcardResolver;
     };
 
     guildInfo: {

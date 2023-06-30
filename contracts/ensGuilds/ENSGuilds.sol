@@ -39,6 +39,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     error GuildAdminOnly();
     error TagAlreadyClaimed();
     error FeeError();
+    error InvalidWildcardResolver();
 
     modifier onlyGuildAdmin(bytes32 guildHash) {
         if (guilds[guildHash].admin != _msgSender()) {
@@ -315,6 +316,19 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
             return address(0);
         }
         return addr(tagEnsNode);
+    }
+
+    /**
+     * @inheritdoc IENSGuilds
+     */
+    function setWildcardResolver(
+        bytes32 guildEnsNode,
+        IExtendedResolver wildcardResolver
+    ) public onlyGuildAdmin(guildEnsNode) {
+        if (!address(wildcardResolver).supportsInterface(type(IExtendedResolver).interfaceId)) {
+            revert InvalidWildcardResolver();
+        }
+        ensRegistry.setResolver(guildEnsNode, address(wildcardResolver));
     }
 
     function _revokeTag(bytes32 guildEnsNode, bytes32 tagHash) private {

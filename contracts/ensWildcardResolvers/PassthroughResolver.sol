@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/ResolverBase.sol";
-import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 import "./IPublicResolver.sol";
 
 /**
@@ -15,16 +11,8 @@ import "./IPublicResolver.sol";
  * fallback Resolver (usually whatever public Resolver the ENS app set on behalf
  * of the user when a name was registered).
  */
-abstract contract PassthroughResolver is Ownable, ResolverBase, IPublicResolver {
-    ENS public immutable ens;
-    INameWrapper public immutable nameWrapper;
-
+abstract contract PassthroughResolver is ResolverBase, IPublicResolver {
     mapping(bytes32 => IPublicResolver) internal passthroughTargets;
-
-    constructor(ENS _ens, INameWrapper wrapperAddress) {
-        ens = _ens;
-        nameWrapper = wrapperAddress;
-    }
 
     function isAuthorised(bytes32) internal view virtual override returns (bool);
 
