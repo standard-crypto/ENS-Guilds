@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+import "../libraries/StringParsing.sol";
 import "./BaseTagsAuthPolicy.sol";
 
 /**
@@ -18,6 +19,9 @@ import "./BaseTagsAuthPolicy.sol";
  */
 contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     using ERC165Checker for address;
+    using StringParsing for bytes;
+
+    error TokenIDTagMustMatchCallerTokenID();
 
     enum TokenStandard {
         ERC721,
@@ -67,7 +71,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function canClaimTag(
         bytes32 guildHash,
-        string calldata,
+        string calldata tag,
         address claimant,
         address,
         bytes calldata extraClaimArgs
@@ -90,6 +94,13 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
         }
         if (!ownsNFT) {
             return false;
+        }
+
+        // if the tag looks like a token ID, it should be the same as the token ID
+        // used to authorize the mint
+        (bool isUint, uint256 parsedTokenID) = bytes(tag).parseUint256();
+        if (isUint && parsedTokenID != nftTokenId) {
+            revert TokenIDTagMustMatchCallerTokenID();
         }
 
         return true;
