@@ -1,5 +1,6 @@
 {
-  "001_deploy_ens_guilds": 1678074002,
-  "002_deploy_auth_policies": 1678074016,
-  "002_deploy_fee_policies": 1678074017
+  "001_deploy_ens_guilds": 1688404081,
+  "002_deploy_auth_policies": 1688404082,
+  "002_deploy_fee_policies": 1688404082,
+  "004_deploy_wildcard_resolver": 1688404132
 }
