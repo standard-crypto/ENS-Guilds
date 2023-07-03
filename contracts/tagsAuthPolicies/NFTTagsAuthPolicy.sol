@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
@@ -20,6 +21,7 @@ import "./BaseTagsAuthPolicy.sol";
 contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     using ERC165Checker for address;
     using StringParsing for bytes;
+    using Strings for string;
 
     error TokenIDTagMustMatchCallerTokenID();
 
@@ -28,7 +30,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
         ERC1155
     }
     struct TagClaim {
-        bytes32 tagHash;
+        string tag;
         address claimedBy;
     }
     struct GuildInfo {
@@ -43,25 +45,25 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
 
     /**
      * @notice Registers the specific NFT collection that a user must be a member of to mint a guild tag
-     * @param guildHash The ENS namehash of the guild's domain
+     * @param guildEnsNode The ENS namehash of the guild's domain
      * @param tokenContract The ERC721 or ERC1155 collection to use
      */
-    function setTokenContract(bytes32 guildHash, address tokenContract) external {
+    function setTokenContract(bytes32 guildEnsNode, address tokenContract) external {
         // caller must be guild admin
         // solhint-disable-next-line reason-string
-        require(_ensGuilds.guildAdmin(guildHash) == _msgSender());
+        require(_ensGuilds.guildAdmin(guildEnsNode) == _msgSender());
 
         // token contract must be ERC721 or ERC1155
         if (tokenContract.supportsInterface(type(IERC721).interfaceId)) {
-            guilds[guildHash].tokenStandard = TokenStandard.ERC721;
+            guilds[guildEnsNode].tokenStandard = TokenStandard.ERC721;
         } else if (tokenContract.supportsInterface(type(IERC1155).interfaceId)) {
-            guilds[guildHash].tokenStandard = TokenStandard.ERC1155;
+            guilds[guildEnsNode].tokenStandard = TokenStandard.ERC1155;
         } else {
             // solhint-disable-next-line reason-string
             revert();
         }
 
-        guilds[guildHash].tokenContract = tokenContract;
+        guilds[guildEnsNode].tokenContract = tokenContract;
     }
 
     /**
@@ -70,13 +72,13 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      * The caller must own the given TokenID.
      */
     function canClaimTag(
-        bytes32 guildHash,
+        bytes32 guildEnsNode,
         string calldata tag,
         address claimant,
         address,
         bytes calldata extraClaimArgs
     ) external view virtual override returns (bool) {
-        GuildInfo storage guildInfo = guilds[guildHash];
+        GuildInfo storage guildInfo = guilds[guildEnsNode];
         address tokenContract = guildInfo.tokenContract;
 
         // parse NFT token ID from the tag claim args
@@ -111,19 +113,18 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      * tag was last minted from the same TokenID.
      */
     function _onTagClaimed(
-        bytes32 guildHash,
+        bytes32 guildEnsNode,
         string calldata tag,
         address claimant,
         address,
         bytes calldata extraClaimArgs
-    ) internal virtual override returns (bytes32 tagToRevoke) {
-        bytes32 tagHash = keccak256(bytes(tag));
+    ) internal virtual override returns (string memory tagToRevoke) {
         uint256 nftTokenId = uint256(bytes32(extraClaimArgs));
 
-        tagToRevoke = guilds[guildHash].tagClaims[nftTokenId].tagHash;
+        tagToRevoke = guilds[guildEnsNode].tagClaims[nftTokenId].tag;
 
-        guilds[guildHash].tagClaims[nftTokenId].tagHash = tagHash;
-        guilds[guildHash].tagClaims[nftTokenId].claimedBy = claimant;
+        guilds[guildEnsNode].tagClaims[nftTokenId].tag = tag;
+        guilds[guildEnsNode].tagClaims[nftTokenId].claimedBy = claimant;
 
         return tagToRevoke;
     }
@@ -133,22 +134,20 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      */
     function canRevokeTag(
         address,
-        bytes32 guildHash,
+        bytes32 guildEnsNode,
         string calldata tag,
         bytes calldata extraRevokeArgs
     ) external view virtual override returns (bool) {
-        bytes32 tagHash = keccak256(bytes(tag));
-
         if (extraRevokeArgs.length != 32) {
             return false;
         }
         uint256 nftTokenId = uint256(bytes32(extraRevokeArgs));
 
-        GuildInfo storage guildInfo = guilds[guildHash];
+        GuildInfo storage guildInfo = guilds[guildEnsNode];
         address tokenContract = guildInfo.tokenContract;
 
         // check that the given tag was indeed claimed from the given NFT
-        if (guildInfo.tagClaims[nftTokenId].tagHash != tagHash) {
+        if (!guildInfo.tagClaims[nftTokenId].tag.equal(tag)) {
             return false;
         }
 
@@ -160,5 +159,27 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
         } else {
             return IERC1155(tokenContract).balanceOf(previousClaimant, nftTokenId) == 0;
         }
+    }
+
+    /**
+     * @inheritdoc ITagsAuthPolicy
+     */
+    function canTransferTag(
+        bytes32,
+        string calldata,
+        address transferredBy,
+        address currentOwner,
+        address,
+        bytes calldata
+    ) external pure returns (bool) {
+        return transferredBy == currentOwner;
+    }
+
+    function _onTagRevoked(address, address, bytes32, string memory) internal virtual override {
+        return;
+    }
+
+    function _onTagTransferred(bytes32, string calldata, address, address, address) internal virtual override {
+        return;
     }
 }

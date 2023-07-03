@@ -10,13 +10,14 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /** Events */
     event Registered(bytes32 indexed guildEnsNode);
     event Deregistered(bytes32 indexed guildEnsNode);
-    event TagClaimed(bytes32 indexed guildId, bytes32 indexed tagHash, address recipient);
-    event TagRevoked(bytes32 indexed guildId, bytes32 indexed tagHash);
-    event FeePolicyUpdated(bytes32 indexed guildId, address feePolicy);
-    event TagsAuthPolicyUpdated(bytes32 indexed guildId, address tagsAuthPolicy);
-    event AdminTransferred(bytes32 indexed guildId, address newAdmin);
-    event SetActive(bytes32 indexed guildId, bool active);
-    event TokenUriTemplateSet(bytes32 indexed guildId, string uriTemplate);
+    event TagClaimed(bytes32 indexed guildEnsNode, bytes32 indexed tagHash, address recipient);
+    event TagTransferred(bytes32 indexed guildEnsNode, bytes32 indexed tagHash, address from, address to);
+    event TagRevoked(bytes32 indexed guildEnsNode, bytes32 indexed tagHash);
+    event FeePolicyUpdated(bytes32 indexed guildEnsNode, address feePolicy);
+    event TagsAuthPolicyUpdated(bytes32 indexed guildEnsNode, address tagsAuthPolicy);
+    event AdminTransferred(bytes32 indexed guildEnsNode, address newAdmin);
+    event SetActive(bytes32 indexed guildEnsNode, bool active);
+    event TokenUriTemplateSet(bytes32 indexed guildEnsNode, string uriTemplate);
 
     /* Functions */
 
@@ -47,7 +48,7 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
      * @notice Claims a guild tag
      * @param guildEnsNode The namehash of the guild for which the tag should be claimed (e.g. namehash('my-guild.eth'))
      * @param tag The tag name to claim (e.g. 'foo' for foo.my-guild.eth). Assumes `tag` is already normalized per
-     *            ENS Name Processing rules
+     * ENS Name Processing rules
      * @param recipient The address that will receive this guild tag (usually same as the caller)
      * @param extraClaimArgs [Optional] Any additional arguments necessary for guild-specific logic,
      *  such as authorization
@@ -58,6 +59,23 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
         address recipient,
         bytes calldata extraClaimArgs
     ) external payable;
+
+    /**
+     * @notice Transfers an existing guild tag
+     * @param guildEnsNode The namehash of the guild for which the tag should be transferred
+     * (e.g. namehash('my-guild.eth'))
+     * @param tag The tag name to transfer (e.g. 'foo' for foo.my-guild.eth). Assumes `tag` is already normalized per
+     * ENS Name Processing rules
+     * @param recipient The address that will receive this guild tag
+     * @param extraTransferArgs [Optional] Any additional arguments necessary for guild-specific logic,
+     *  such as authorization
+     */
+    function transferGuildTag(
+        bytes32 guildEnsNode,
+        string calldata tag,
+        address recipient,
+        bytes calldata extraTransferArgs
+    ) external;
 
     /**
      * @notice Claims multiple tags for a guild at once

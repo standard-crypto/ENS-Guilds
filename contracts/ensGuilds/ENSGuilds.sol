@@ -36,6 +36,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     error GuildNotActive();
     error ClaimUnauthorized();
     error RevokeUnauthorized();
+    error TransferUnauthorized();
     error GuildAdminOnly();
     error TagAlreadyClaimed();
     error FeeError();
@@ -44,6 +45,20 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     modifier onlyGuildAdmin(bytes32 guildHash) {
         if (guilds[guildHash].admin != _msgSender()) {
             revert GuildAdminOnly();
+        }
+        _;
+    }
+
+    modifier requireGuildRegistered(bytes32 guildEnsNode) {
+        if (guilds[guildEnsNode].deregistered) {
+            revert GuildNotActive();
+        }
+        _;
+    }
+
+    modifier requireGuildActive(bytes32 guildEnsNode) {
+        if (!guilds[guildEnsNode].active || guilds[guildEnsNode].deregistered) {
+            revert GuildNotActive();
         }
         _;
     }
@@ -111,9 +126,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     /**
      * @inheritdoc IENSGuilds
      */
-    function deregisterGuild(bytes32 ensNode) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) {
+    function deregisterGuild(
+        bytes32 ensNode
+    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) requireGuildRegistered(ensNode) {
         delete guilds[ensNode];
         guilds[ensNode].deregistered = true;
+        guilds[ensNode].active = false;
         emit Deregistered(ensNode);
     }
 
@@ -125,13 +143,8 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         string calldata tag,
         address recipient,
         bytes calldata extraClaimArgs
-    ) public payable override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
+    ) public payable override(ENSGuildsHumanized, IENSGuilds) nonReentrant requireGuildActive(guildEnsNode) {
         bytes32 tagHash = keccak256(bytes(tag));
-
-        // assert guild is not frozen
-        if (!guilds[guildEnsNode].active) {
-            revert GuildNotActive();
-        }
 
         // check tag not already registered
         bytes32 ensNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
@@ -146,35 +159,14 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         }
 
         // fees
-        (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
-            guildEnsNode,
-            tag,
-            _msgSender(),
-            extraClaimArgs
-        );
-        if (fee != 0) {
-            if (feeToken == address(0)) {
-                if (msg.value != fee) {
-                    revert FeeError();
-                }
-                // solhint-disable-next-line avoid-low-level-calls
-                (bool sent, ) = feePaidTo.call{ value: msg.value }("");
-                if (!sent) revert FeeError();
-            } else {
-                try IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee) returns (bool sent) {
-                    if (!sent) revert FeeError();
-                } catch {
-                    revert FeeError();
-                }
-            }
-        }
+        _handleClaimFee(guildEnsNode, tag, extraClaimArgs);
 
         // NFT mint
         _mintNewGuildToken(guildEnsNode, tagHash, recipient);
 
         // inform auth contract that tag was claimed, then revoke an existing tag if instructed
-        bytes32 tagToRevoke = auth.onTagClaimed(guildEnsNode, tag, _msgSender(), recipient, extraClaimArgs);
-        if (tagToRevoke != bytes32(0)) {
+        string memory tagToRevoke = auth.onTagClaimed(guildEnsNode, tag, _msgSender(), recipient, extraClaimArgs);
+        if (bytes(tagToRevoke).length != 0) {
             _revokeTag(guildEnsNode, tagToRevoke);
         }
 
@@ -204,6 +196,42 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     /**
      * @inheritdoc IENSGuilds
      */
+    function transferGuildTag(
+        bytes32 guildEnsNode,
+        string calldata tag,
+        address recipient,
+        bytes calldata extraTransferArgs
+    ) public override(ENSGuildsHumanized, IENSGuilds) nonReentrant requireGuildActive(guildEnsNode) {
+        bytes32 tagHash = keccak256(bytes(tag));
+        bytes32 tagEnsNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
+        address currentOwner = tagOwner(guildEnsNode, tagHash);
+
+        // check that tag exists
+        if (currentOwner == address(0)) {
+            revert TransferUnauthorized();
+        }
+
+        // transfer authorized?
+        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        if (!auth.canTransferTag(guildEnsNode, tag, _msgSender(), currentOwner, recipient, extraTransferArgs)) {
+            revert TransferUnauthorized();
+        }
+
+        // NFT transfer
+        _transferGuildToken(guildEnsNode, tagHash, currentOwner, recipient);
+
+        // Update forward record in ENS resolver
+        _setEnsForwardRecord(tagEnsNode, recipient);
+
+        // Inform auth contract that tag was transferred
+        auth.onTagTransferred(guildEnsNode, tag, _msgSender(), currentOwner, recipient);
+
+        emit TagTransferred(guildEnsNode, tagHash, currentOwner, recipient);
+    }
+
+    /**
+     * @inheritdoc IENSGuilds
+     */
     function guildAdmin(bytes32 guildHash) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         return guilds[guildHash].admin;
     }
@@ -218,14 +246,19 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     ) public override(ENSGuildsHumanized, IENSGuilds) nonReentrant {
         GuildInfo storage guild = guilds[guildEnsNode];
 
+        // All tags can be revoked from a guild that has been de-registered
+        if (guild.deregistered) {
+            _revokeTag(guildEnsNode, tag);
+            return;
+        }
+
         // revoke authorized?
-        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!guild.deregistered && !auth.canRevokeTag(_msgSender(), guildEnsNode, tag, extraData)) {
+        ITagsAuthPolicy auth = guild.tagsAuthPolicy;
+        if (!auth.canRevokeTag(_msgSender(), guildEnsNode, tag, extraData)) {
             revert RevokeUnauthorized();
         }
 
-        bytes32 tagHash = keccak256(bytes(tag));
-        _revokeTag(guildEnsNode, tagHash);
+        _revokeTag(guildEnsNode, tag);
     }
 
     /**
@@ -247,7 +280,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function updateGuildFeePolicy(
         bytes32 guildEnsNode,
         address feePolicy
-    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
@@ -261,7 +299,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function updateGuildTagsAuthPolicy(
         bytes32 guildEnsNode,
         address tagsAuthPolicy
-    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
             revert InvalidPolicy(tagsAuthPolicy);
         }
@@ -275,7 +318,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function transferGuildAdmin(
         bytes32 guildEnsNode,
         address newAdmin
-    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         guilds[guildEnsNode].admin = newAdmin;
         emit AdminTransferred(guildEnsNode, newAdmin);
     }
@@ -286,7 +334,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function setGuildTokenUriTemplate(
         bytes32 guildEnsNode,
         string calldata uriTemplate
-    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         _setGuildTokenURITemplate(guildEnsNode, uriTemplate);
         emit TokenUriTemplateSet(guildEnsNode, uriTemplate);
     }
@@ -297,7 +350,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function setGuildActive(
         bytes32 guildEnsNode,
         bool active
-    ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         guilds[guildEnsNode].active = active;
         emit SetActive(guildEnsNode, active);
     }
@@ -324,14 +382,15 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function setWildcardResolver(
         bytes32 guildEnsNode,
         IExtendedResolver wildcardResolver
-    ) public onlyGuildAdmin(guildEnsNode) {
+    ) public onlyGuildAdmin(guildEnsNode) requireGuildRegistered(guildEnsNode) {
         if (!address(wildcardResolver).supportsInterface(type(IExtendedResolver).interfaceId)) {
             revert InvalidWildcardResolver();
         }
         ensRegistry.setResolver(guildEnsNode, address(wildcardResolver));
     }
 
-    function _revokeTag(bytes32 guildEnsNode, bytes32 tagHash) private {
+    function _revokeTag(bytes32 guildEnsNode, string memory tag) private {
+        bytes32 tagHash = keccak256(bytes(tag));
         address _tagOwner = tagOwner(guildEnsNode, tagHash);
 
         // check that tag exists
@@ -342,6 +401,36 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(0), address(0), 0);
         _burnGuildToken(guildEnsNode, tagHash, _tagOwner);
 
+        ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
+        if (address(auth) != address(0)) {
+            auth.onTagRevoked(_msgSender(), _tagOwner, guildEnsNode, tag);
+        }
+
         emit TagRevoked(guildEnsNode, tagHash);
+    }
+
+    function _handleClaimFee(bytes32 guildEnsNode, string calldata tag, bytes calldata extraClaimArgs) internal {
+        (address feeToken, uint256 fee, address feePaidTo) = guilds[guildEnsNode].feePolicy.tagClaimFee(
+            guildEnsNode,
+            tag,
+            _msgSender(),
+            extraClaimArgs
+        );
+        if (fee != 0) {
+            if (feeToken == address(0)) {
+                if (msg.value != fee) {
+                    revert FeeError();
+                }
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool sent, ) = feePaidTo.call{ value: msg.value }("");
+                if (!sent) revert FeeError();
+            } else {
+                try IERC20(feeToken).transferFrom(_msgSender(), feePaidTo, fee) returns (bool sent) {
+                    if (!sent) revert FeeError();
+                } catch {
+                    revert FeeError();
+                }
+            }
+        }
     }
 }

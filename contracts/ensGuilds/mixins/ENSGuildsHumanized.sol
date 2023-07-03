@@ -34,7 +34,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * Designates guild as inactive and marks all tags previously minted for that guild as eligible for revocation.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      */
-    function deregisterGuild(string calldata guildEnsName) external {
+    function deregisterGuild(string calldata guildEnsName) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         deregisterGuild(guildEnsNode);
     }
@@ -57,6 +57,16 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
         claimGuildTag(guildEnsNode, tag, recipient, extraClaimArgs);
     }
 
+    function transferGuildTag(
+        string memory guildEnsName,
+        string calldata tag,
+        address recipient,
+        bytes calldata extraTransferArgs
+    ) external override {
+        bytes32 guildEnsNode = bytes(guildEnsName).namehash();
+        transferGuildTag(guildEnsNode, tag, recipient, extraTransferArgs);
+    }
+
     /**
      * @notice Attempts to revoke an existing guild tag, if authorized by the guild's AuthPolicy.
      * Deregistered guilds will bypass auth checks for revocation of all tags.
@@ -64,7 +74,11 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param tag The tag to revoke (e.g. 'foobar')
      * @param extraData [Optional] Any additional arguments necessary for assessing whether a tag may be revoked
      */
-    function revokeGuildTag(string calldata guildEnsName, string calldata tag, bytes calldata extraData) external {
+    function revokeGuildTag(
+        string calldata guildEnsName,
+        string calldata tag,
+        bytes calldata extraData
+    ) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         revokeGuildTag(guildEnsNode, tag, extraData);
     }
@@ -75,7 +89,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param tag The tag (e.g. 'foobar')
      */
-    function tagOwner(string calldata guildEnsName, string calldata tag) external view returns (address) {
+    function tagOwner(string calldata guildEnsName, string calldata tag) external view override returns (address) {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         bytes32 tagHash = keccak256(bytes(tag));
         return tagOwner(guildEnsNode, tagHash);
@@ -86,7 +100,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param feePolicy The address of an implementation of FeePolicy to use for minting new tags within this guild
      */
-    function updateGuildFeePolicy(string calldata guildEnsName, address feePolicy) external {
+    function updateGuildFeePolicy(string calldata guildEnsName, address feePolicy) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         updateGuildFeePolicy(guildEnsNode, feePolicy);
     }
@@ -97,7 +111,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for
      * minting new tags within this guild
      */
-    function updateGuildTagsAuthPolicy(string calldata guildEnsName, address tagsAuthPolicy) external {
+    function updateGuildTagsAuthPolicy(string calldata guildEnsName, address tagsAuthPolicy) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         updateGuildTagsAuthPolicy(guildEnsNode, tagsAuthPolicy);
     }
@@ -108,7 +122,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param uriTemplate The ERC1155 metadata URL template
      */
-    function setGuildTokenUriTemplate(string calldata guildEnsName, string calldata uriTemplate) external {
+    function setGuildTokenUriTemplate(string calldata guildEnsName, string calldata uriTemplate) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         setGuildTokenUriTemplate(guildEnsNode, uriTemplate);
     }
@@ -118,7 +132,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param active The new status
      */
-    function setGuildActive(string calldata guildEnsName, bool active) external {
+    function setGuildActive(string calldata guildEnsName, bool active) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         setGuildActive(guildEnsNode, active);
     }
@@ -127,7 +141,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @notice Returns the current admin registered for the given guild.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      */
-    function guildAdmin(string calldata guildEnsName) external view returns (address) {
+    function guildAdmin(string calldata guildEnsName) external view override returns (address) {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         return guildAdmin(guildEnsNode);
     }
@@ -138,7 +152,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param newAdmin The new admin
      */
-    function transferGuildAdmin(string calldata guildEnsName, address newAdmin) external {
+    function transferGuildAdmin(string calldata guildEnsName, address newAdmin) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         transferGuildAdmin(guildEnsNode, newAdmin);
     }
@@ -150,6 +164,8 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     function deregisterGuild(bytes32) public virtual;
 
     function claimGuildTag(bytes32, string calldata, address, bytes calldata) public payable virtual;
+
+    function transferGuildTag(bytes32, string calldata, address, bytes calldata) public virtual;
 
     function revokeGuildTag(bytes32, string calldata, bytes calldata) public virtual;
 

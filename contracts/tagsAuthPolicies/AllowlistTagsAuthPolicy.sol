@@ -51,9 +51,9 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
         address claimant,
         address,
         bytes calldata
-    ) internal virtual override returns (bytes32 tagToRevoke) {
+    ) internal virtual override returns (string memory tagToRevoke) {
         guildAllowlists[guildHash][claimant] = false;
-        return 0;
+        return "";
     }
 
     /**
@@ -66,5 +66,27 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
         bytes calldata
     ) external view virtual override returns (bool) {
         return false;
+    }
+
+    /**
+     * @inheritdoc ITagsAuthPolicy
+     */
+    function canTransferTag(
+        bytes32,
+        string calldata,
+        address transferredBy,
+        address currentOwner,
+        address,
+        bytes calldata
+    ) external pure returns (bool) {
+        return transferredBy == currentOwner;
+    }
+
+    function _onTagRevoked(address, address, bytes32, string memory) internal virtual override {
+        return;
+    }
+
+    function _onTagTransferred(bytes32, string calldata, address, address, address) internal virtual override {
+        return;
     }
 }

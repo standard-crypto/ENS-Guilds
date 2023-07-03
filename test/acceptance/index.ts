@@ -14,6 +14,7 @@ import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
 import { testNFTFeatures } from "./nftFeatures";
 import { testTagRevocation } from "./tagRevocation";
+import { testTagTransfers } from "./tagTransfers";
 import "./type-annotations";
 import { testWildcardResolution } from "./wildcardResolution";
 
@@ -89,5 +90,6 @@ describe("Acceptance Tests", function () {
   testDomainOwnerControls.bind(this)();
   testGuildDeregistration.bind(this)();
   testTagRevocation.bind(this)();
+  testTagTransfers.bind(this)();
   testWildcardResolution.bind(this)();
 });

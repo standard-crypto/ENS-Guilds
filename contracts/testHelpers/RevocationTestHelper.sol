@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
 
 contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
-    bytes32 private _onTagClaimedRetVal;
+    string private _onTagClaimedRetVal;
     bool private _tagCanBeRevokedRetVal = true;
 
     function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {
@@ -29,8 +29,23 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
         address,
         address,
         bytes calldata
-    ) external virtual override returns (bytes32 tagToRevoke) {
+    ) external virtual override returns (string memory tagToRevoke) {
         return _onTagClaimedRetVal;
+    }
+
+    function canTransferTag(
+        bytes32,
+        string calldata,
+        address,
+        address,
+        address,
+        bytes calldata
+    ) external pure override returns (bool) {
+        return false;
+    }
+
+    function onTagTransferred(bytes32, string calldata, address, address, address) external pure override {
+        return;
     }
 
     function canRevokeTag(
@@ -42,12 +57,16 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
         return _tagCanBeRevokedRetVal;
     }
 
+    function onTagRevoked(address, address, bytes32, string memory) external virtual override {
+        return;
+    }
+
     // solhint-disable func-name-mixedcase
     function stub_tagCanBeRevokedReturnVal(bool retVal) external {
         _tagCanBeRevokedRetVal = retVal;
     }
 
-    function stub_onTagClaimedReturnVal(bytes32 retVal) external {
+    function stub_onTagClaimedReturnVal(string calldata retVal) external {
         _onTagClaimedRetVal = retVal;
     }
     // solhint-enable func-name-mixedcase

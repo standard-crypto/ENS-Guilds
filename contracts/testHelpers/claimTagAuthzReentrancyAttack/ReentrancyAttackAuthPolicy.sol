@@ -42,8 +42,23 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         address,
         address,
         bytes calldata
-    ) external virtual override returns (bytes32 tagToRevoke) {
-        return bytes32(0);
+    ) external virtual override returns (string memory tagToRevoke) {
+        return "";
+    }
+
+    function canTransferTag(
+        bytes32,
+        string calldata,
+        address,
+        address,
+        address,
+        bytes calldata
+    ) external pure override returns (bool) {
+        return false;
+    }
+
+    function onTagTransferred(bytes32, string calldata, address, address, address) external pure override {
+        return;
     }
 
     function canRevokeTag(
@@ -53,5 +68,9 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         bytes calldata
     ) external view virtual override returns (bool) {
         return false;
+    }
+
+    function onTagRevoked(address, address, bytes32, string memory) external virtual override {
+        return;
     }
 }

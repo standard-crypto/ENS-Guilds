@@ -122,7 +122,7 @@ export function testTagRevocation(): void {
 
       // configure the stub Auth Policy to have the next mint trigger a revocation of the mint prior
       await asAccount(minter1, async (signer) => {
-        await revocationTestHelper.connect(signer).stub_onTagClaimedReturnVal(ensLabelHash(firstTagToMint));
+        await revocationTestHelper.connect(signer).stub_onTagClaimedReturnVal(firstTagToMint);
       });
 
       // mint a new tag

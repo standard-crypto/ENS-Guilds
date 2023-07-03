@@ -67,6 +67,12 @@ abstract contract GuildTagTokens is ERC1155 {
         _burn(tagOwner, tokenId, 1);
     }
 
+    function _transferGuildToken(bytes32 guildHash, bytes32 tagHash, address from, address to) internal {
+        bytes16 truncatedGuildHash = bytes16(guildHash);
+        uint256 tokenId = guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash];
+        _safeTransferFrom(from, to, tokenId, 1, "");
+    }
+
     function _setGuildTokenURITemplate(bytes32 guildHash, string calldata templateURI) internal {
         bytes16 truncatedGuildHash = bytes16(guildHash);
         guilds[truncatedGuildHash].templateURI = templateURI;

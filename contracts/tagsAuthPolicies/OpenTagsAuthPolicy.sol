@@ -16,7 +16,7 @@ contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {
         address,
         address,
         bytes calldata
-    ) external view virtual override returns (bool) {
+    ) external pure virtual override returns (bool) {
         return true;
     }
 
@@ -26,8 +26,8 @@ contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {
         address,
         address,
         bytes calldata
-    ) external virtual override returns (bytes32 tagToRevoke) {
-        return 0;
+    ) external virtual override returns (string memory tagToRevoke) {
+        return "";
     }
 
     function canRevokeTag(
@@ -35,7 +35,26 @@ contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {
         bytes32,
         string calldata,
         bytes calldata
-    ) external view virtual override returns (bool) {
+    ) external pure virtual override returns (bool) {
         return false;
+    }
+
+    function canTransferTag(
+        bytes32,
+        string calldata,
+        address transferredBy,
+        address currentOwner,
+        address,
+        bytes calldata
+    ) external pure returns (bool) {
+        return transferredBy == currentOwner;
+    }
+
+    function onTagRevoked(address, address, bytes32, string memory) external pure virtual override {
+        return;
+    }
+
+    function onTagTransferred(bytes32, string calldata, address, address, address) external pure override {
+        return;
     }
 }
