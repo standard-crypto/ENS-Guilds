@@ -131,7 +131,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     /**
      * @inheritdoc ITagsAuthPolicy
      */
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address,
         bytes32 guildHash,
         string calldata tag,

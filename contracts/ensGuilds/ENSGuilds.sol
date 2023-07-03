@@ -220,7 +220,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
 
         // revoke authorized?
         ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
-        if (!guild.deregistered && !auth.tagCanBeRevoked(_msgSender(), guildEnsNode, tag, extraData)) {
+        if (!guild.deregistered && !auth.canRevokeTag(_msgSender(), guildEnsNode, tag, extraData)) {
             revert RevokeUnauthorized();
         }
 

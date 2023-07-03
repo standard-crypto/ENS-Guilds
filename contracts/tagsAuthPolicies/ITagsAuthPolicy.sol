@@ -51,7 +51,7 @@ interface ITagsAuthPolicy is IERC165 {
      * @param tag The tag being revoked (e.g. 'foo' for foo.my-guild.eth)
      * @param extraRevokeArgs Any additional arguments necessary for assessing whether a tag may be revoked
      */
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address revokedBy,
         bytes32 guildHash,
         string calldata tag,

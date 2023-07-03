@@ -33,7 +33,7 @@ contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
         return _onTagClaimedRetVal;
     }
 
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address,
         bytes32,
         string calldata,

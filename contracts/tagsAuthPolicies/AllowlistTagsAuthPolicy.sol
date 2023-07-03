@@ -59,7 +59,7 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
     /**
      * @inheritdoc ITagsAuthPolicy
      */
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address,
         bytes32,
         string calldata,

@@ -30,7 +30,7 @@ contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {
         return 0;
     }
 
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address,
         bytes32,
         string calldata,

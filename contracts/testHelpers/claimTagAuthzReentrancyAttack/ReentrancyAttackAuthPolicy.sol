@@ -46,7 +46,7 @@ contract ReentrancyAttackAuthPolicy is ITagsAuthPolicy, ERC165 {
         return bytes32(0);
     }
 
-    function tagCanBeRevoked(
+    function canRevokeTag(
         address,
         bytes32,
         string calldata,
