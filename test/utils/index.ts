@@ -1,8 +1,15 @@
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { impersonateAccount, stopImpersonatingAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { stopImpersonatingAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { increase, increaseTo } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
 import chai from "chai";
-import { type EventFragment, EventLog, type Log } from "ethers";
+import {
+  type ContractTransactionResponse,
+  type ErrorDescription,
+  type EventFragment,
+  EventLog,
+  type Interface,
+  type Log,
+} from "ethers";
 import { ethers } from "hardhat";
 
 import { type TypedContractEvent, type TypedEventLog } from "../../types/common";
@@ -15,15 +22,8 @@ export function expectDefined<T>(arg: T): asserts arg is NonNullable<T> {
   expect(arg).to.not.be.null;
 }
 
-export async function getSigner(address: string): Promise<HardhatEthersSigner> {
-  return await asAccount(address, async () => {
-    return await ethers.getSigner(address);
-  });
-}
-
 export async function asAccount<T>(address: string, action: (signer: HardhatEthersSigner) => Promise<T>): Promise<T> {
-  await impersonateAccount(address);
-  const signer = await ethers.getSigner(address);
+  const signer = await ethers.getImpersonatedSigner(address);
   const result = await action(signer);
   await stopImpersonatingAccount(address);
   return result;
@@ -51,10 +51,16 @@ export function findTypedEvent<EventType extends TypedContractEvent>(
   expectDefined(foundLog);
 
   return foundLog as TypedEventLog<EventType>;
+}
 
-  // const targetEventTopic = contractInterface.getEventTopic(contractInterface.events[targetEventFragment.format()]);
-  // const foundLog = logs.find((log) => log.topics.includes(targetEventTopic));
+interface TypechainContractFactory {
+  createInterface: () => Interface;
+}
 
-  // const logDescription = contractInterface.parseLog(foundLog);
-  // return { ...foundLog, args: logDescription?.args };
+export async function catchCustomError(
+  call: Promise<ContractTransactionResponse>,
+  contractFactory: TypechainContractFactory,
+): Promise<ErrorDescription | null> {
+  const iface = contractFactory.createInterface();
+  return await call.then(() => null).catch<ErrorDescription | null>(async (e) => iface.parseError(e.data));
 }

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { AbiCoder, Wallet, ZeroAddress, dnsEncode, namehash, parseEther } from "ethers";
-import { deployments, getNamedAccounts, getUnnamedAccounts } from "hardhat";
+import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import type { ENS, Erc721WildcardResolver, IENSLegacyPublicResolver, TestERC721 } from "../../../types";
 import {
@@ -14,7 +14,7 @@ import {
   TestERC721__factory,
 } from "../../../types";
 import { resolveAddr, resolveText } from "../../../utils";
-import { asAccount, getSigner } from "../../utils";
+import { asAccount } from "../../utils";
 
 export function testErc721WildcardResolver(): void {
   describe("Erc721WildcardResolver", function () {
@@ -38,7 +38,7 @@ export function testErc721WildcardResolver(): void {
       await deployments.fixture();
       const { deployer, ensRegistry } = await getNamedAccounts();
 
-      const signer = await getSigner(deployer);
+      const signer = await ethers.getImpersonatedSigner(deployer);
 
       const deployment = await deployments.get("Erc721WildcardResolver");
       wildcardResolver = Erc721WildcardResolver__factory.connect(deployment.address, signer);

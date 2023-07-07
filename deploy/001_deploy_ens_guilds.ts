@@ -5,7 +5,7 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer, ensRegistry } = await getNamedAccounts();
+  const { deployer, ensRegistry, ensNameWrapper } = await getNamedAccounts();
 
   const baseDeployArgs = {
     from: deployer,
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ensGuildsDeployment = await deploy("ENSGuilds", {
     ...baseDeployArgs,
     // TODO: don't use a stub here
-    args: ["stubMetadataUri", ensRegistry],
+    args: ["stubMetadataUri", ensRegistry, ensNameWrapper],
   });
 
   // NFTTagsAuthPolicy

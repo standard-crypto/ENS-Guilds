@@ -6,12 +6,12 @@ import { findTransferSingleEvent } from "../utils/erc1155";
 export function testNFTFeatures(): void {
   describe("NFT Features", function () {
     beforeEach("Setup guild", async function () {
-      const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
+      const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
 
+      await this.approveGuildsAsEnsOperator();
+
       await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
         // Register guild
         await ensGuilds
           .connect(signer)
