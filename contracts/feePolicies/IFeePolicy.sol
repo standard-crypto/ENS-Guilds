@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
 /**
  * @title IFeePolicy
  * @notice An interface for Guilds to implement that will specify how fees must be paid for guild tag mints
  */
-interface IFeePolicy {
+interface IFeePolicy is IERC165 {
     /**
      * @notice Returns the fee required to mint the given guild tag by the given minter
      * @param guildHash The ENS namehash of the guild's domain

@@ -63,12 +63,14 @@ contract Erc721WildcardResolver is Context, PassthroughResolver, IExtendedResolv
         address tokenContract,
         IPublicResolver fallbackResolver
     ) external {
+        // Must have provided valid ERC721 contract
         if (!tokenContract.supportsInterface(type(IERC721).interfaceId)) {
             revert InvalidTokenContract();
         }
 
         (bytes memory encodedName, bytes32 ensNode) = ensName.dnsEncodeName();
 
+        // Caller must be the name owner or a delegate of the name owner
         if (!isAuthorised(ensNode)) {
             revert CallerNotAuthorised();
         }
@@ -79,10 +81,16 @@ contract Erc721WildcardResolver is Context, PassthroughResolver, IExtendedResolv
     }
 
     function isAuthorised(bytes32 node) internal view virtual override returns (bool) {
-        return _msgSender() == _nodeOwner(node) || approvedDelegates[node][_msgSender()];
+        address owner = _nodeOwner(node);
+        address sender = _msgSender();
+        return sender == owner || isApprovedFor(owner, node, sender);
     }
 
-    function setDelegate(bytes32 node, address delegate, bool approved) external {
+    function isApprovedFor(address, bytes32 node, address delegate) public view returns (bool) {
+        return approvedDelegates[node][delegate];
+    }
+
+    function setApprovedFor(bytes32 node, address delegate, bool approved) external {
         if (_msgSender() != _nodeOwner(node)) {
             revert CallerNotAuthorised();
         }
