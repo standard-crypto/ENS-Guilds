@@ -6,6 +6,7 @@ import type {
   Erc721WildcardResolver,
   FlatFeePolicy,
   IENSGuilds,
+  INameWrapper,
   NFTTagsAuthPolicy,
   OpenTagsAuthPolicy,
 } from "../../types";
@@ -19,8 +20,11 @@ declare module "mocha" {
       openAuthPolicy: OpenTagsAuthPolicy;
       flatFeePolicy: FlatFeePolicy;
       ensRegistry: ENS;
+      ensNameWrapper: INameWrapper;
       erc721WildcardResolver: Erc721WildcardResolver;
     };
+
+    usingNameWrapper: boolean;
 
     guildInfo: {
       domain: string;
@@ -35,5 +39,6 @@ declare module "mocha" {
     };
 
     expectRevertedWithCustomError: (tx: Promise<ContractTransactionResponse>, customErrorName: string) => Promise<void>;
+    approveGuildsAsEnsOperator: () => Promise<void>;
   }
 }

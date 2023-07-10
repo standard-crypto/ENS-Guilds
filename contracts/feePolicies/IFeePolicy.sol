@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-
 /**
- * @title FeePolicy
+ * @title IFeePolicy
  * @notice An interface for Guilds to implement that will specify how fees must be paid for guild tag mints
  */
-abstract contract FeePolicy is ERC165 {
-    function supportsInterface(bytes4 interfaceID) public view virtual override(ERC165) returns (bool) {
-        return interfaceID == type(FeePolicy).interfaceId || super.supportsInterface(interfaceID);
-    }
-
+interface IFeePolicy {
     /**
      * @notice Returns the fee required to mint the given guild tag by the given minter
      * @param guildHash The ENS namehash of the guild's domain
@@ -27,5 +21,5 @@ abstract contract FeePolicy is ERC165 {
         string calldata tag,
         address claimant,
         bytes calldata extraClaimArgs
-    ) external view virtual returns (address tokenContract, uint256 fee, address feePaidTo);
+    ) external view returns (address tokenContract, uint256 fee, address feePaidTo);
 }

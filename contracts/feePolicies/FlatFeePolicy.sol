@@ -5,18 +5,18 @@ import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import "./FeePolicy.sol";
+import "./FeePolicyBase.sol";
 import "../ensGuilds/interfaces/IENSGuilds.sol";
 
 /**
  * @title FlatFeePolicy
- * @notice A common implementation of FeePolicy that can be used to configure
+ * @notice A common implementation of IFeePolicy that can be used to configure
  * flat-rate fees for multiple guilds simultaneously
  */
-contract FlatFeePolicy is Context, FeePolicy {
+contract FlatFeePolicy is Context, FeePolicyBase {
     using ERC165Checker for address;
 
-    IENSGuilds private immutable ensGuilds;
+    IENSGuilds public immutable ensGuilds;
     struct FeeInfo {
         address feeToken;
         uint256 fee;
@@ -46,7 +46,7 @@ contract FlatFeePolicy is Context, FeePolicy {
     }
 
     /**
-     * @inheritdoc FeePolicy
+     * @inheritdoc IFeePolicy
      */
     function tagClaimFee(
         bytes32 guildHash,

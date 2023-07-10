@@ -5,6 +5,7 @@ import { namehash, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import { IENSGuilds__factory } from "../../types";
+import { asAccount } from "../utils";
 import { testAdminControls } from "./adminControls";
 import { testDomainOwnerControls } from "./domainOwnerControls";
 import { testEnsRecords } from "./ensRecords";
@@ -12,6 +13,7 @@ import { testGuildDeregistration } from "./guildDeregistration";
 import { testGuildRegistration } from "./guildRegistration";
 import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
+import { testNameWrapperSupport } from "./nameWrapperSupport";
 import { testNFTFeatures } from "./nftFeatures";
 import { testTagRevocation } from "./tagRevocation";
 import { testTagTransfers } from "./tagTransfers";
@@ -19,11 +21,11 @@ import "./type-annotations";
 import { testWildcardResolution } from "./wildcardResolution";
 
 describe("Acceptance Tests", function () {
-  beforeEach("Base setup", async function () {
+  beforeEach("Base acceptance test setup", async function () {
     await deployments.fixture();
 
     // Grab handles to all deployed contracts
-    const { ensRegistry } = await getNamedAccounts();
+    const { ensRegistry, ensNameWrapper } = await getNamedAccounts();
     const ensGuildsDeployment = await deployments.get("ENSGuilds");
     const nftAuthPolicyDeployment = await deployments.get("NFTTagsAuthPolicy");
     const allowlistAuthPolicyDeployment = await deployments.get("AllowlistTagsAuthPolicy");
@@ -34,9 +36,11 @@ describe("Acceptance Tests", function () {
     const ensGuildsImpl = await ethers.getContractAt("ENSGuilds", ensGuildsDeployment.address);
 
     const ens = await ethers.getContractAt("ENS", ensRegistry);
+    const nameWrapper = await ethers.getContractAt("INameWrapper", ensNameWrapper);
 
     this.deployedContracts = {
       ensRegistry: ens,
+      ensNameWrapper: nameWrapper,
 
       ensGuilds: IENSGuilds__factory.connect(ensGuildsDeployment.address, ethers.provider),
       flatFeePolicy: await ethers.getContractAt("FlatFeePolicy", flatFeePolicyDeployment.address),
@@ -50,15 +54,16 @@ describe("Acceptance Tests", function () {
     };
 
     // Setup basic info for a guild that is / will be registered
-    const ensName = "standard-crypto.eth";
+    this.usingNameWrapper = this.usingNameWrapper ?? false;
+    const ensName = this.usingNameWrapper ? "agi.eth" : "standard-crypto.eth";
     const guildHash = namehash(ensName);
-    const ensNameOwner = await ens.owner(guildHash);
+    const ensNameOwner = this.usingNameWrapper ? await nameWrapper.ownerOf(guildHash) : await ens.owner(guildHash);
     const [guildAdmin, minter, unauthorizedThirdParty] = await getUnnamedAccounts();
 
     this.guildInfo = {
       domain: ensName,
       ensNode: guildHash,
-      ensNameOwner: await ens.owner(guildHash),
+      ensNameOwner,
       admin: guildAdmin,
     };
 
@@ -79,6 +84,18 @@ describe("Acceptance Tests", function () {
     ): Promise<void> => {
       await expect(tx).to.be.revertedWithCustomError(ensGuildsImpl, customErrorName);
     };
+
+    this.approveGuildsAsEnsOperator = async (): Promise<void> => {
+      const { ensGuilds, ensRegistry } = this.deployedContracts;
+      const { ensNameOwner } = this.guildInfo;
+      await asAccount(ensNameOwner, async (signer) => {
+        if (this.usingNameWrapper) {
+          await nameWrapper.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
+        } else {
+          await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
+        }
+      });
+    };
   });
 
   testGuildRegistration.bind(this)();
@@ -92,4 +109,5 @@ describe("Acceptance Tests", function () {
   testTagRevocation.bind(this)();
   testTagTransfers.bind(this)();
   testWildcardResolution.bind(this)();
+  testNameWrapperSupport.bind(this)();
 });

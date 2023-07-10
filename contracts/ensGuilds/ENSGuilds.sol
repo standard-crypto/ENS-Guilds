@@ -3,29 +3,33 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { INameWrapper, CAN_DO_EVERYTHING } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 
 import "./interfaces/IENSGuilds.sol";
-import "../feePolicies/FeePolicy.sol";
+import "../feePolicies/IFeePolicy.sol";
 import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
 import "./mixins/GuildTagResolver.sol";
 import "./mixins/GuildTagTokens.sol";
 import "./mixins/ENSGuildsHumanized.sol";
 
-contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagResolver, ReentrancyGuard {
+contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagResolver, ERC1155Holder, ReentrancyGuard {
     struct GuildInfo {
         address admin;
-        FeePolicy feePolicy;
+        IFeePolicy feePolicy;
         ITagsAuthPolicy tagsAuthPolicy;
         bool active;
         bool deregistered;
+        bool usesNameWrapper;
     }
 
     using ERC165Checker for address;
 
     /** State */
     ENS public immutable ensRegistry;
+    INameWrapper public immutable nameWrapper;
     mapping(bytes32 => GuildInfo) public guilds;
 
     /** Errors */
@@ -63,8 +67,13 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         _;
     }
 
-    constructor(string memory defaultTokenMetadataUri, ENS _ensRegistry) ERC1155(defaultTokenMetadataUri) {
+    constructor(
+        string memory defaultTokenMetadataUri,
+        ENS _ensRegistry,
+        INameWrapper _nameWrapper
+    ) ERC1155(defaultTokenMetadataUri) {
         ensRegistry = _ensRegistry;
+        nameWrapper = _nameWrapper;
     }
 
     /**
@@ -72,11 +81,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(GuildTagResolver, GuildTagTokens, IERC165) returns (bool) {
+    ) public view virtual override(GuildTagResolver, GuildTagTokens, ERC1155Receiver, IERC165) returns (bool) {
         return
             interfaceId == type(IENSGuilds).interfaceId ||
             GuildTagResolver.supportsInterface(interfaceId) ||
             GuildTagTokens.supportsInterface(interfaceId) ||
+            ERC1155Receiver.supportsInterface(interfaceId) ||
             ERC165.supportsInterface(interfaceId);
     }
 
@@ -89,8 +99,16 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         address feePolicy,
         address tagsAuthPolicy
     ) public override(ENSGuildsHumanized, IENSGuilds) {
+        // Determine whether this name is using the ENS NameWrapper
+        address nodeOwner = ensRegistry.owner(ensNode);
+        bool usesNameWrapper = false;
+        if (nodeOwner == address(nameWrapper)) {
+            nodeOwner = nameWrapper.ownerOf(uint256(ensNode));
+            usesNameWrapper = true;
+        }
+
         // Check caller is owner of domain
-        if (ensRegistry.owner(ensNode) != _msgSender()) {
+        if (nodeOwner != _msgSender()) {
             revert NotDomainOwner();
         }
 
@@ -100,12 +118,15 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         }
 
         // Check ENSGuilds contract has been approved to edit the ENS registry on behalf of the caller
-        if (!ensRegistry.isApprovedForAll(_msgSender(), address(this))) {
+        if (usesNameWrapper && !nameWrapper.isApprovedForAll(_msgSender(), address(this))) {
+            revert ENSGuildsIsNotRegisteredOperator();
+        }
+        if (!usesNameWrapper && !ensRegistry.isApprovedForAll(_msgSender(), address(this))) {
             revert ENSGuildsIsNotRegisteredOperator();
         }
 
         // Check for valid fee/tagsAuth policies
-        if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
+        if (!feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
         if (!tagsAuthPolicy.supportsInterface(type(ITagsAuthPolicy).interfaceId)) {
@@ -114,10 +135,11 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
 
         guilds[ensNode] = GuildInfo({
             admin: admin,
-            feePolicy: FeePolicy(feePolicy),
+            feePolicy: IFeePolicy(feePolicy),
             tagsAuthPolicy: ITagsAuthPolicy(tagsAuthPolicy),
             active: true,
-            deregistered: false
+            deregistered: false,
+            usesNameWrapper: usesNameWrapper
         });
 
         emit Registered(ensNode);
@@ -129,9 +151,19 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
     function deregisterGuild(
         bytes32 ensNode
     ) public override(ENSGuildsHumanized, IENSGuilds) onlyGuildAdmin(ensNode) requireGuildRegistered(ensNode) {
-        delete guilds[ensNode];
-        guilds[ensNode].deregistered = true;
-        guilds[ensNode].active = false;
+        guilds[ensNode] = GuildInfo({
+            admin: address(0),
+            feePolicy: IFeePolicy(address(0)),
+            active: false,
+            deregistered: true,
+            // Need to preserve this state so the contract knows how to facilitate
+            // un-setting ENS records via revokeTag()
+            usesNameWrapper: guilds[ensNode].usesNameWrapper,
+            // Preserve this too, so that any tags revoked after de-registration
+            // will also hit onTagRevoked() on the auth contract, allowing the auth policy to
+            // cleanup its own state
+            tagsAuthPolicy: guilds[ensNode].tagsAuthPolicy
+        });
         emit Deregistered(ensNode);
     }
 
@@ -147,8 +179,8 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         bytes32 tagHash = keccak256(bytes(tag));
 
         // check tag not already registered
-        bytes32 ensNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
-        if (ensRegistry.owner(ensNode) != address(0)) {
+        bytes32 tagEnsNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
+        if (ensRegistry.owner(tagEnsNode) != address(0)) {
             revert TagAlreadyClaimed();
         }
 
@@ -171,10 +203,10 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         }
 
         // Register this new name in ENS
-        ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(this), address(this), 0);
+        _setResolverForEnsNode(guildEnsNode, tag, tagHash, address(this) /* owner */, address(this) /* resolver */);
 
         // Set forward record in ENS resolver
-        _setEnsForwardRecord(ensNode, recipient);
+        _setEnsForwardRecord(tagEnsNode, recipient);
 
         emit TagClaimed(guildEnsNode, tagHash, recipient);
     }
@@ -286,10 +318,10 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         onlyGuildAdmin(guildEnsNode)
         requireGuildRegistered(guildEnsNode)
     {
-        if (!feePolicy.supportsInterface(type(FeePolicy).interfaceId)) {
+        if (!feePolicy.supportsInterface(type(IFeePolicy).interfaceId)) {
             revert InvalidPolicy(feePolicy);
         }
-        guilds[guildEnsNode].feePolicy = FeePolicy(feePolicy);
+        guilds[guildEnsNode].feePolicy = IFeePolicy(feePolicy);
         emit FeePolicyUpdated(guildEnsNode, feePolicy);
     }
 
@@ -368,11 +400,21 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         bytes32 tagHash
     ) public view override(ENSGuildsHumanized, IENSGuilds) returns (address) {
         bytes32 tagEnsNode = keccak256(abi.encodePacked(guildEnsNode, tagHash));
+        address _owner;
+
+        if (guilds[guildEnsNode].usesNameWrapper) {
+            _owner = nameWrapper.ownerOf(uint256(tagEnsNode));
+        } else {
+            _owner = ensRegistry.owner(tagEnsNode);
+        }
+
         // if ENSGuilds is not the owner of the tag's ENS node, then the tag itself is not valid
         // and therefore has no owner
-        if (ensRegistry.owner(tagEnsNode) != address(this)) {
+        if (_owner != address(this)) {
             return address(0);
         }
+
+        // We control this tag, so we can just use the `addr()` resolver to fetch the owner
         return addr(tagEnsNode);
     }
 
@@ -386,7 +428,11 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
         if (!address(wildcardResolver).supportsInterface(type(IExtendedResolver).interfaceId)) {
             revert InvalidWildcardResolver();
         }
-        ensRegistry.setResolver(guildEnsNode, address(wildcardResolver));
+        if (guilds[guildEnsNode].usesNameWrapper) {
+            nameWrapper.setResolver(guildEnsNode, address(wildcardResolver));
+        } else {
+            ensRegistry.setResolver(guildEnsNode, address(wildcardResolver));
+        }
     }
 
     function _revokeTag(bytes32 guildEnsNode, string memory tag) private {
@@ -398,7 +444,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
             revert RevokeUnauthorized();
         }
 
-        ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, address(0), address(0), 0);
+        _setResolverForEnsNode(guildEnsNode, tag, tagHash, address(0) /* owner */, address(0) /* resolver */);
         _burnGuildToken(guildEnsNode, tagHash, _tagOwner);
 
         ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
@@ -431,6 +477,28 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, GuildTagRe
                     revert FeeError();
                 }
             }
+        }
+    }
+
+    function _setResolverForEnsNode(
+        bytes32 guildEnsNode,
+        string memory tag,
+        bytes32 tagHash,
+        address owner,
+        address resolver
+    ) internal {
+        if (guilds[guildEnsNode].usesNameWrapper) {
+            nameWrapper.setSubnodeRecord(
+                guildEnsNode,
+                tag,
+                owner,
+                resolver,
+                0 /* TTL */,
+                CAN_DO_EVERYTHING /* fuses */,
+                0 /* fusesExpiry */
+            );
+        } else {
+            ensRegistry.setSubnodeRecord(guildEnsNode, tagHash, owner, resolver, 0 /* TTL */);
         }
     }
 }

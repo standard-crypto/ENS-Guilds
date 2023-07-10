@@ -13,13 +13,7 @@ export function testMintFees(): void {
     const tagToMint = "test";
 
     beforeEach("setup", async function () {
-      const { ensRegistry, ensGuilds } = this.deployedContracts;
-      const { ensNameOwner } = this.guildInfo;
-
-      await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
-      });
+      await this.approveGuildsAsEnsOperator();
     });
 
     it("Domain owner can set the fee policy when registering a new guild", async function () {

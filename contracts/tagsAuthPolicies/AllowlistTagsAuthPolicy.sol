@@ -15,12 +15,6 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
     // solhint-disable-next-line no-empty-blocks
     constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
 
-    modifier onlyGuildAdmin(bytes32 guildHash) {
-        // solhint-disable-next-line reason-string
-        require(_ensGuilds.guildAdmin(guildHash) == _msgSender());
-        _;
-    }
-
     function allowMint(bytes32 guildHash, address minter) external onlyGuildAdmin(guildHash) {
         guildAllowlists[guildHash][minter] = true;
     }

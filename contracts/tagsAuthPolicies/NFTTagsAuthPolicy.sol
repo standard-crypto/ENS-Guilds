@@ -48,11 +48,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
      * @param guildEnsNode The ENS namehash of the guild's domain
      * @param tokenContract The ERC721 or ERC1155 collection to use
      */
-    function setTokenContract(bytes32 guildEnsNode, address tokenContract) external {
-        // caller must be guild admin
-        // solhint-disable-next-line reason-string
-        require(_ensGuilds.guildAdmin(guildEnsNode) == _msgSender());
-
+    function setTokenContract(bytes32 guildEnsNode, address tokenContract) external onlyGuildAdmin(guildEnsNode) {
         // token contract must be ERC721 or ERC1155
         if (tokenContract.supportsInterface(type(IERC721).interfaceId)) {
             guilds[guildEnsNode].tokenStandard = TokenStandard.ERC721;

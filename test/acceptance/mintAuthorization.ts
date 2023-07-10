@@ -7,14 +7,8 @@ import { asAccount } from "../utils";
 
 export function testMintAuthorization(): void {
   describe("Mint Authorization", function () {
-    beforeEach("Set ENSGuilds contract as the ENS resolver for the domain", async function () {
-      const { ensRegistry, ensGuilds } = this.deployedContracts;
-      const { ensNameOwner } = this.guildInfo;
-
-      await asAccount(ensNameOwner, async (signer) => {
-        // Set ENSGuilds contract as an approved operator
-        await ensRegistry.connect(signer).setApprovalForAll(ensGuilds.getAddress(), true);
-      });
+    beforeEach("Set ENSGuilds contract as an ENS manager for the domain", async function () {
+      await this.approveGuildsAsEnsOperator();
     });
 
     it("Domain owner can set authorization policy when registering a new guild", async function () {
@@ -188,7 +182,7 @@ export function testMintAuthorization(): void {
       });
     });
 
-    it("User cannot mint a tag if its domain name was already registered in ENS", async function () {
+    it("User cannot mint a tag if its full name was already registered in ENS", async function () {
       const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, ensNode, admin } = this.guildInfo;
       const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();

@@ -16,18 +16,24 @@ import "../ensGuilds/interfaces/IENSGuilds.sol";
 abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, ReentrancyGuard {
     using ERC165Checker for address;
 
-    IENSGuilds internal immutable _ensGuilds;
+    IENSGuilds public immutable ensGuilds;
 
-    constructor(IENSGuilds ensGuilds) {
+    constructor(IENSGuilds _ensGuilds) {
         // solhint-disable-next-line reason-string
-        require(ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
-        _ensGuilds = ensGuilds;
+        require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
+        ensGuilds = _ensGuilds;
     }
 
     modifier onlyEnsGuildsContract() {
         // caller must be guild admin
         // solhint-disable-next-line reason-string
-        require(_msgSender() == address(_ensGuilds));
+        require(_msgSender() == address(ensGuilds));
+        _;
+    }
+
+    modifier onlyGuildAdmin(bytes32 guildEnsNode) {
+        // solhint-disable-next-line reason-string
+        require(ensGuilds.guildAdmin(guildEnsNode) == _msgSender());
         _;
     }
 
