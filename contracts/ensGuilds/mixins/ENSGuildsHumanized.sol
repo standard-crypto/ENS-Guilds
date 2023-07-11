@@ -58,7 +58,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     }
 
     function transferGuildTag(
-        string memory guildEnsName,
+        string calldata guildEnsName,
         string calldata tag,
         address recipient,
         bytes calldata extraTransferArgs
@@ -89,7 +89,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      * @param tag The tag (e.g. 'foobar')
      */
-    function tagOwner(string calldata guildEnsName, string calldata tag) external view override returns (address) {
+    function tagOwner(string memory guildEnsName, string memory tag) external view override returns (address) {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         bytes32 tagHash = keccak256(bytes(tag));
         return tagOwner(guildEnsNode, tagHash);
@@ -141,7 +141,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @notice Returns the current admin registered for the given guild.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
      */
-    function guildAdmin(string calldata guildEnsName) external view override returns (address) {
+    function guildAdmin(string memory guildEnsName) external view override returns (address) {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
         return guildAdmin(guildEnsNode);
     }

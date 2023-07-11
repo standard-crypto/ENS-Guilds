@@ -10,6 +10,12 @@ import "./IPublicResolver.sol";
  * to selectively implement specific record types, deferring all others to the
  * fallback Resolver (usually whatever public Resolver the ENS app set on behalf
  * of the user when a name was registered).
+ *
+ * The owner of the ENS name must first configure their PublicResolver to approve
+ * this contract as an authorized manager on the owner's behalf for the setter
+ * methods of PassthroughResolver to work. Note that this delegation is separate
+ * from approvals set with the ENS Registry. ENS's public Registry and its public
+ * Resolvers each have their own, independent concepts of approved managers.
  */
 abstract contract PassthroughResolver is ResolverBase, IPublicResolver {
     mapping(bytes32 => IPublicResolver) internal passthroughTargets;
