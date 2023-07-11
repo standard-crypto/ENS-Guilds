@@ -151,7 +151,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
             usesNameWrapper: usesNameWrapper
         });
 
-        // Set ENSGuilds as the resolver for the Guild's ENS name
+        // Set GuildsResolver as the resolver for the Guild's ENS name
         _guildsResolver.setPassthroughTarget(ensNode, originalResolver);
         _setResolverForGuild(ensNode, address(_guildsResolver));
         _guildsResolver.onGuildRegistered(guildName);
