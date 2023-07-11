@@ -27,6 +27,7 @@ describe("Acceptance Tests", function () {
     // Grab handles to all deployed contracts
     const { ensRegistry, ensNameWrapper } = await getNamedAccounts();
     const ensGuildsDeployment = await deployments.get("ENSGuilds");
+    const guildsResolverDeployment = await deployments.get("GuildsResolver");
     const nftAuthPolicyDeployment = await deployments.get("NFTTagsAuthPolicy");
     const allowlistAuthPolicyDeployment = await deployments.get("AllowlistTagsAuthPolicy");
     const openAuthPolicyDeployment = await deployments.get("OpenTagsAuthPolicy");
@@ -43,6 +44,7 @@ describe("Acceptance Tests", function () {
       ensNameWrapper: nameWrapper,
 
       ensGuilds: IENSGuilds__factory.connect(ensGuildsDeployment.address, ethers.provider),
+      guildsResolver: await ethers.getContractAt("GuildsResolver", guildsResolverDeployment.address),
       flatFeePolicy: await ethers.getContractAt("FlatFeePolicy", flatFeePolicyDeployment.address),
       openAuthPolicy: await ethers.getContractAt("OpenTagsAuthPolicy", openAuthPolicyDeployment.address),
       nftAuthPolicy: await ethers.getContractAt("NFTTagsAuthPolicy", nftAuthPolicyDeployment.address),

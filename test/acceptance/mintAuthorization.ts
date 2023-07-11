@@ -13,19 +13,19 @@ export function testMintAuthorization(): void {
 
     it("Domain owner can set authorization policy when registering a new guild", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
     it("User can claim a guild tag if they pass the authz check", async function () {
       const { ensGuilds, flatFeePolicy, allowlistAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
       const tagToMint = "test";
@@ -34,7 +34,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
       // Add allowlist entry for the minter
@@ -50,32 +50,30 @@ export function testMintAuthorization(): void {
 
     it("Domain owner can't register an nonexistent or invalid contract as the authz policy for a guild", async function () {
       const { ensGuilds, flatFeePolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
         // Attempt to set zero address as the auth policy should fail
-        let tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ZeroAddress);
+        let tx = ensGuilds.connect(signer).registerGuild(domain, admin, flatFeePolicy.getAddress(), ZeroAddress);
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an existing contract that doesn't implement AuthPolicy
         tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), flatFeePolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), flatFeePolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
-        tx = ensGuilds
-          .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ensGuilds.getAddress());
+        tx = ensGuilds.connect(signer).registerGuild(domain, admin, flatFeePolicy.getAddress(), ensGuilds.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an EOA as the AuthPolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, flatFeePolicy.getAddress(), ensNameOwner);
+        tx = ensGuilds.connect(signer).registerGuild(domain, admin, flatFeePolicy.getAddress(), ensNameOwner);
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
       });
     });
 
     it("User cannot circumvent authz via reentrancy attack", async function () {
       const { ensGuilds, flatFeePolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
       const tagToMint = "test";
@@ -99,7 +97,7 @@ export function testMintAuthorization(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), authPolicyDeployment.address);
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), authPolicyDeployment.address);
       });
 
       // Attempt to claim a tag, indirectly triggering a reentrant call on claimGuildTag
@@ -111,7 +109,7 @@ export function testMintAuthorization(): void {
 
     it("User failing authz check causes TX to revert", async function () {
       const { ensGuilds, flatFeePolicy, allowlistAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
       const tagToMint = "test";
@@ -120,7 +118,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
       // attempt to claim a tag without first being allowlisted
@@ -132,7 +130,7 @@ export function testMintAuthorization(): void {
 
     it("Frozen guild causes mint TX to revert", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
 
       const tagToMint = "test";
@@ -141,7 +139,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // Freeze the guild
@@ -158,7 +156,7 @@ export function testMintAuthorization(): void {
 
     it("User cannot mint an existing tag that has not been revoked", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
 
       const tagToMint = "test";
@@ -167,7 +165,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // minter1 successfully claims this tag
@@ -184,7 +182,7 @@ export function testMintAuthorization(): void {
 
     it("User cannot mint a tag if its full name was already registered in ENS", async function () {
       const { ensRegistry, ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
       const { minter } = this.addresses;
 
@@ -201,7 +199,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // minter should fail when trying to claim this tag
@@ -213,7 +211,7 @@ export function testMintAuthorization(): void {
 
     it("Caller can specify different address to receive the tag if authz policy allows", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter, unauthorizedThirdParty: tagRecipient } = this.addresses;
 
       const tagToMint = "test";
@@ -222,7 +220,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // claim a tag for a separate recipient
@@ -233,7 +231,7 @@ export function testMintAuthorization(): void {
 
     it("Multiple tags can be minted in batch", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter: minter1, unauthorizedThirdParty: minter2 } = this.addresses;
 
       const tag1 = "test1";
@@ -243,7 +241,7 @@ export function testMintAuthorization(): void {
       await asAccount(ensNameOwner, async (signer) => {
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // claim both tags

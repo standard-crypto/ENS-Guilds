@@ -37,7 +37,7 @@ export function testNameWrapperSupport(): void {
 
           await ensGuilds
             .connect(signer)
-            .registerGuild(ensNode, ensNameOwner, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+            .registerGuild(wrappedEnsName, ensNameOwner, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
         });
       });
       await guildRegistered();
@@ -63,41 +63,6 @@ export function testNameWrapperSupport(): void {
 
       // check the tag owner
       await expect(ensGuilds.tagOwner(ensNode, ensLabelHash(tagToMint))).to.eventually.eq(minter);
-    });
-
-    it("Name-wrapper's ERC1155s go to the ENS Guilds contract", async function () {
-      const { ensNameWrapper, ensGuilds } = this.deployedContracts;
-
-      await tagMinted();
-
-      // Check that ENS Guilds contract owns the token that was minted
-      const tokenId = namehash(`${tagToMint}.${wrappedEnsName}`);
-      await expect(ensNameWrapper.ownerOf(tokenId)).to.eventually.eq(await ensGuilds.getAddress());
-    });
-
-    it("Name-wrapper's ERC1155s go to the zero address when a tag is revoked", async function () {
-      const { ensNameWrapper, ensGuilds } = this.deployedContracts;
-      const { deploy } = deployments;
-      const { deployer } = await getNamedAccounts();
-
-      await tagMinted();
-
-      const revocationTestHelper = await deploy("RevocationTestHelper", {
-        from: deployer,
-        autoMine: true,
-      });
-
-      await asAccount(ensNameOwner, async (signer) => {
-        // change the guild's auth contract so we can do some revocations
-        await ensGuilds.connect(signer).updateGuildTagsAuthPolicy(ensNode, revocationTestHelper.address);
-
-        // revoke the tag
-        await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, "0x");
-      });
-
-      // check that the name-wrapper's ERC1155 is owned by the zero address
-      const tokenId = namehash(`${tagToMint}.${wrappedEnsName}`);
-      await expect(ensNameWrapper.ownerOf(tokenId)).to.eventually.eq(ZeroAddress);
     });
 
     it("Unclaimed tags appear as owned by the zero address", async function () {

@@ -5,6 +5,7 @@ import type {
   ENS,
   Erc721WildcardResolver,
   FlatFeePolicy,
+  GuildsResolver,
   IENSGuilds,
   INameWrapper,
   NFTTagsAuthPolicy,
@@ -15,6 +16,7 @@ declare module "mocha" {
   export interface Context {
     deployedContracts: {
       ensGuilds: IENSGuilds;
+      guildsResolver: GuildsResolver;
       nftAuthPolicy: NFTTagsAuthPolicy;
       allowlistAuthPolicy: AllowlistTagsAuthPolicy;
       openAuthPolicy: OpenTagsAuthPolicy;

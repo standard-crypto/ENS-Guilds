@@ -43,7 +43,8 @@
     "Authorised",
     "authorisation",
     "authorisations",
-    "deauthorised"
+    "deauthorised",
+    "proxied"
   ],
   "flagWords": [],
   "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "deployments"],

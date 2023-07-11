@@ -28,7 +28,7 @@ export function testDomainOwnerControls(): void {
 function _testSuite(): void {
   beforeEach("Setup guild", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     await this.approveGuildsAsEnsOperator();
 
@@ -36,7 +36,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
     });
   });
 
@@ -60,7 +60,7 @@ function _testSuite(): void {
     const subdomainNode = namehash(`${subdomain}.${domain}`);
     const expectedSubdomainResolvesTo = ethers.Wallet.createRandom().address;
 
-    // mint a subdomain using the default resolver
+    // register a subdomain using the default resolver
     await asAccount(ensNameOwner, async (signer) => {
       if (this.usingNameWrapper) {
         await ensNameWrapper
@@ -83,7 +83,6 @@ function _testSuite(): void {
     });
 
     // check that the new forward record was created correctly
-    // console.log(subdomain, domain, ensRegistry.address);
     const subdomainResolvesTo = await resolveAddr(ensRegistry, `${subdomain}.${domain}`);
 
     expect(subdomainResolvesTo).to.eq(expectedSubdomainResolvesTo);

@@ -26,7 +26,7 @@ export function testEnsRecords(): void {
 function _testSuite(): void {
   beforeEach("Setup guild", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     await this.approveGuildsAsEnsOperator();
 
@@ -34,7 +34,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
     });
   });
 

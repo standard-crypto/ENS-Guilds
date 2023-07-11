@@ -21,5 +21,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   return true;
 };
-func.id = "004_deploy_wildcard_resolver";
+func.id = "005_deploy_nft_wildcard_resolver";
 export default func;

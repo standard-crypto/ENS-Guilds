@@ -13,8 +13,8 @@ their membership within that community.
     - [ENS Under the Hood](#ens-under-the-hood)
     - [Moderation and Revocation](#moderation-and-revocation)
     - [ENS Reverse Records](#ens-reverse-records)
-    - [Protecting Existing Sub-Names](#protecting-existing-sub-names)
-  - [Dynamic ENS Resolution](#dynamic-ens-resolution)
+    - [De-Registering Guilds](#de-registering-guilds)
+    - [Setting Custom Fallback Resolvers](#setting-custom-fallback-resolvers)
   - [Risk Surface](#risk-surface)
   - [Decentralization and Governance](#decentralization-and-governance)
   - [ENS Name Wrapper Compatibility](#ens-name-wrapper-compatibility)
@@ -22,18 +22,17 @@ their membership within that community.
 
 ## How It Works
 
-Guild tags are the way users claim sub-names under a Guild's top-level ENS name.
+Guild tags are the way users can claim sub-names under a Guild's top-level ENS name.
 
-As an example, an account participating in a Guild named `punks.eth` might claim the tag "foo" for their address,
-granting them the ENS name `foo.punks.eth`.
+As an example, an account participating in a Guild named `punks.eth` might claim the tag `alice` for their address,
+granting them the ENS name `alice.punks.eth`.
 
 ### The Basic Flow
 
-1. The owner of an ENS name authorizes the shared ENSGuilds contract to update ENS records on their behalf (see
-   [Risks](#risks))
-2. The ENS name owner registers a new Guild with that name on the ENSGuilds contract
-3. Accounts can claim custom tags within the Guild, and the correct ENS address records will be set for their tags
-4. The Guild's admin account sets policies governing which accounts can claim which tags and how fees should be paid
+1. The owner of an ENS name authorizes the shared ENSGuilds contract to update ENS records on their behalf
+2. The ENS name owner registers a new Guild with that name via `ENSGuilds.registerGuild()`
+3. Accounts can claim custom tags within the Guild and the correct ENS address records will be set for their tags
+4. The Guild's admin account sets the policies governing which accounts can claim which tags and how fees should be paid
 
 ### Claiming a Tag
 
@@ -57,7 +56,7 @@ The `recipient` will become the owner of that tag and their address will be regi
 
 ### Setting Up a Guild
 
-For the ENSGuilds contract to operate it must be approved by the guild name's owner to update ENS state for the name.
+For the ENSGuilds contract to operate, it must be authorized by the Guild name's owner to update ENS state for the name.
 
 The original name owner still keeps ownership of the name, and only appoints the ENSGuilds contract as an approved
 manager of their names. (See [ENS documentation](https://docs.ens.domains/contract-api-reference/ens#set-approval)). The
@@ -68,19 +67,19 @@ A Guild may be registered for top-level `.eth` names (`some-project.eth`) or for
 (`team.some-project.eth`).
 
 When registering the new Guild the name owner appoints an admin for the guild, which can be the name owner itself. They
-must also provide an initial `TagsAuthPolicy` and `FeePolicy` for their specific guild, which combined will govern
-whether an account may claim or revoke any guild tag.
+must also provide an initial `TagsAuthPolicy` and `FeePolicy` for their specific guild, which combined will govern what
+happens when an account attempts to claim or revoke any guild tag.
 
 ### Customizing Fees and Auth
 
-The ENSGuilds contract uses a modular design to allow individual Guilds to set their own fee and auth policies for tags
+The ENSGuilds contract uses a modular design to allow individual Guilds to set their own fees and auth policies for tags
 while sharing the basic plumbing needed to properly integrate with ENS.
 
 Each Guild stores the address of a contract implementing `IFeePolicy` and the address of a contract implementing
 `ITagsAuthPolicy`.
 
-Guilds may build and use their own bespoke `IFeePolicy` and `ITagsAuthPolicy` implementations or can use an existing one
-built to support multiple Guilds (see [Deployed Contract Addresses](#deployed-contract-addresses)).
+Guilds may build and use their own bespoke `IFeePolicy` and `ITagsAuthPolicy` implementations or may use any existing
+ones built to support multiple Guilds simultaneously (see [Deployed Contract Addresses](#deployed-contract-addresses)).
 
 Fee policies are simple:
 
@@ -97,7 +96,7 @@ interface IFeePolicy is IERC165 {
 ```
 
 Implementations check how much the `claimant` must pay to mint the given `tag` for the given guild, returning the info
-on what token type must be paid, how much, and where payment should be routed.
+on what token type must be paid (`address(0)` for ETH), how much, and where payment should be routed.
 
 The simple `FlatFeePolicy` deployed by the ENSGuilds project should work for most cases, as it covers both free and paid
 mints and allows only the Guild admin to set or update their specific Guild's fee amount.
@@ -134,25 +133,29 @@ interface ITagsAuthPolicy is IERC165 {
 ```
 
 The ENSGuilds project provides three `ITagsAuthPolicy` implementations: one that allows any account to claim any
-unclaimed tag, one that checks allowlists, and one that checks for NFT ownership.
+unclaimed tag (`OpenAuthPolicy`), one that checks allowlists (`AllowlistAuthPolicy`), and one that checks for NFT
+ownership (`NFTAuthPolicy`).
 
 Other custom `ITagsAuthPolicy` implementations might, for example, use a commit-reveal scheme to prevent front-running,
 check results of an auction, or verify a custom ZKP.
 
+`ExtraClaimArgs`, `extraTransferArgs`, and the like are provided to allow custom implementations to take additional
+implementation-specific details from the caller. ENSGuilds will blindly forward these arguments through to the Guild's
+`FeePolicy` and `TagsAuthPolicy`; implementations are free to encode information in these bytes as they please.
+
 ### Resolving ENS Address Lookups
 
-When a user claims a tag, a corresponding ENS record is registered resolving their full tag name to the address the user
-provided. Any tool that resolves ENS address records will resolve their tag as expected.
+When a user claims a tag, a corresponding ENS record is registered resolving their full tag name (`bob.some-guild.eth`)
+to the address the user provided. Any tool that resolves ENS address records will resolve their tag as expected,
+provided that the tool supports
+[WildcardResolution](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) (as most do).
 
-ENSGuilds assigns itself ownership of all ENS records it creates. By design, a users cannot edit or delete a Guild's ENS
-records without using the ENSGuilds contract itself.
+By design, a users cannot edit or delete a Guild's ENS records without using the ENSGuilds contract itself.
 
-Reverse ENS records are not managed by ENSGuilds, and must be set by the owner of a tag (see
+Reverse ENS records are not managed by ENSGuilds. They must be set by the owner of a tag (see
 [ENS Reverse Records](#ens-reverse-records)).
 
-Other ENS record types beyond `Address` records are not supported.
-
-Only the `.eth` top-level domain is supported.
+Other ENS record types beyond `Address` records are not supported, and only the `.eth` top-level domain is supported.
 
 ### ENS Under the Hood
 
@@ -161,83 +164,134 @@ set Resolvers for their names, Resolvers answer queries about names, and Records
 can be asked of a name.
 
 In practice there is a single Registry for the `.eth` domain where users register `.eth` names and set the Resolvers for
-their sub-names. There are a few Public Resolvers provided by ENS that most names will use by default. Users use their
-PublicResolver to set the Records for their names, with `address` being the most commonly used record type.
+their name and its sub-names. There are a few deployed versions of `PublicResolver` provided by ENS that most names will
+use by default. Name owners interact with their PublicResolver to set the individual Records for their name and its
+sub-names.
 
-The ENSGuilds contract updates the `.eth` Registry when a tag is claimed and sets itself as the Resolver for the tag's
-full name.
+The ENSGuilds contract updates the `.eth` Registry to designate itself as the Resolver for the Guild's name and uses the
+[wildcard resolution standard](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) to both
+resolve tag names under the Guild's name and to resolve records on the top-level Guild name itself.
+
+As an example, consider a fictional Guild named `some-guild.eth`, owned in the `.eth` Registry by an address
+`alice.eth`.
+
+Prior to registering her name as a new Guild, `alice.eth` must first call
+`ENS.setApprovalForAll(ENSGuilds.address, true)` at the ENS Registry contract, authorizing ENSGuilds to edit all of her
+ENS names (but not to transfer their ownership).
+
+She then calls `ENSGuilds.registerGuild("some-guild.eth", ...)` to launch her new Guild. While serving her request, the
+ENSGuilds contract will update the `.eth` Registry via its own internal call to
+`ENS.setResolver(namehash("some-guild.eth"), GuildsResolver.address)`.
+
+The GuildsResolver contract is then responsible for resolving all records at `some-guild.eth` as well as those of any of
+its subdomains, except in situations where a subdomain was already registered prior to launching her Guild.
+
+The GuildsResolver will answer any address queries for tags claimed by users of her Guild, such as the example tag
+`bob.some-guild.eth`.
+
+If GuildsResolver receives a query that does not correspond to an existing Guild tag, it will proxy the query through to
+the original Resolver that `alice.eth` had configured for her `some-guild.eth` name before its Resolver registration was
+rewritten to point to `GuildsResolver`.
+
+If `alice.eth` had registered, for example, `treasury.some-guild.eth` prior to launching her Guild, any records she set
+for that on that name are preserved by the proxy.
+
+To recap, consider these example ENS record queries:
+
+- `addr("some-guild.eth")`: GuildsResolver will proxy this to the original Resolver of `some-guild.eth`
+- `text("some-guild.eth", "avatar")`: GuildsResolver will proxy this to the original Resolver of `some-guild.eth`
+- `addr("bob.some-guild.eth")`: GuildsResolver will directly answer this query, assuming `bob` is an existing tag
+  claimed by a member of that Guild
+- `text("bob.some-guild.eth", "avatar")`: GuildResolver will proxy this query, as Guild tags don't have text records.
+- `addr("unclaimed.some-guild.eth")`: Assuming the tag `unclaimed` is indeed unclaimed for this Guild, GuildsResolver
+  will proxy the query to the original Resolver of `some-guild.eth` (if that original Resolver implements the
+  [wildcard resolution standard](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution))
+- `text("unclaimed.some-guild.eth", "avatar")`: Proxied to the original Resolver
+- `addr("treasury.some-guild.eth")`: GuildsResolver is not involved in resolving this name. This name was directly
+  registered in the `.eth` Registry and therefore uses one of ENS's PublicResolvers to store the address record for this
+  name.
 
 Note that the ENSGuilds contract does not check the
 [normalization](https://docs.ens.domains/contract-api-reference/name-processing#normalising-names) on names provided in
-contract calls.
+contract calls, especially when a user attempts to claim a tag. Applications should take care to normalize names prior
+to submitting them in contract calls.
 
 ### Moderation and Revocation
 
 ENSGuilds provides two mechanisms for moderating and revoking tag names:
 
 1. A Guild's `TagsAuthPolicy` implementation may impose any arbitrary rules governing when a tag may be claimed
-   (supporting moderation prior to claims) and when tags may be revoked (moderation post-claims)
-1. As an option of last resort, the owner of the Guild's ENS name can call the `.ens` Registry out-of-band to edit or
-   delete any of the Guild's sub-names at any point
+   (moderation prior to claim) and when tags may be revoked (moderation post-claim)
+2. The owner of the Guild's ENS name may interact with the `.eth` Registry out-of-band to manually register the sub-name
+   corresponding to any offending tag. Recall that sub-names registered directly with the `.eth` Registry will always
+   take precedence over wildcard resolver results, and that GuildsResolver uses
+   [wildcard resolution](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) to resolve tag
+   names.
 
 ### ENS Reverse Records
 
-Accounts may set a Guild tag as their "Primary Name" using the ENS app, just as they would for any other name. More
-background on ENS Primary Names [here](https://support.ens.domains/en/articles/7890756-the-primary-name).
+Accounts may set a Guild tag as their "Primary Name" using the ENS app, just as they would for any other name, though
+they will not see their tags in the list of all names they own on the ENS webapp (a consequence of using wildcard
+resolution). More background on ENS Primary Names
+[here](https://support.ens.domains/en/articles/7890756-the-primary-name).
 
-### Protecting Existing Sub-Names
+### De-Registering Guilds
 
-TODO
+When a Guild is de-registered, all tags for the Guild are wiped and the `.eth` Registry is reset to point back to the
+original Resolver for the Guild's name. All tag names claimed under that Guild will no longer resolve to any address.
 
-## Dynamic ENS Resolution
+A de-registered guild may be re-registered again with the same name, in which case it launches with a clean slate of
+unassigned tags.
+
+It is the Guild admin's responsibility to manually reset any state kept by the Guild's `FeePolicy` and `TagsAuthPolicy`
+once a Guild is de-registered, if it is to be re-registered again with those same policies.
+
+### Setting Custom Fallback Resolvers
 
 Some Guilds may find it useful for sub-names to be automatically and dynamically assigned to addresses, without need for
 manually claiming each as a tag. As an example, a Guild centered around a specific NFT project may choose to
-automatically assign a name to each token owner derived from a feature of their token (such as `punk-123.punks.eth`)
+automatically assign a name to each token owner derived from a feature of their token (such as the name
+`punk-123.punks.eth`)
 
-Guilds can register a wildcard resolver for their domain, which may incorporate any arbitrary logic for resolving
+Guilds can register a custom fallback Resolver for their domain, which may incorporate any arbitrary logic for resolving
 sub-names of the Guild. Accounts can choose to set their Primary Name to one of these dynamically assigned names if they
 like.
 
-When using a wildcard resolver, a Guild should be mindful of the potential for name collisions between the wildcard
-resolver and the tags that users have claimed or may later claim. Manually claimed tags will supersede wildcard resolver
-names. The Guild's `TagsAuthPolicy` should be aware of possible name collisions and permit or prevent them.
-
-A wildcard resolver should implement
-[the ENS standard](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) for wildcard
-resolvers (the `IExtendedResolver` interface).
+When setting a custom fallback resolver, a Guild should be mindful of the potential for name collisions between the
+fallback resolver and the tags that users have claimed or may later claim. Manually claimed tags will always supersede
+wildcard resolver names. The Guild's `TagsAuthPolicy` should be aware of possible name collisions and permit or prevent
+them.
 
 The ENS Guilds project provides a wildcard resolver that will resolve names of the form `{token-id}.{guild-name}.eth`
 where `token-id` is the ID of an ERC721 token.
 
-Note that there is a special case when a Guild would like to use wildcard names and set records on the top-level Guild
-name itself. As an example, consider an NFT project which uses an address record at `{guild-name}.eth` to point to the
-Guild's NFT token contract and registers a wildcard resolver to resolve names of the form `{token-id}.{guild-name}.eth`.
-A `PassthroughResolver` is provided by the ENS Guilds project to preserve records that were set at the top level
-`{guild-name}.eth`.
+Note that this is the same mechanism used by the GuildsResolver itself to proxy any non-tag-related queries to the guild
+name's original Resolver. By setting a custom fallback resolver, the Guild admin is simply rewriting the proxy target
+for their particular guild.
 
 ## Risk Surface
 
 The ENSGuilds contract, as a manager of each Guild's name, is limited to CRUD operations on the Guild's top-level name
-and all sub-names. As a manager, it cannot change the owner of the top-level ENS name, nor edit the set of managers.
+and all sub-names. As a manager, it cannot change the owner of the top-level ENS name, nor edit the set of other
+managers.
 
-The ENS name owner is the ultimate authority, and retains the ability to revoke the ENSGuild contract's authorization
-and edit any records it created. Note that a name owner may be exposed to a large cumulative gas expense to clear
-potentially many sub-names.
+The guild name's owner is the ultimate authority, retaining the ability to revoke the ENSGuild contract's authorization
+or reset back to the original resolver for the Guild's name.
 
-The appointed admin account for each Guild may edit the Guild's configuration, deactivate or deregister it, and alter
-the Guild's `FeePolicy` and `TagsAuthPolicy`. Teams may choose to use the same account as ENS name owner and Guild admin
-for simplicity, or separate the name owner from the Guild admin for more granular separation of capabilities.
+The appointed admin account for each Guild may edit the Guild's configuration, deactivate or deregister it, or alter the
+Guild's `FeePolicy` or `TagsAuthPolicy`. Teams may choose to use the Guild's name owner as the Guild's admin for
+simplicity, or separate the name owner from the admin for a more granular separation of capabilities.
 
-There is a nuance in the ENS Registry's delegation systems in that approving a contract as a manager will authorize it
-to make changes to all names owned by the caller. It is recommended to not co-mingle ownership of multiple top-level ENS
-names in the same account, as a measure to limit the scope of risk exposure across multiple names.
+There is a nuance in the ENS Registry's delegation system in that approving a contract as a manager will authorize it to
+make changes to _all_ names owned by the caller. It is therefore recommended to not co-mingle ownership of multiple
+top-level ENS names in the same account.
 
 ## Decentralization and Governance
 
 To achieve community governance of a Guild, it is recommended to use the ENS name owner and the Guild's admin account as
-hooks for existing governance stacks. For example, a Guild may transfer ownership of its ENS name to a multisig or to
-any pre-made governance contract, also designating that address as the Guild's admin, to achieve decentralization.
+hooks for plugging in existing governance stacks. For example, a Guild may transfer ownership of its ENS name to a
+multisig or to any pre-made governance contract, also designating that address as the Guild's admin, to achieve full
+decentralization.
 
 To assist with calculating voting power, the ENSGuilds contract implements the ERC1155 token standard. Each guild is
 assigned its own token ID derived from the Guild's ENS namehash, and each account is given a balance of that token equal
@@ -245,9 +299,15 @@ to the number of tags it owns.
 
 ## ENS Name Wrapper Compatibility
 
-TODO: (Fuses, expiry)
+ENSGuilds supports both wrapped and unwrapped Guild names. In the case of wrapped ENS names, the name owner must call
+`NameWrapper.setApprovalForAll(ENSGuilds.address, true)` prior to launching the Guild, instead of calling
+`setApprovalForAll` on the `ENS` contract.
+
+As ENSGuilds uses wildcard resolution for all Guild tags, it does not interact with NameWrapper's tokens nor its system
+of fuses and expirations.
 
 ## Deployed Contract Addresses
 
 - [ENSGuilds contract](https://app.ens.domains/ensguilds.eth?tab=records)
-- Off-the-shelf Fee and TagAuth policies [here](https://app.ens.domains/policies.ensguilds.eth?tab=subnames)
+- [GuildsResolver](https://app.ens.domains/guilds.resolvers.ensguilds.eth?tab=records)
+- Off-the-shelf [Fee and TagAuth policies](https://app.ens.domains/policies.ensguilds.eth?tab=subnames)
