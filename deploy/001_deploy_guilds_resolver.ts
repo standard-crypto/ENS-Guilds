@@ -14,32 +14,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deterministicDeployment: !hre.network.tags.test,
   };
 
-  // ENSGuilds
-  const ensGuildsDeployment = await deploy("ENSGuilds", {
+  await deploy("GuildsResolver", {
     ...baseDeployArgs,
-    // TODO: don't use a stub here
-    args: ["stubMetadataUri", ensRegistry, ensNameWrapper],
-  });
-
-  // NFTTagsAuthPolicy
-  await deploy("NFTTagsAuthPolicy", {
-    ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
-  });
-
-  // AllowlistTagsAuthPolicy
-  await deploy("AllowlistTagsAuthPolicy", {
-    ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
-  });
-
-  // FlatFeePolicy
-  await deploy("FlatFeePolicy", {
-    ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
+    args: [ensRegistry, ensNameWrapper],
   });
 
   return true;
 };
-func.id = "001_deploy_ens_guilds";
+func.id = "001_deploy_guilds_resolver";
 export default func;

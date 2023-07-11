@@ -2,13 +2,6 @@
 pragma solidity ^0.8.4;
 
 interface IENSGuildsHumanized {
-    function registerGuild(
-        string calldata ensName,
-        address guildAdmin,
-        address feePolicy,
-        address tagsAuthPolicy
-    ) external;
-
     function deregisterGuild(string calldata guildEnsName) external;
 
     function claimGuildTag(

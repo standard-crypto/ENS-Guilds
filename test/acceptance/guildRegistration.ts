@@ -26,7 +26,7 @@ export function testGuildRegistration(): void {
 function _testSuite(): void {
   it("A domain owner can register their domain for minting", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     // Set ENSGuilds contract as an ENS operator
     await this.approveGuildsAsEnsOperator();
@@ -35,7 +35,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
     });
   });
 
@@ -63,7 +63,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(guildHash, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(guildName, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
 
       // Mint a tag and check that it resolves correctly
       const tag = "test-tag";
@@ -75,7 +75,7 @@ function _testSuite(): void {
 
   it("A domain owner cannot register an already registered domain", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     // Set ENSGuilds contract as an ENS operator
     await this.approveGuildsAsEnsOperator();
@@ -84,19 +84,19 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
 
       // Register the guild again
       const tx = ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       await this.expectRevertedWithCustomError(tx, "AlreadyRegistered");
     });
   });
 
   it("A guild cannot be registered by a non-owner of that domain", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNode, admin } = this.guildInfo;
+    const { domain, admin } = this.guildInfo;
     const { unauthorizedThirdParty } = this.addresses;
 
     await this.approveGuildsAsEnsOperator();
@@ -104,7 +104,7 @@ function _testSuite(): void {
     await asAccount(unauthorizedThirdParty, async (signer) => {
       const tx = ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
     });
   });
@@ -114,25 +114,25 @@ function _testSuite(): void {
     const { admin } = this.guildInfo;
     const { unauthorizedThirdParty } = this.addresses;
 
-    const ensNode = namehash("nosuchensnameexistsxxxxxxxxx.eth"); // cspell: disable-line
+    const domain = "nosuchensnameexistsxxxxxxxxx.eth"; // cspell: disable-line
 
     await asAccount(unauthorizedThirdParty, async (signer) => {
       const tx = ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       await this.expectRevertedWithCustomError(tx, "NotDomainOwner");
     });
   });
 
   it("A guild cannot be registered until the domain owner has set ENSGuilds as its operator", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     await asAccount(ensNameOwner, async (signer) => {
       // Register guild
       const tx = ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       await this.expectRevertedWithCustomError(tx, "ENSGuildsIsNotRegisteredOperator");
     });
   });

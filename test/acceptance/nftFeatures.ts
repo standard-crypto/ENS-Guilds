@@ -7,7 +7,7 @@ export function testNFTFeatures(): void {
   describe("NFT Features", function () {
     beforeEach("Setup guild", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await this.approveGuildsAsEnsOperator();
 
@@ -15,7 +15,7 @@ export function testNFTFeatures(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 

@@ -64,21 +64,10 @@ export function testENSGuildsHumanized(): void {
       });
     });
 
-    it("supports humanized registerGuild()", async function () {
-      // Register guild
-      await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsHumanized.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
-      });
-
-      // Check that correct guild was registered
-      const guildAdmin = await ensGuildsOriginal.guildAdmin(guildHash);
-      expect(guildAdmin).to.eq(ensNameOwner);
-    });
-
     it("supports humanized deregisterGuild()", async function () {
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, openAuthPolicy);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
       });
 
       // De-register guild
@@ -94,7 +83,7 @@ export function testENSGuildsHumanized(): void {
     it("supports humanized claimGuildTag()", async function () {
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, openAuthPolicy);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
       });
 
       // Mint a tag
@@ -117,7 +106,7 @@ export function testENSGuildsHumanized(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, authPolicyOld);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, authPolicyOld);
       });
 
       // Change auth policy
@@ -135,7 +124,7 @@ export function testENSGuildsHumanized(): void {
     it("supports humanized setGuildActive()", async function () {
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, openAuthPolicy);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
       });
 
       // Set guild inactive
@@ -151,7 +140,7 @@ export function testENSGuildsHumanized(): void {
     it("supports humanized guildAdmin()", async function () {
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, openAuthPolicy);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
       });
 
       // lookup guild admin
@@ -164,7 +153,7 @@ export function testENSGuildsHumanized(): void {
 
       // Register guild
       await asAccount(ensNameOwner, async (signer) => {
-        await ensGuildsOriginal.connect(signer).registerGuild(guildHash, ensNameOwner, flatFeePolicy, openAuthPolicy);
+        await ensGuildsOriginal.connect(signer).registerGuild(ensName, ensNameOwner, flatFeePolicy, openAuthPolicy);
       });
 
       // transfer guild admin role

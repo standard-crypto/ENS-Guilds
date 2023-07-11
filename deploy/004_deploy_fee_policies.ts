@@ -16,25 +16,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const ensGuildsDeployment = await deployments.get("ENSGuilds");
 
-  // NFTTagsAuthPolicy
-  await deploy("NFTTagsAuthPolicy", {
+  // FlatFeePolicy
+  await deploy("FlatFeePolicy", {
     ...baseDeployArgs,
     args: [ensGuildsDeployment.address],
-  });
-
-  // AllowlistTagsAuthPolicy
-  await deploy("AllowlistTagsAuthPolicy", {
-    ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
-  });
-
-  // OpenTagsAuthPolicy
-  await deploy("OpenTagsAuthPolicy", {
-    ...baseDeployArgs,
-    args: [],
   });
 
   return true;
 };
-func.id = "002_deploy_auth_policies";
+func.id = "004_deploy_fee_policies";
 export default func;

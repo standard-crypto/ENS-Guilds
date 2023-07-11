@@ -11,25 +11,6 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     // Humanized versions
 
     /**
-     * @notice Registers a new guild from an existing ENS domain.
-     * Caller must be the ENS node's owner and ENSGuilds must have been designated an "operator" for the caller.
-     * @param ensName The guild's full domain name (e.g. 'my-guild.eth')
-     * @param admin The address that will administrate this guild
-     * @param feePolicy The address of an implementation of FeePolicy to use for minting new tags within this guild
-     * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for minting new tags
-     * within this guild
-     */
-    function registerGuild(
-        string calldata ensName,
-        address admin,
-        address feePolicy,
-        address tagsAuthPolicy
-    ) external override {
-        bytes32 ensNode = bytes(ensName).namehash();
-        registerGuild(ensNode, admin, feePolicy, tagsAuthPolicy);
-    }
-
-    /**
      * @notice De-registers a registered guild.
      * Designates guild as inactive and marks all tags previously minted for that guild as eligible for revocation.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
@@ -158,8 +139,6 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     }
 
     // Original versions
-
-    function registerGuild(bytes32, address, address, address) public virtual;
 
     function deregisterGuild(bytes32) public virtual;
 

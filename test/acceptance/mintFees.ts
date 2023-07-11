@@ -18,19 +18,19 @@ export function testMintFees(): void {
 
     it("Domain owner can set the fee policy when registering a new guild", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
     it("Domain owner can specify a beneficial address to receive fee payments", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -40,7 +40,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -60,7 +60,7 @@ export function testMintFees(): void {
 
     it("Domain owner can specify fees as ETH denominated", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -70,7 +70,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -90,7 +90,7 @@ export function testMintFees(): void {
 
     it("Domain owner can specify fees as ERC20 denominated", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const fee = parseEther("1");
       const feeBeneficiary = ethers.Wallet.createRandom();
@@ -107,7 +107,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -131,7 +131,7 @@ export function testMintFees(): void {
 
     it("Domain owner can make minting free", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -141,7 +141,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -157,7 +157,7 @@ export function testMintFees(): void {
 
     it("Minter can get a fee quote before they mint", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -167,7 +167,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -190,7 +190,7 @@ export function testMintFees(): void {
 
     it("Fees denominated in ETH are collected correctly", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -200,7 +200,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -220,7 +220,7 @@ export function testMintFees(): void {
 
     it("Fees denominated in ERC20 are collected correctly", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const fee = parseEther("1");
       const feeBeneficiary = ethers.Wallet.createRandom();
@@ -237,7 +237,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -261,7 +261,7 @@ export function testMintFees(): void {
 
     it("Free mints behave as expected", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
       const { minter } = this.addresses;
       const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -271,7 +271,7 @@ export function testMintFees(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
 
       // setup fee policy
@@ -287,25 +287,25 @@ export function testMintFees(): void {
 
     it("Domain owner can't register nonexistent or invalid contract as the fee policy for a guild", async function () {
       const { ensGuilds, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await asAccount(ensNameOwner, async (signer) => {
         // Attempt to set zero address as the fee policy should fail
-        let tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ZeroAddress, openAuthPolicy.getAddress());
+        let tx = ensGuilds.connect(signer).registerGuild(domain, admin, ZeroAddress, openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an existing contract that doesn't implement FeePolicy
         tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, openAuthPolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, openAuthPolicy.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
         tx = ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, ensGuilds.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, ensGuilds.getAddress(), openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
 
         // Attempt to use an EOA as the FeePolicy
-        tx = ensGuilds.connect(signer).registerGuild(ensNode, admin, ensNameOwner, openAuthPolicy.getAddress());
+        tx = ensGuilds.connect(signer).registerGuild(domain, admin, ensNameOwner, openAuthPolicy.getAddress());
         await this.expectRevertedWithCustomError(tx, "InvalidPolicy");
       });
     });
@@ -314,7 +314,7 @@ export function testMintFees(): void {
       describe("for ETH denominated fees", function () {
         it("due to too little ETH attached to claim TX", async function () {
           const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-          const { ensNameOwner, ensNode, admin } = this.guildInfo;
+          const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
           const { minter } = this.addresses;
           const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -324,7 +324,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+              .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -341,7 +341,7 @@ export function testMintFees(): void {
 
         it("due to too much ETH attached to claim TX", async function () {
           const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-          const { ensNameOwner, ensNode, admin } = this.guildInfo;
+          const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
           const { minter } = this.addresses;
           const feeBeneficiary = ethers.Wallet.createRandom();
 
@@ -351,7 +351,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+              .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -379,7 +379,7 @@ export function testMintFees(): void {
           });
 
           const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-          const { ensNameOwner, ensNode, admin } = this.guildInfo;
+          const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
           const { minter } = this.addresses;
 
           const fee = parseEther("1");
@@ -388,7 +388,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+              .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy with a non-payable contract as the beneficiary
@@ -416,7 +416,7 @@ export function testMintFees(): void {
       describe("for ERC20 denominated fees", function () {
         it("due to insufficient ERC20 approval", async function () {
           const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-          const { ensNameOwner, ensNode, admin } = this.guildInfo;
+          const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
           const { minter } = this.addresses;
           const fee = parseEther("1");
           const feeBeneficiary = ethers.Wallet.createRandom();
@@ -433,7 +433,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+              .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy
@@ -454,7 +454,7 @@ export function testMintFees(): void {
 
         it("due to insufficient balance", async function () {
           const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-          const { ensNameOwner, ensNode, admin } = this.guildInfo;
+          const { ensNameOwner, ensNode, domain, admin } = this.guildInfo;
           const { minter } = this.addresses;
           const fee = parseEther("1");
           const feeBeneficiary = ethers.Wallet.createRandom();
@@ -470,7 +470,7 @@ export function testMintFees(): void {
             // Register guild
             await ensGuilds
               .connect(signer)
-              .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+              .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
           });
 
           // setup fee policy

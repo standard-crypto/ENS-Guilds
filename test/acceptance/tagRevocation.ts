@@ -31,7 +31,7 @@ function _testSuite(): void {
 
   beforeEach("Setup guild", async function () {
     const { ensRegistry, ensGuilds, flatFeePolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
     const revocationTestHelperDeployment = await deploy("RevocationTestHelper", {
@@ -49,7 +49,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), revocationTestHelperDeployment.address);
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), revocationTestHelperDeployment.address);
     });
   });
 

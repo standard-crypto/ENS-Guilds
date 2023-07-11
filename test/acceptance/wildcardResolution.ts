@@ -27,7 +27,7 @@ export function testWildcardResolution(): void {
 function _testSuite(): void {
   beforeEach("Setup guild", async function () {
     const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-    const { ensNameOwner, ensNode, admin } = this.guildInfo;
+    const { ensNameOwner, domain, admin } = this.guildInfo;
 
     await this.approveGuildsAsEnsOperator();
 
@@ -35,7 +35,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
     });
   });
 
@@ -62,7 +62,7 @@ function _testSuite(): void {
 
     // Guild admin sets the wildcard resolver for their guild
     await asAccount(admin, async (signer) => {
-      await ensGuilds.connect(signer).setWildcardResolver(ensNode, erc721WildcardResolver.getAddress());
+      await ensGuilds.connect(signer).setFallbackResolver(ensNode, erc721WildcardResolver.getAddress());
     });
 
     // Mint a token to someone
@@ -84,7 +84,7 @@ function _testSuite(): void {
 
     // Guild admin sets the wildcard resolver for their guild
     await asAccount(admin, async (signer) => {
-      await ensGuilds.connect(signer).setWildcardResolver(ensNode, erc721WildcardResolver.getAddress());
+      await ensGuilds.connect(signer).setFallbackResolver(ensNode, erc721WildcardResolver.getAddress());
     });
 
     // mint a tag

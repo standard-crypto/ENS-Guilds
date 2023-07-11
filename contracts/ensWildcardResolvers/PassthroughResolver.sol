@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/resolvers/ResolverBase.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./IPublicResolver.sol";
 
 /**
@@ -17,8 +18,10 @@ import "./IPublicResolver.sol";
  * from approvals set with the ENS Registry. ENS's public Registry and its public
  * Resolvers each have their own, independent concepts of approved managers.
  */
-abstract contract PassthroughResolver is ResolverBase, IPublicResolver {
-    mapping(bytes32 => IPublicResolver) internal passthroughTargets;
+abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
+    using ERC165Checker for address;
+
+    mapping(bytes32 => address) private _passthroughTargets;
 
     function isAuthorised(bytes32) internal view virtual override returns (bool);
 
@@ -37,41 +40,64 @@ abstract contract PassthroughResolver is ResolverBase, IPublicResolver {
             super.supportsInterface(interfaceID);
     }
 
+    function getPassthroughTarget(bytes32 node) public view virtual returns (address resolver) {
+        return _passthroughTargets[node];
+    }
+
+    function _setPassthroughTarget(bytes32 node, address target) internal {
+        _passthroughTargets[node] = target;
+    }
+
     function setABI(bytes32 node, uint256 contentType, bytes calldata data) external virtual authorised(node) {
-        passthroughTargets[node].setABI(node, contentType, data);
+        IPublicResolver(getPassthroughTarget(node)).setABI(node, contentType, data);
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function ABI(bytes32 node, uint256 contentTypes) external view virtual override returns (uint256, bytes memory) {
-        return passthroughTargets[node].ABI(node, contentTypes);
+    function ABI(
+        bytes32 node,
+        uint256 contentTypes
+    ) external view virtual override returns (uint256 a, bytes memory b) {
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IABIResolver).interfaceId)) {
+            return IABIResolver(target).ABI(node, contentTypes);
+        }
     }
 
     function setAddr(bytes32 node, address a) external virtual authorised(node) {
-        passthroughTargets[node].setAddr(node, a);
+        IPublicResolver(getPassthroughTarget(node)).setAddr(node, a);
     }
 
     function addr(bytes32 node) public view virtual override returns (address payable) {
-        return passthroughTargets[node].addr(node);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IAddrResolver).interfaceId)) {
+            return IAddrResolver(target).addr(node);
+        }
     }
 
     function setAddr(bytes32 node, uint256 coinType, bytes memory a) public virtual authorised(node) {
-        passthroughTargets[node].setAddr(node, coinType, a);
+        IPublicResolver(getPassthroughTarget(node)).setAddr(node, coinType, a);
     }
 
     function addr(bytes32 node, uint256 coinType) public view virtual override returns (bytes memory) {
-        return passthroughTargets[node].addr(node, coinType);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IAddressResolver).interfaceId)) {
+            return IAddressResolver(target).addr(node, coinType);
+        }
     }
 
     function setContenthash(bytes32 node, bytes calldata hash) external virtual authorised(node) {
-        passthroughTargets[node].setContenthash(node, hash);
+        IPublicResolver(getPassthroughTarget(node)).setContenthash(node, hash);
     }
 
     function contenthash(bytes32 node) external view virtual override returns (bytes memory) {
-        return passthroughTargets[node].contenthash(node);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IContentHashResolver).interfaceId)) {
+            return IContentHashResolver(target).contenthash(node);
+        }
     }
 
     function setDNSRecords(bytes32 node, bytes calldata data) external virtual authorised(node) {
-        passthroughTargets[node].setDNSRecords(node, data);
+        IPublicResolver(getPassthroughTarget(node)).setDNSRecords(node, data);
     }
 
     function dnsRecord(
@@ -79,50 +105,64 @@ abstract contract PassthroughResolver is ResolverBase, IPublicResolver {
         bytes32 name,
         uint16 resource
     ) public view virtual override returns (bytes memory) {
-        return passthroughTargets[node].dnsRecord(node, name, resource);
-    }
-
-    function hasDNSRecords(bytes32 node, bytes32 name) public view virtual returns (bool) {
-        return passthroughTargets[node].hasDNSRecords(node, name);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IDNSRecordResolver).interfaceId)) {
+            return IDNSRecordResolver(target).dnsRecord(node, name, resource);
+        }
     }
 
     function setZonehash(bytes32 node, bytes calldata hash) external virtual authorised(node) {
-        passthroughTargets[node].setZonehash(node, hash);
+        IPublicResolver(getPassthroughTarget(node)).setZonehash(node, hash);
     }
 
     function zonehash(bytes32 node) external view virtual override returns (bytes memory) {
-        return passthroughTargets[node].zonehash(node);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IDNSZoneResolver).interfaceId)) {
+            return IDNSZoneResolver(target).zonehash(node);
+        }
     }
 
     function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external virtual authorised(node) {
-        passthroughTargets[node].setInterface(node, interfaceID, implementer);
+        IPublicResolver(getPassthroughTarget(node)).setInterface(node, interfaceID, implementer);
     }
 
     function interfaceImplementer(bytes32 node, bytes4 interfaceID) external view virtual override returns (address) {
-        return passthroughTargets[node].interfaceImplementer(node, interfaceID);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IInterfaceResolver).interfaceId)) {
+            return IInterfaceResolver(target).interfaceImplementer(node, interfaceID);
+        }
     }
 
     function setName(bytes32 node, string calldata newName) external virtual authorised(node) {
-        passthroughTargets[node].setName(node, newName);
+        IPublicResolver(getPassthroughTarget(node)).setName(node, newName);
     }
 
     function name(bytes32 node) external view virtual override returns (string memory) {
-        return passthroughTargets[node].name(node);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(INameResolver).interfaceId)) {
+            return INameResolver(target).name(node);
+        }
     }
 
     function setPubkey(bytes32 node, bytes32 x, bytes32 y) external virtual authorised(node) {
-        passthroughTargets[node].setPubkey(node, x, y);
+        IPublicResolver(getPassthroughTarget(node)).setPubkey(node, x, y);
     }
 
     function pubkey(bytes32 node) external view virtual override returns (bytes32 x, bytes32 y) {
-        return passthroughTargets[node].pubkey(node);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(IPubkeyResolver).interfaceId)) {
+            return IPubkeyResolver(target).pubkey(node);
+        }
     }
 
     function setText(bytes32 node, string calldata key, string calldata value) external virtual authorised(node) {
-        passthroughTargets[node].setText(node, key, value);
+        IPublicResolver(getPassthroughTarget(node)).setText(node, key, value);
     }
 
     function text(bytes32 node, string calldata key) public view virtual override returns (string memory) {
-        return passthroughTargets[node].text(node, key);
+        address target = getPassthroughTarget(node);
+        if (target.supportsInterface(type(ITextResolver).interfaceId)) {
+            return ITextResolver(target).text(node, key);
+        }
     }
 }

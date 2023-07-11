@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 
-interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
+interface IENSGuilds is IERC1155MetadataURI {
     /** Events */
     event Registered(bytes32 indexed guildEnsNode);
     event Deregistered(bytes32 indexed guildEnsNode);
@@ -24,14 +22,14 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
     /**
      * @notice Registers a new guild from an existing ENS domain.
      * Caller must be the ENS node's owner and ENSGuilds must have been designated an "operator" for the caller.
-     * @param guildEnsNode The ENS namehash of the guild's domain
+     * @param ensName The guild's full ENS name (e.g. 'my-guild.eth')
      * @param guildAdmin The address that will administrate this guild
      * @param feePolicy The address of an implementation of FeePolicy to use for minting new tags within this guild
      * @param tagsAuthPolicy The address of an implementation of TagsAuthPolicy to use for minting new tags
      * within this guild
      */
     function registerGuild(
-        bytes32 guildEnsNode,
+        string calldata ensName,
         address guildAdmin,
         address feePolicy,
         address tagsAuthPolicy
@@ -167,8 +165,10 @@ interface IENSGuilds is IAddrResolver, IAddressResolver, IERC1155MetadataURI {
 
     /**
      * @notice Registers a resolver for the guild's root ENS name that will
-     * dynamically resolve the guild's child names
+     * answer queries about the parent name itself, or any child names that are
+     * not Guild tags
      * @param guildEnsNode The ENS namehash of the guild's domain
+     * @param fallbackResolver The fallback resolver
      */
-    function setWildcardResolver(bytes32 guildEnsNode, IExtendedResolver wildcardResolver) external;
+    function setFallbackResolver(bytes32 guildEnsNode, address fallbackResolver) external;
 }

@@ -34,8 +34,6 @@ interface IPublicResolver is
 
     function setDNSRecords(bytes32 node, bytes calldata data) external;
 
-    function hasDNSRecords(bytes32 node, bytes32 name) external view returns (bool);
-
     function setZonehash(bytes32 node, bytes calldata hash) external;
 
     function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external;
