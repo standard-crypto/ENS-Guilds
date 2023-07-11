@@ -6,7 +6,7 @@ export function testAdminControls(): void {
   describe("Guild Admin Controls", function () {
     beforeEach("Set ENSGuilds contract as an ENS manager for the domain", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
-      const { ensNameOwner, ensNode, admin } = this.guildInfo;
+      const { ensNameOwner, domain, admin } = this.guildInfo;
 
       await this.approveGuildsAsEnsOperator();
 
@@ -14,7 +14,7 @@ export function testAdminControls(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(ensNode, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
       });
     });
 
