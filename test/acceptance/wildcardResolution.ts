@@ -97,5 +97,21 @@ function _testSuite(): void {
     expect(registeredAddress).to.eq(minter);
   });
 
-  it("non-guild-owner cannot set a wildcard resolver");
+  it("non-guild-admin cannot set a wildcard resolver", async function () {
+    const { ensGuilds, erc721WildcardResolver } = this.deployedContracts;
+    const { ensNameOwner, ensNode } = this.guildInfo;
+    const { unauthorizedThirdParty } = this.addresses;
+
+    // Third party setting the wildcard resolver should fail
+    await asAccount(unauthorizedThirdParty, async (signer) => {
+      const tx = ensGuilds.connect(signer).setFallbackResolver(ensNode, erc721WildcardResolver.getAddress());
+      await this.expectRevertedWithCustomError(tx, "GuildAdminOnly");
+    });
+
+    // Owner setting the wildcard resolver should fail
+    await asAccount(ensNameOwner, async (signer) => {
+      const tx = ensGuilds.connect(signer).setFallbackResolver(ensNode, erc721WildcardResolver.getAddress());
+      await this.expectRevertedWithCustomError(tx, "GuildAdminOnly");
+    });
+  });
 }
