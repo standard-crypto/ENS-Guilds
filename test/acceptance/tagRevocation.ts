@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ZeroAddress, namehash } from "ethers";
 import { deployments, getNamedAccounts } from "hardhat";
 
-import { type RevocationTestHelper, RevocationTestHelper__factory } from "../../types";
+import { type TagTestHelper, TagTestHelper__factory } from "../../types";
 import { ensLabelHash, resolveAddr } from "../../utils";
 import { asAccount } from "../utils";
 import { findTransferSingleEvent } from "../utils/erc1155";
@@ -27,21 +27,18 @@ export function testTagRevocation(): void {
 }
 
 function _testSuite(): void {
-  let revocationTestHelper: RevocationTestHelper;
+  let tagTestHelper: TagTestHelper;
 
   beforeEach("Setup guild", async function () {
     const { ensRegistry, ensGuilds, flatFeePolicy } = this.deployedContracts;
     const { ensNameOwner, domain, admin } = this.guildInfo;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    const revocationTestHelperDeployment = await deploy("RevocationTestHelper", {
+    const tagTestHelperDeployment = await deploy("TagTestHelper", {
       from: deployer,
       autoMine: true,
     });
-    revocationTestHelper = RevocationTestHelper__factory.connect(
-      revocationTestHelperDeployment.address,
-      ensRegistry.runner,
-    );
+    tagTestHelper = TagTestHelper__factory.connect(tagTestHelperDeployment.address, ensRegistry.runner);
 
     await this.approveGuildsAsEnsOperator();
 
@@ -49,7 +46,7 @@ function _testSuite(): void {
       // Register guild
       await ensGuilds
         .connect(signer)
-        .registerGuild(domain, admin, flatFeePolicy.getAddress(), revocationTestHelperDeployment.address);
+        .registerGuild(domain, admin, flatFeePolicy.getAddress(), tagTestHelperDeployment.address);
     });
   });
 
@@ -140,7 +137,7 @@ function _testSuite(): void {
 
     // configure the stub Auth Policy to have the next mint trigger a revocation of the mint prior
     await asAccount(minter1, async (signer) => {
-      await revocationTestHelper.connect(signer).stub_onTagClaimedReturnVal(firstTagToMint);
+      await tagTestHelper.connect(signer).stub_onTagClaimedReturnVal(firstTagToMint);
     });
 
     // mint a new tag
@@ -167,14 +164,14 @@ function _testSuite(): void {
       await ensGuilds.connect(signer).claimGuildTag(ensNode, tagToMint, minter, "0x");
 
       // stub: canRevoke == false
-      await revocationTestHelper.connect(signer).stub_tagCanBeRevokedReturnVal(false);
+      await tagTestHelper.connect(signer).stub_tagCanBeRevokedReturnVal(false);
 
       // attempt to revoke should fail
       const tx = ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, minter);
       await this.expectRevertedWithCustomError(tx, "RevokeUnauthorized");
 
       // stub: canRevoke == true
-      await revocationTestHelper.connect(signer).stub_tagCanBeRevokedReturnVal(true);
+      await tagTestHelper.connect(signer).stub_tagCanBeRevokedReturnVal(true);
 
       // attempt to revoke should succeed
       await ensGuilds.connect(signer).revokeGuildTag(ensNode, tagToMint, minter);
