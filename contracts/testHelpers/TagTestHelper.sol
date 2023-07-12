@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
 
-contract RevocationTestHelper is ITagsAuthPolicy, ERC165 {
+contract TagTestHelper is ITagsAuthPolicy, ERC165 {
     string private _onTagClaimedRetVal;
     bool private _tagCanBeRevokedRetVal = true;
 
