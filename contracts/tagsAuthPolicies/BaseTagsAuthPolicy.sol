@@ -25,7 +25,6 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
     }
 
     modifier onlyEnsGuildsContract() {
-        // caller must be guild admin
         // solhint-disable-next-line reason-string
         require(_msgSender() == address(ensGuilds));
         _;

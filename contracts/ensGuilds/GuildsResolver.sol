@@ -19,7 +19,6 @@ contract GuildsResolver is WildcardResolverBase {
     mapping(bytes32 => uint256) private _guildRecordVersions;
 
     modifier onlyEnsGuildsContract() {
-        // caller must be guild admin
         // solhint-disable-next-line reason-string
         require(_msgSender() == address(ensGuilds));
         _;
