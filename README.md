@@ -22,10 +22,10 @@ their membership within that community.
 
 ## How It Works
 
-Guild tags are the way users can claim sub-names under a Guild's top-level ENS name.
+Users may claim sub-names under a Guild's top-level ENS name as "tags" within that Guild.
 
-As an example, an account participating in a Guild named `punks.eth` might claim the tag `alice` for their address,
-granting them the ENS name `alice.punks.eth`.
+As an example, an account participating in a Guild named `some-project.eth` might claim the tag `alice` for their
+address, granting them the ENS name `alice.some-project.eth`.
 
 ### The Basic Flow
 
@@ -49,7 +49,7 @@ function claimGuildTag(
 ```
 
 The `recipient` will become the owner of that tag and their address will be registered in ENS under the full name
-`{tag}.{guild-name}.eth`
+`{tag}.{guildEnsName}`
 
 `ExtraClaimArgs` is a catch-all for any additional info needed to check authorization for that specific guild (see
 [Customizing Fees and Auth](#customizing-fees-and-auth)).
@@ -66,9 +66,9 @@ changes after guild registration, the new owner must re-approve ENSGuilds as a m
 A Guild may be registered for top-level `.eth` names (`some-project.eth`) or for sub-names at any depth
 (`team.some-project.eth`).
 
-When registering the new Guild the name owner appoints an admin for the guild, which can be the name owner itself. They
-must also provide an initial `TagsAuthPolicy` and `FeePolicy` for their specific guild, which combined will govern what
-happens when an account attempts to claim or revoke any guild tag.
+When registering the new Guild the name owner appoints an admin for the guild, which can be the same address as the name
+owner itself. They must also provide an initial `TagsAuthPolicy` and `FeePolicy` for their specific guild, which
+combined will govern what happens when an account attempts to claim or revoke any guild tag.
 
 ### Customizing Fees and Auth
 
@@ -132,14 +132,14 @@ interface ITagsAuthPolicy is IERC165 {
 
 ```
 
-The ENSGuilds project provides three `ITagsAuthPolicy` implementations: one that allows any account to claim any
-unclaimed tag (`OpenAuthPolicy`), one that checks allowlists (`AllowlistAuthPolicy`), and one that checks for NFT
+The ENSGuilds project provides three `ITagsAuthPolicy` implementations: one allowing any account to claim any unclaimed
+tag (`OpenAuthPolicy`), one using allowlists controlled by each Guild's admin (`AllowlistAuthPolicy`), and one using NFT
 ownership (`NFTAuthPolicy`).
 
 Other custom `ITagsAuthPolicy` implementations might, for example, use a commit-reveal scheme to prevent front-running,
 check results of an auction, or verify a custom ZKP.
 
-`ExtraClaimArgs`, `extraTransferArgs`, and the like are provided to allow custom implementations to take additional
+`ExtraClaimArgs`, `extraTransferArgs`, and the like are provided to allow custom implementations to receive additional
 implementation-specific details from the caller. ENSGuilds will blindly forward these arguments through to the Guild's
 `FeePolicy` and `TagsAuthPolicy`; implementations are free to encode information in these bytes as they please.
 
@@ -147,7 +147,7 @@ implementation-specific details from the caller. ENSGuilds will blindly forward 
 
 When a user claims a tag, a corresponding ENS record is registered resolving their full tag name (`bob.some-guild.eth`)
 to the address the user provided. Any tool that resolves ENS address records will resolve their tag as expected,
-provided that the tool supports
+provided the tool supports
 [WildcardResolution](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) (as most do).
 
 By design, a users cannot edit or delete a Guild's ENS records without using the ENSGuilds contract itself.
@@ -159,9 +159,9 @@ Other ENS record types beyond `Address` records are not supported, and only the 
 
 ### ENS Under the Hood
 
-The ENS stack is composed of Registries, Resolvers, and Records. Registries govern ownership of names an allows users to
-set Resolvers for their names, Resolvers answer queries about names, and Records describe the types of questions that
-can be asked of a name.
+Background: The ENS stack is composed of Registries, Resolvers, and Records. Registries govern ownership of names an
+allows users to set Resolvers for their names, Resolvers answer queries about names, and Records describe the types of
+questions that can be asked of a name.
 
 In practice there is a single Registry for the `.eth` domain where users register `.eth` names and set the Resolvers for
 their name and its sub-names. There are a few deployed versions of `PublicResolver` provided by ENS that most names will
