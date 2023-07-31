@@ -8,23 +8,21 @@ import { type NounsToken, NounsToken__factory } from "../../types/ethers-contrac
 import { type NounsAuctionHouse } from "../../types/ethers-contracts/NounsAuctionHouse";
 import { NounsAuctionHouse__factory } from "../../types/ethers-contracts/factories/NounsAuctionHouse__factory";
 import { ensLabelHash, resolveAddr, resolveText } from "../../utils";
-import { asAccount, mineBlockAtTimestamp } from "../utils";
+import { asAccount, fastForward } from "../utils";
 
 export function testNounsIntegration(): void {
   let nounsDomain: string;
   let nounsHash: BytesLike;
   let nounsDomainOwner: string;
   let ens: ENS;
-  let existingTagNode: BytesLike;
   let nounsAuction: NounsAuctionHouse;
   let nounsToken: NounsToken;
 
   describe("Nouns Integration", function () {
-    beforeEach("Set ENSGuilds contract as an ENS manager for the domain", async function () {
+    beforeEach("Configure ENS Guild for Nouns domain", async function () {
       const { nounsAuctionContract, nounsTokenContract } = await getNamedAccounts();
-      const { ensGuilds, erc721WildcardResolver, flatFeePolicy, openAuthPolicy, ensRegistry } = this.deployedContracts;
+      const { ensGuilds, erc721WildcardResolver, flatFeePolicy, nftAuthPolicy, ensRegistry } = this.deployedContracts;
       const { admin } = this.guildInfo;
-      const { ensDefaultResolver: ensDefaultResolverAddr } = await getNamedAccounts();
 
       // Set up nouns domain
       nounsDomain = "nouns.eth";
@@ -32,17 +30,6 @@ export function testNounsIntegration(): void {
       ens = await ethers.getContractAt("ENS", ensRegistry);
       nounsDomainOwner = await ens.owner(namehash(nounsDomain));
       const originalResolver = await ensRegistry.resolver(nounsHash);
-
-      // Set up a subdomain
-      const existingTag = "existing";
-      const existingTagHash = ensLabelHash(existingTag);
-      existingTagNode = namehash(`${existingTag}.${nounsDomain}`);
-
-      await asAccount(nounsDomainOwner, async (signer) => {
-        await ensRegistry
-          .connect(signer)
-          .setSubnodeRecord(nounsHash, existingTagHash, nounsDomainOwner, ensDefaultResolverAddr, 0);
-      });
 
       // Connect to Nouns Token contract and Nouns Auction House contract
       nounsToken = NounsToken__factory.connect(nounsTokenContract, ens.runner);
@@ -55,12 +42,11 @@ export function testNounsIntegration(): void {
       });
 
       // 2. Name owner registers nouns.eth as a new guild
-      // const nounsDomain = "nouns.eth";
       await asAccount(nounsDomainOwner, async (signer) => {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(nounsDomain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
+          .registerGuild(nounsDomain, admin, flatFeePolicy.getAddress(), nftAuthPolicy.getAddress());
       });
 
       // 3. Name owner configures NFTWildcardResolver to resolve nouns.eth names using Nouns token contract
@@ -87,7 +73,7 @@ export function testNounsIntegration(): void {
         expect(resolvedAddr).to.eq(nounOwner);
       });
       it("Automatically follow transfers of Noun ownership", async function () {
-        const [minter] = await getUnnamedAccounts();
+        const [nounTransferRecipient] = await getUnnamedAccounts();
         const { ensRegistry } = this.deployedContracts;
         const existingNounId = 0;
         const nounOwner = await nounsToken.ownerOf(existingNounId);
@@ -95,12 +81,12 @@ export function testNounsIntegration(): void {
 
         // Transfer the Noun to a new account
         await asAccount(nounOwner, async (signer) => {
-          await nounsToken.connect(signer).transferFrom(nounOwner, minter, existingNounId);
+          await nounsToken.connect(signer).transferFrom(nounOwner, nounTransferRecipient, existingNounId);
         });
 
         // Check that 0.nouns.eth resolves to the account it was transferred to
         const resolvedAddr = await resolveAddr(ensRegistry, `${existingNounId}.${nounsDomain}`);
-        expect(resolvedAddr).to.eq(minter);
+        expect(resolvedAddr).to.eq(nounTransferRecipient);
       });
       it("Are automatically assigned on auctions of new Nouns", async function () {
         const { ensRegistry } = this.deployedContracts;
@@ -113,10 +99,9 @@ export function testNounsIntegration(): void {
           await nounsAuction.connect(signer).createBid(nounId, { value: ethers.parseUnits("100", "ether") });
         });
 
-        // set date to after auction has closed
-        const date = new Date();
-        date.setDate(date.getDate() + 1);
-        await mineBlockAtTimestamp(date);
+        // Fast forward to when the auction has closed
+        await fastForward(86400);
+        // Settle the auction
         await asAccount(nounsAuctionOwner, async (signer) => {
           await nounsAuction.connect(signer).settleCurrentAndCreateNewAuction();
         });
@@ -152,9 +137,8 @@ export function testNounsIntegration(): void {
         await expect(resolveText(ens, nounsDomain, "snapshot")).to.eventually.eq(nounsTextRecord);
       });
       it("Existing records for nouns.eth sub-names are preserved", async function () {
-        const { ensRegistry } = this.deployedContracts;
-        const existingSubdomainAddr = await ensRegistry.owner(existingTagNode);
-        expect(existingSubdomainAddr).to.eq(nounsDomainOwner);
+        const foundationSubdomainAddr = "0x37b8e20646d174B00198b7E183dd1f25520C0f60";
+        await expect(resolveAddr(ens, "foundation.nouns.eth")).to.eventually.eq(foundationSubdomainAddr);
       });
       it("Name owner can still directly register sub-names", async function () {
         const { ensRegistry } = this.deployedContracts;
