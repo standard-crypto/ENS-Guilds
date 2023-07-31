@@ -15,6 +15,7 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^1.0.3",
+    "@nouns/contracts": "^0.3.0",
     "@openzeppelin/contracts": "^4.9.2",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "@typechain/ethers-v6": "^0.4.0",
@@ -98,6 +99,7 @@
     "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
     "test": "hardhat test",
-    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
+    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain && yarn typechain-nouns",
+    "typechain-nouns": "typechain --target ethers-v6 './node_modules/@nouns/contracts/dist/abi/contracts/NounsAuctionHouse.sol/*.json' './node_modules/@nouns/contracts/dist/abi/contracts/NounsToken.sol/*.json'"
   }
 }
