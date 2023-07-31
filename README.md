@@ -45,7 +45,6 @@ function claimGuildTag(
   address recipient,
   bytes calldata extraClaimArgs
 ) external payable;
-
 ```
 
 The `recipient` will become the owner of that tag and their address will be registered in ENS under the full name
@@ -92,7 +91,6 @@ interface IFeePolicy is IERC165 {
     bytes calldata extraClaimArgs
   ) external view returns (address tokenContract, uint256 fee, address feePaidTo);
 }
-
 ```
 
 Implementations check how much the `claimant` must pay to mint the given `tag` for the given guild, returning the info
@@ -129,7 +127,6 @@ interface ITagsAuthPolicy is IERC165 {
     bytes calldata extraTransferArgs
   ) external view returns (bool);
 }
-
 ```
 
 The ENSGuilds project provides three `ITagsAuthPolicy` implementations: one allowing any account to claim any unclaimed

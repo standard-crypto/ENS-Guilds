@@ -143,6 +143,7 @@ export function testNounsIntegration(): void {
     describe("Existing nouns.eth ENS records", function () {
       const nounsAddrRecord = "0x0BC3807Ec262cB779b38D65b38158acC3bfedE10";
       const nounsTextRecord =
+        // cspell: disable-next-line
         "ipns://storage.snapshot.page/registry/0x3c8221321441b08C580506e21899E3fa88943672/nouns.eth";
       it("Addr record on nouns.eth is preserved", async function () {
         await expect(resolveAddr(ens, nounsDomain)).to.eventually.eq(nounsAddrRecord);
