@@ -5,7 +5,7 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, ensRegistry } = await getNamedAccounts();
 
   const baseDeployArgs = {
     from: deployer,
@@ -19,19 +19,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // NFTTagsAuthPolicy
   await deploy("NFTTagsAuthPolicy", {
     ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
+    args: [ensRegistry, ensGuildsDeployment.address],
   });
 
   // AllowlistTagsAuthPolicy
   await deploy("AllowlistTagsAuthPolicy", {
     ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
+    args: [ensRegistry, ensGuildsDeployment.address],
   });
 
   // OpenTagsAuthPolicy
   await deploy("OpenTagsAuthPolicy", {
     ...baseDeployArgs,
-    args: [],
+    args: [ensRegistry],
   });
 
   return true;

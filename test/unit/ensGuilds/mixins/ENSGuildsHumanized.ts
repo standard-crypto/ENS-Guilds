@@ -12,7 +12,7 @@ import {
   IENSGuildsHumanized__factory,
   IENSGuilds__factory,
 } from "../../../../types";
-import { resolveAddr } from "../../../../utils";
+import { ensLabelHash, getReverseName, getReverseRegistrar, resolveAddr } from "../../../../utils";
 import { asAccount } from "../../../utils";
 
 export function testENSGuildsHumanized(): void {
@@ -58,10 +58,39 @@ export function testENSGuildsHumanized(): void {
 
       await setBalance(ensNameOwner, parseEther("100000000"));
       await setBalance(minter, parseEther("100000000"));
+      await setBalance(ensGuildsDeployment.address, parseEther("100000000"));
 
       await asAccount(ensNameOwner, async (signer) => {
         await ens.connect(signer).setApprovalForAll(ensGuildsHumanized.getAddress(), true);
       });
+    });
+
+    it("claims it's own reverse record", async function () {
+      const { ensDefaultResolver } = await getNamedAccounts();
+      const ensGuildsDeployment = await deployments.get("ENSGuilds");
+      const reverseRegistrar = await getReverseRegistrar(ens);
+      const guildSubdomain = `guilds`;
+      const guildSubdomainHash = ensLabelHash(guildSubdomain);
+      const guildHash = namehash(ensName);
+      const fullTagName = `${guildSubdomain}.${ensName}`;
+
+      // Set forward record
+      await asAccount(ensNameOwner, async (signer) => {
+        await ens
+          .connect(signer)
+          .setSubnodeRecord(guildHash, guildSubdomainHash, ensGuildsDeployment.address, ensDefaultResolver, 0);
+      });
+
+      // Set Primary Name
+      await asAccount(ensGuildsDeployment.address, async (signer) => {
+        await reverseRegistrar
+          .connect(signer)
+          .setNameForAddr(ensGuildsDeployment.address, signer, ensDefaultResolver, fullTagName);
+      });
+
+      // Lookup the reverse record
+      const reverseName = await getReverseName(ens, ensGuildsDeployment.address);
+      expect(reverseName).to.eq(fullTagName);
     });
 
     it("supports humanized deregisterGuild()", async function () {

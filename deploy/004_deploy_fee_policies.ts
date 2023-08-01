@@ -5,7 +5,7 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, ensRegistry } = await getNamedAccounts();
 
   const baseDeployArgs = {
     from: deployer,
@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // FlatFeePolicy
   await deploy("FlatFeePolicy", {
     ...baseDeployArgs,
-    args: [ensGuildsDeployment.address],
+    args: [ensRegistry, ensGuildsDeployment.address],
   });
 
   return true;

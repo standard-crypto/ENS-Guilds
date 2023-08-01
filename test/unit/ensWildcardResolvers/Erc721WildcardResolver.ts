@@ -1,3 +1,4 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { AbiCoder, Wallet, ZeroAddress, dnsEncode, namehash, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
@@ -13,7 +14,7 @@ import {
   ITextResolver__factory,
   TestERC721__factory,
 } from "../../../types";
-import { resolveAddr, resolveText } from "../../../utils";
+import { ensLabelHash, getReverseName, getReverseRegistrar, resolveAddr, resolveText } from "../../../utils";
 import { asAccount } from "../../utils";
 
 export function testErc721WildcardResolver(): void {
@@ -73,6 +74,41 @@ export function testErc721WildcardResolver(): void {
 
       [tokenOwner] = await getUnnamedAccounts();
       await tokenContract.mint(tokenOwner, tokenId);
+    });
+
+    it("claims it's own reverse record", async function () {
+      const { ensDefaultResolver } = await getNamedAccounts();
+      const wildCardResolverDeployment = await deployments.get("Erc721WildcardResolver");
+      const reverseRegistrar = await getReverseRegistrar(ENS);
+      const guildSubdomain = `wildcard`;
+      const ensDomain = "standard-crypto.eth";
+      const guildSubdomainHash = ensLabelHash(guildSubdomain);
+      const guildHash = namehash(ensDomain);
+      const fullTagName = `${guildSubdomain}.${ensDomain}`;
+      const ensNameOwner = await ENS.owner(guildHash);
+
+      await setBalance(ensNameOwner, parseEther("100000000"));
+      await setBalance(wildCardResolverDeployment.address, parseEther("100000000"));
+
+      // Set forward record
+      await asAccount(ensNameOwner, async (signer) => {
+        await ENS.connect(signer).setSubnodeRecord(
+          guildHash,
+          guildSubdomainHash,
+          wildCardResolverDeployment.address,
+          ensDefaultResolver,
+          0,
+        );
+      });
+
+      // Set Primary Name
+      await asAccount(wildCardResolverDeployment.address, async (signer) => {
+        await reverseRegistrar.connect(signer).setNameForAddr(signer, signer, ensDefaultResolver, fullTagName);
+      });
+
+      // Lookup the reverse record
+      const reverseName = await getReverseName(ENS, wildCardResolverDeployment.address);
+      expect(reverseName).to.eq(fullTagName);
     });
 
     it("implements ENSIP 10 interface", async function () {

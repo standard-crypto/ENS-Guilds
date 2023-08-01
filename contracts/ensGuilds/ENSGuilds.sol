@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 import { INameWrapper, CAN_DO_EVERYTHING } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 
 import "../feePolicies/IFeePolicy.sol";
@@ -16,7 +17,7 @@ import "./mixins/GuildTagTokens.sol";
 import "./mixins/ENSGuildsHumanized.sol";
 import "./GuildsResolver.sol";
 
-contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Holder, ReentrancyGuard {
+contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Holder, ReentrancyGuard, ReverseClaimer {
     struct GuildInfo {
         address admin;
         IFeePolicy feePolicy;
@@ -75,7 +76,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         ENS ensRegistry,
         INameWrapper nameWrapper,
         GuildsResolver guildsResolver
-    ) ERC1155(defaultTokenMetadataUri) {
+    ) ERC1155(defaultTokenMetadataUri) ReverseClaimer(ensRegistry, msg.sender) {
         _ensRegistry = ensRegistry;
         _nameWrapper = nameWrapper;
         _guildsResolver = guildsResolver;

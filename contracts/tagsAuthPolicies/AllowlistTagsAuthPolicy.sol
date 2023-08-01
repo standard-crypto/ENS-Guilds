@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./BaseTagsAuthPolicy.sol";
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 
 /**
  * @title AllowlistTagsAuthPolicy
@@ -9,11 +10,14 @@ import "./BaseTagsAuthPolicy.sol";
  * guild tags to only allowlisted addresses.
  * A separate allowlist is maintained per each guild, and may only be updated by that guild's registered admin.
  */
-contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy {
+contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy, ReverseClaimer {
     mapping(bytes32 => mapping(address => bool)) public guildAllowlists;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
+    constructor(
+        ENS _ensRegistry,
+        IENSGuilds ensGuilds
+    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, msg.sender) {}
 
     function allowMint(bytes32 guildHash, address minter) external onlyGuildAdmin(guildHash) {
         guildAllowlists[guildHash][minter] = true;

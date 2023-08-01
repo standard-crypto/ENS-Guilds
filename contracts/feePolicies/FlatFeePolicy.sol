@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -13,7 +14,7 @@ import "../ensGuilds/interfaces/IENSGuilds.sol";
  * @notice A common implementation of IFeePolicy that can be used to configure
  * flat-rate fees for multiple guilds simultaneously
  */
-contract FlatFeePolicy is Context, FeePolicyBase {
+contract FlatFeePolicy is Context, FeePolicyBase, ReverseClaimer {
     using ERC165Checker for address;
 
     IENSGuilds public immutable ensGuilds;
@@ -24,7 +25,7 @@ contract FlatFeePolicy is Context, FeePolicyBase {
     }
     mapping(bytes32 => FeeInfo) public guildFees;
 
-    constructor(address _ensGuilds) {
+    constructor(ENS _ensRegistry, address _ensGuilds) ReverseClaimer(_ensRegistry, msg.sender) {
         // solhint-disable-next-line reason-string
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = IENSGuilds(_ensGuilds);

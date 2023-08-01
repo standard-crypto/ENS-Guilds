@@ -2,12 +2,13 @@
 pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 
 import "../ensWildcardResolvers/WildcardResolverBase.sol";
 import "../libraries/ENSByteUtils.sol";
 import "./interfaces/IENSGuilds.sol";
 
-contract GuildsResolver is WildcardResolverBase {
+contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
     using NameEncoder for string;
 
     IENSGuilds public ensGuilds;
@@ -24,7 +25,10 @@ contract GuildsResolver is WildcardResolverBase {
         _;
     }
 
-    constructor(ENS _ensRegistry, INameWrapper _ensNameWrapper) WildcardResolverBase(_ensRegistry, _ensNameWrapper) {
+    constructor(
+        ENS _ensRegistry,
+        INameWrapper _ensNameWrapper
+    ) WildcardResolverBase(_ensRegistry, _ensNameWrapper) ReverseClaimer(_ensRegistry, msg.sender) {
         return;
     }
 
