@@ -15,6 +15,7 @@ import { testMintAuthorization } from "./mintAuthorization";
 import { testMintFees } from "./mintFees";
 import { testNameWrapperSupport } from "./nameWrapperSupport";
 import { testNFTFeatures } from "./nftFeatures";
+import { testNounsIntegration } from "./nouns";
 import { testTagRevocation } from "./tagRevocation";
 import { testTagTransfers } from "./tagTransfers";
 import "./type-annotations";
@@ -112,4 +113,5 @@ describe("Acceptance Tests", function () {
   testTagTransfers.bind(this)();
   testWildcardResolution.bind(this)();
   testNameWrapperSupport.bind(this)();
+  testNounsIntegration.bind(this)();
 });

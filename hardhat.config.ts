@@ -119,6 +119,12 @@ const config: HardhatUserConfig = {
       default: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
       goerli: "0x114D4603199df73e7D157787f8778E21fCd13066",
     },
+    nounsAuctionContract: {
+      default: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+    },
+    nounsTokenContract: {
+      default: "0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03",
+    },
   },
   networks: {
     hardhat: {
