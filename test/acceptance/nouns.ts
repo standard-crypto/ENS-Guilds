@@ -21,7 +21,8 @@ export function testNounsIntegration(): void {
   describe("Nouns Integration", function () {
     beforeEach("Configure ENS Guild for Nouns domain", async function () {
       const { nounsAuctionContract, nounsTokenContract } = await getNamedAccounts();
-      const { ensGuilds, erc721WildcardResolver, flatFeePolicy, nftAuthPolicy, ensRegistry } = this.deployedContracts;
+      const { ensGuilds, erc721WildcardResolver, flatFeePolicy, allowlistAuthPolicy, ensRegistry } =
+        this.deployedContracts;
       const { admin } = this.guildInfo;
 
       // Set up nouns domain
@@ -46,7 +47,7 @@ export function testNounsIntegration(): void {
         // Register guild
         await ensGuilds
           .connect(signer)
-          .registerGuild(nounsDomain, admin, flatFeePolicy.getAddress(), nftAuthPolicy.getAddress());
+          .registerGuild(nounsDomain, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
       // 3. Name owner configures NFTWildcardResolver to resolve nouns.eth names using Nouns token contract
