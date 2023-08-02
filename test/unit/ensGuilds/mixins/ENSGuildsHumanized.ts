@@ -65,7 +65,7 @@ export function testENSGuildsHumanized(): void {
       });
     });
 
-    it("claims it's own reverse record", async function () {
+    it("claims its own reverse record", async function () {
       const { ensDefaultResolver } = await getNamedAccounts();
       const ensGuildsDeployment = await deployments.get("ENSGuilds");
       const reverseRegistrar = await getReverseRegistrar(ens);
