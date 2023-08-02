@@ -76,7 +76,7 @@ export function testErc721WildcardResolver(): void {
       await tokenContract.mint(tokenOwner, tokenId);
     });
 
-    it("claims it's own reverse record", async function () {
+    it("claims its own reverse record", async function () {
       const { ensDefaultResolver } = await getNamedAccounts();
       const wildCardResolverDeployment = await deployments.get("Erc721WildcardResolver");
       const reverseRegistrar = await getReverseRegistrar(ENS);
