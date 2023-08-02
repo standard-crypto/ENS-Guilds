@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -18,7 +19,7 @@ import "./BaseTagsAuthPolicy.sol";
  *
  * A user's guild tag is eligible for revocation once that user ceases to own the TokenID used in minting that tag.
  */
-contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
+contract NFTTagsAuthPolicy is BaseTagsAuthPolicy, ReverseClaimer {
     using ERC165Checker for address;
     using StringParsing for bytes;
     using Strings for string;
@@ -41,7 +42,11 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy {
     mapping(bytes32 => GuildInfo) public guilds;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IENSGuilds ensGuilds) BaseTagsAuthPolicy(ensGuilds) {}
+    constructor(
+        ENS _ensRegistry,
+        IENSGuilds ensGuilds,
+        address reverseRecordOwner
+    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, reverseRecordOwner) {}
 
     /**
      * @notice Registers the specific NFT collection that a user must be a member of to mint a guild tag

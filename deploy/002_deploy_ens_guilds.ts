@@ -1,3 +1,4 @@
+import { namehash } from "ethers";
 import { type DeployFunction } from "hardhat-deploy/types";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -18,11 +19,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const guildsResolverDeployment = await deployments.get("GuildsResolver");
 
+  const ens = await ethers.getContractAt("ENS", ensRegistry);
+  const ensDomainOwner = await ens.owner(namehash("standard-crypto.eth"));
+
   // ENSGuilds
   const ensGuildsDeployment = await deploy("ENSGuilds", {
     ...baseDeployArgs,
     // TODO: don't use a stub here
-    args: ["stubMetadataUri", ensRegistry, ensNameWrapper, guildsResolverDeployment.address],
+    args: ["stubMetadataUri", ensRegistry, ensNameWrapper, guildsResolverDeployment.address, ensDomainOwner],
   });
 
   // Initialize the GuildTagsResolver with the address of the base ENSGuilds contract

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -11,7 +12,7 @@ import "../libraries/ENSNamehash.sol";
 import "../libraries/StringParsing.sol";
 import "./WildcardResolverBase.sol";
 
-contract Erc721WildcardResolver is WildcardResolverBase {
+contract Erc721WildcardResolver is WildcardResolverBase, ReverseClaimer {
     using ENSNamehash for bytes;
     using ERC165Checker for address;
     using NameEncoder for string;
@@ -30,7 +31,11 @@ contract Erc721WildcardResolver is WildcardResolverBase {
     // mapping of namehash(parentName) to set of addresses authorized to set records on the parent
     mapping(bytes32 => mapping(address => bool)) public approvedDelegates;
 
-    constructor(ENS _ensRegistry, INameWrapper _ensNameWrapper) WildcardResolverBase(_ensRegistry, _ensNameWrapper) {
+    constructor(
+        ENS _ensRegistry,
+        INameWrapper _ensNameWrapper,
+        address reverseRecordOwner
+    ) WildcardResolverBase(_ensRegistry, _ensNameWrapper) ReverseClaimer(_ensRegistry, reverseRecordOwner) {
         return;
     }
 
