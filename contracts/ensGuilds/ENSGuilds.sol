@@ -75,8 +75,9 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         string memory defaultTokenMetadataUri,
         ENS ensRegistry,
         INameWrapper nameWrapper,
-        GuildsResolver guildsResolver
-    ) ERC1155(defaultTokenMetadataUri) ReverseClaimer(ensRegistry, msg.sender) {
+        GuildsResolver guildsResolver,
+        address reverseRecordOwner
+    ) ERC1155(defaultTokenMetadataUri) ReverseClaimer(ensRegistry, reverseRecordOwner) {
         _ensRegistry = ensRegistry;
         _nameWrapper = nameWrapper;
         _guildsResolver = guildsResolver;

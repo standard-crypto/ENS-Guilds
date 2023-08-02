@@ -12,7 +12,7 @@ contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165, ReverseClaimer {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(ENS _ensRegistry) ReverseClaimer(_ensRegistry, msg.sender) {}
+    constructor(ENS _ensRegistry, address reverseRecordOwner) ReverseClaimer(_ensRegistry, reverseRecordOwner) {}
 
     function canClaimTag(
         bytes32,

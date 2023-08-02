@@ -33,8 +33,9 @@ contract Erc721WildcardResolver is WildcardResolverBase, ReverseClaimer {
 
     constructor(
         ENS _ensRegistry,
-        INameWrapper _ensNameWrapper
-    ) WildcardResolverBase(_ensRegistry, _ensNameWrapper) ReverseClaimer(_ensRegistry, msg.sender) {
+        INameWrapper _ensNameWrapper,
+        address reverseRecordOwner
+    ) WildcardResolverBase(_ensRegistry, _ensNameWrapper) ReverseClaimer(_ensRegistry, reverseRecordOwner) {
         return;
     }
 

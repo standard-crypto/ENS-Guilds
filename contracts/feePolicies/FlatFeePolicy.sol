@@ -25,7 +25,11 @@ contract FlatFeePolicy is Context, FeePolicyBase, ReverseClaimer {
     }
     mapping(bytes32 => FeeInfo) public guildFees;
 
-    constructor(ENS _ensRegistry, address _ensGuilds) ReverseClaimer(_ensRegistry, msg.sender) {
+    constructor(
+        ENS _ensRegistry,
+        address _ensGuilds,
+        address reverseRecordOwner
+    ) ReverseClaimer(_ensRegistry, reverseRecordOwner) {
         // solhint-disable-next-line reason-string
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = IENSGuilds(_ensGuilds);

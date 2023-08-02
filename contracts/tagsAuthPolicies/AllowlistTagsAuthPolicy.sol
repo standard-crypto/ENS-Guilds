@@ -16,8 +16,9 @@ contract AllowlistTagsAuthPolicy is BaseTagsAuthPolicy, ReverseClaimer {
     // solhint-disable-next-line no-empty-blocks
     constructor(
         ENS _ensRegistry,
-        IENSGuilds ensGuilds
-    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, msg.sender) {}
+        IENSGuilds ensGuilds,
+        address reverseRecordOwner
+    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, reverseRecordOwner) {}
 
     function allowMint(bytes32 guildHash, address minter) external onlyGuildAdmin(guildHash) {
         guildAllowlists[guildHash][minter] = true;

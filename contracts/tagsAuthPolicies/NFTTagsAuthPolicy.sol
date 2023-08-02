@@ -44,8 +44,9 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy, ReverseClaimer {
     // solhint-disable-next-line no-empty-blocks
     constructor(
         ENS _ensRegistry,
-        IENSGuilds ensGuilds
-    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, msg.sender) {}
+        IENSGuilds ensGuilds,
+        address reverseRecordOwner
+    ) BaseTagsAuthPolicy(ensGuilds) ReverseClaimer(_ensRegistry, reverseRecordOwner) {}
 
     /**
      * @notice Registers the specific NFT collection that a user must be a member of to mint a guild tag
