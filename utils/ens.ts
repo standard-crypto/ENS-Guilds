@@ -1,5 +1,15 @@
 import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
-import { type AbstractProvider, EnsPlugin, EnsResolver, type Network, keccak256, namehash, toUtf8Bytes } from "ethers";
+import {
+  type AbstractProvider,
+  EnsPlugin,
+  EnsResolver,
+  JsonRpcProvider,
+  type Network,
+  type Provider,
+  keccak256,
+  namehash,
+  toUtf8Bytes,
+} from "ethers";
 
 import { INameResolver__factory, type IReverseRegistrar, IReverseRegistrar__factory } from "../types";
 import type { ENS } from "../types/@ensdomains/ens-contracts/contracts/registry/ENS";
@@ -9,8 +19,12 @@ export function ensLabelHash(label: string): string {
   return keccak256(toUtf8Bytes(label));
 }
 
-export async function resolveAddr(ensRegistry: ENS, name: string): Promise<string | null> {
-  const resolver = await getResolver(ensRegistry, name);
+export async function resolveAddr(
+  ensRegistry: ENS,
+  name: string,
+  options = { enableCcip: false },
+): Promise<string | null> {
+  const resolver = await getResolver(ensRegistry, name, options);
 
   if (resolver === null) {
     return null;
@@ -19,8 +33,13 @@ export async function resolveAddr(ensRegistry: ENS, name: string): Promise<strin
   return await resolver.getAddress();
 }
 
-export async function resolveText(ensRegistry: ENS, name: string, key: string): Promise<string | null> {
-  const resolver = await getResolver(ensRegistry, name);
+export async function resolveText(
+  ensRegistry: ENS,
+  name: string,
+  key: string,
+  options = { enableCcip: false },
+): Promise<string | null> {
+  const resolver = await getResolver(ensRegistry, name, options);
 
   if (resolver === null) {
     return null;
@@ -29,25 +48,52 @@ export async function resolveText(ensRegistry: ENS, name: string, key: string): 
   return await resolver.getText(key);
 }
 
-export async function getResolver(ensRegistry: ENS, name: string): Promise<EnsResolver | null> {
+export async function getResolver(
+  ensRegistry: ENS,
+  name: string,
+  { enableCcip = false }: { enableCcip?: boolean } = {},
+): Promise<EnsResolver | null> {
   const ensRegistryAddress = await ensRegistry.getAddress();
 
-  const provider = ensRegistry.runner?.provider;
+  let provider: Provider;
 
-  if (provider === null || provider === undefined) {
-    throw new Error("provider not found");
-  }
+  if (enableCcip) {
+    provider = new JsonRpcProvider("http://localhost:8545/");
 
-  // hack the address of the ENS registry into the ethers provider so that we can directly use
-  // the implementation of ENS lookups provided by ethers.js
-  class WrappedProvider extends HardhatEthersProvider {
-    public async getNetwork(): Promise<Network> {
-      const network = await super.getNetwork();
-      network.attachPlugin(new EnsPlugin(ensRegistryAddress));
-      return network;
+    class WrappedProvider extends JsonRpcProvider {
+      public async getNetwork(): Promise<Network> {
+        const network = await super.getNetwork();
+        network.attachPlugin(new EnsPlugin(ensRegistryAddress));
+        return network;
+      }
     }
+
+    Object.setPrototypeOf(provider, WrappedProvider.prototype);
+
+    try {
+      await provider.getBlockNumber();
+    } catch (e) {
+      throw new Error("Unable to connect to local hardhat node. Did you run `yarn hardhat node` first?");
+    }
+  } else {
+    const prov = ensRegistry.runner?.provider;
+    if (prov === null || prov === undefined) {
+      throw new Error("provider not found");
+    }
+    provider = prov;
+
+    // hack the address of the ENS registry into the ethers provider so that we can directly use
+    // the implementation of ENS lookups provided by ethers.js
+    class WrappedProvider extends HardhatEthersProvider {
+      public async getNetwork(): Promise<Network> {
+        const network = await super.getNetwork();
+        network.attachPlugin(new EnsPlugin(ensRegistryAddress));
+        return network;
+      }
+    }
+    Object.setPrototypeOf(provider, WrappedProvider.prototype);
   }
-  Object.setPrototypeOf(provider, WrappedProvider.prototype);
+
   return await EnsResolver.fromName(provider as unknown as AbstractProvider, name);
 }
 

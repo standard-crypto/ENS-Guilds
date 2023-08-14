@@ -98,7 +98,7 @@
     "prepublishOnly": "pinst --disable",
     "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
-    "test": "hardhat test",
+    "test": "yarn hardhat test",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain && yarn typechain-nouns",
     "typechain-nouns": "typechain --target ethers-v6 './node_modules/@nouns/contracts/dist/abi/contracts/NounsAuctionHouse.sol/*.json' './node_modules/@nouns/contracts/dist/abi/contracts/NounsToken.sol/*.json'"
   }
