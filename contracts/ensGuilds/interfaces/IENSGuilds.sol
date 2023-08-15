@@ -15,7 +15,7 @@ interface IENSGuilds is IERC1155MetadataURI {
     event TagsAuthPolicyUpdated(bytes32 indexed guildEnsNode, address tagsAuthPolicy);
     event AdminTransferred(bytes32 indexed guildEnsNode, address newAdmin);
     event SetActive(bytes32 indexed guildEnsNode, bool active);
-    event TokenUriTemplateSet(bytes32 indexed guildEnsNode, string uriTemplate);
+    event TokenUriSet(bytes32 indexed guildEnsNode, string uri);
 
     /* Functions */
 
@@ -135,12 +135,12 @@ interface IENSGuilds is IERC1155MetadataURI {
     function updateGuildTagsAuthPolicy(bytes32 guildEnsNode, address tagsAuthPolicy) external;
 
     /**
-     * @notice Sets the metadata URI template string for fetching metadata for a guild's tag NFTs.
+     * @notice Sets the metadata URI string for fetching metadata for a guild's tag NFTs.
      * May only be called by the guild's registered admin.
      * @param guildEnsNode The ENS namehash of the guild's domain
-     * @param uriTemplate The ERC1155 metadata URL template
+     * @param uri The ERC1155 metadata URL template
      */
-    function setGuildTokenUriTemplate(bytes32 guildEnsNode, string calldata uriTemplate) external;
+    function setGuildTokenUri(bytes32 guildEnsNode, string calldata uri) external;
 
     /**
      * @notice Sets a guild as active or inactive. May only be called by the guild's registered admin.

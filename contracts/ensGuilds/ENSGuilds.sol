@@ -220,7 +220,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         _handleClaimFee(guildEnsNode, tag, extraClaimArgs);
 
         // NFT mint
-        _mintNewGuildToken(guildEnsNode, tagHash, recipient);
+        _mintNewGuildToken(guildEnsNode, recipient);
 
         // inform auth contract that tag was claimed, then revoke an existing tag if instructed
         string memory tagToRevoke = auth.onTagClaimed(guildEnsNode, tag, _msgSender(), recipient, extraClaimArgs);
@@ -272,7 +272,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         }
 
         // NFT transfer
-        _transferGuildToken(guildEnsNode, tagHash, currentOwner, recipient);
+        _transferGuildToken(guildEnsNode, currentOwner, recipient);
 
         // Update forward record in ENS resolver
         _guildsResolver.setEnsForwardRecord(guildEnsNode, tag, recipient);
@@ -379,17 +379,17 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
     /**
      * @inheritdoc IENSGuilds
      */
-    function setGuildTokenUriTemplate(
+    function setGuildTokenUri(
         bytes32 guildEnsNode,
-        string calldata uriTemplate
+        string calldata uri
     )
         public
         override(ENSGuildsHumanized, IENSGuilds)
         onlyGuildAdmin(guildEnsNode)
         requireGuildRegistered(guildEnsNode)
     {
-        _setGuildTokenURITemplate(guildEnsNode, uriTemplate);
-        emit TokenUriTemplateSet(guildEnsNode, uriTemplate);
+        _setGuildTokenURI(guildEnsNode, uri);
+        emit TokenUriSet(guildEnsNode, uri);
     }
 
     /**
@@ -441,7 +441,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         _guildsResolver.setEnsForwardRecord(guildEnsNode, tag, address(0));
 
         // clear the token ownership for the tag
-        _burnGuildToken(guildEnsNode, tagHash, _tagOwner);
+        _burnGuildToken(guildEnsNode, _tagOwner);
 
         // inform the auth policy of the revocation
         ITagsAuthPolicy auth = guilds[guildEnsNode].tagsAuthPolicy;
