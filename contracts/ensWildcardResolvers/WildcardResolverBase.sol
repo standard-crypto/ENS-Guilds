@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../libraries/ENSParentName.sol";
 import "../libraries/ENSByteUtils.sol";
+import "../libraries/BytesLib.sol";
 import "./PassthroughResolver.sol";
 
 abstract contract WildcardResolverBase is IExtendedResolver, Context, PassthroughResolver {
@@ -18,6 +19,8 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
     using ERC165Checker for address;
 
     error RecordTypeNotSupported();
+    error InvalidOperation();
+    error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData);
 
     bytes4 public constant RESOLVER_SIGNATURE__ADDR = bytes4(keccak256(bytes("addr(bytes32)")));
     bytes4 public constant RESOLVER_SIGNATURE__ADDR_WITH_COINTYPE = bytes4(keccak256(bytes("addr(bytes32,uint256)")));
@@ -107,9 +110,43 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
         // that as a final option
         address passthrough = getPassthroughTarget(ensNode);
         if (result == address(0) && passthrough.supportsInterface(type(IExtendedResolver).interfaceId)) {
-            bytes memory encodedResult = IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata);
-            (result) = abi.decode(encodedResult, (address));
+            try IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata) returns (
+                bytes memory encodedResult
+            ) {
+                (result) = abi.decode(encodedResult, (address));
+                // Catch OffchainLookup and override sender param
+            } catch (bytes memory err) {
+                (
+                    address sender,
+                    string[] memory urls,
+                    bytes memory callData,
+                    bytes4 callbackFunction,
+                    bytes memory extraData
+                ) = abi.decode(BytesLib.slice(err, 4, err.length - 4), (address, string[], bytes, bytes4, bytes));
+                revert OffchainLookup(
+                    address(this),
+                    urls,
+                    callData,
+                    this.resolveCallback.selector,
+                    abi.encode(sender, callbackFunction, extraData)
+                );
+            }
         }
+    }
+
+    // Callback to contract that initially reverted OffchainLookup
+    function resolveCallback(bytes calldata response, bytes calldata extraData) public returns (bytes memory) {
+        (address inner, bytes4 innerCallbackFunction, bytes memory innerExtraData) = abi.decode(
+            extraData,
+            (address, bytes4, bytes)
+        );
+        (bool success, bytes memory data) = inner.call(
+            abi.encodeWithSelector(innerCallbackFunction, response, innerExtraData)
+        );
+        if (success) {
+            return abi.decode(data, (bytes));
+        }
+        revert InvalidOperation();
     }
 
     function _resolveTextRecord(

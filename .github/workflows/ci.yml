@@ -52,6 +52,12 @@ jobs:
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
           MNEMONIC: ${{ secrets.MNEMONIC }}
 
+      - name: "Test the use cases"
+        run: "yarn test:usecase"
+        env:
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+
       - name: "Add test summary"
         run: |
           echo "## Test results" >> $GITHUB_STEP_SUMMARY
