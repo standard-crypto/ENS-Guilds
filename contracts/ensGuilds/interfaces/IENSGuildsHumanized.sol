@@ -2,8 +2,6 @@
 pragma solidity ^0.8.4;
 
 interface IENSGuildsHumanized {
-    function deregisterGuild(string calldata guildEnsName) external;
-
     function claimGuildTag(
         string calldata guildEnsName,
         string calldata tag,
@@ -17,6 +15,8 @@ interface IENSGuildsHumanized {
         address recipient,
         bytes calldata extraTransferArgs
     ) external;
+
+    function setFallbackResolver(string calldata guildEnsName, address fallbackResolver) external;
 
     function tagOwner(string memory guildEnsName, string memory tag) external view returns (address);
 
@@ -33,4 +33,6 @@ interface IENSGuildsHumanized {
     function guildAdmin(string memory guildEnsName) external view returns (address);
 
     function transferGuildAdmin(string calldata guildEnsName, address newAdmin) external;
+
+    function deregisterGuild(string calldata guildEnsName) external;
 }

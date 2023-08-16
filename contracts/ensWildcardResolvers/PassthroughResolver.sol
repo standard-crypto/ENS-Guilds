@@ -67,7 +67,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setAddr(node, a);
     }
 
-    function addr(bytes32 node) public view virtual override returns (address payable) {
+    function addr(bytes32 node) public view virtual override returns (address payable result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IAddrResolver).interfaceId)) {
             return IAddrResolver(target).addr(node);
@@ -78,7 +78,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setAddr(node, coinType, a);
     }
 
-    function addr(bytes32 node, uint256 coinType) public view virtual override returns (bytes memory) {
+    function addr(bytes32 node, uint256 coinType) public view virtual override returns (bytes memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IAddressResolver).interfaceId)) {
             return IAddressResolver(target).addr(node, coinType);
@@ -89,7 +89,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setContenthash(node, hash);
     }
 
-    function contenthash(bytes32 node) external view virtual override returns (bytes memory) {
+    function contenthash(bytes32 node) external view virtual override returns (bytes memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IContentHashResolver).interfaceId)) {
             return IContentHashResolver(target).contenthash(node);
@@ -102,9 +102,9 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
 
     function dnsRecord(
         bytes32 node,
-        bytes32 name,
+        bytes32 name, // solhint-disable-line
         uint16 resource
-    ) public view virtual override returns (bytes memory) {
+    ) public view virtual override returns (bytes memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IDNSRecordResolver).interfaceId)) {
             return IDNSRecordResolver(target).dnsRecord(node, name, resource);
@@ -115,7 +115,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setZonehash(node, hash);
     }
 
-    function zonehash(bytes32 node) external view virtual override returns (bytes memory) {
+    function zonehash(bytes32 node) external view virtual override returns (bytes memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IDNSZoneResolver).interfaceId)) {
             return IDNSZoneResolver(target).zonehash(node);
@@ -126,7 +126,10 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setInterface(node, interfaceID, implementer);
     }
 
-    function interfaceImplementer(bytes32 node, bytes4 interfaceID) external view virtual override returns (address) {
+    function interfaceImplementer(
+        bytes32 node,
+        bytes4 interfaceID
+    ) external view virtual override returns (address result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(IInterfaceResolver).interfaceId)) {
             return IInterfaceResolver(target).interfaceImplementer(node, interfaceID);
@@ -137,7 +140,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setName(node, newName);
     }
 
-    function name(bytes32 node) external view virtual override returns (string memory) {
+    function name(bytes32 node) external view virtual override returns (string memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(INameResolver).interfaceId)) {
             return INameResolver(target).name(node);
@@ -159,7 +162,7 @@ abstract contract PassthroughResolver is IPublicResolver, ResolverBase {
         IPublicResolver(getPassthroughTarget(node)).setText(node, key, value);
     }
 
-    function text(bytes32 node, string calldata key) public view virtual override returns (string memory) {
+    function text(bytes32 node, string calldata key) public view virtual override returns (string memory result) {
         address target = getPassthroughTarget(node);
         if (target.supportsInterface(type(ITextResolver).interfaceId)) {
             return ITextResolver(target).text(node, key);

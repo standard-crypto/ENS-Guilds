@@ -1,5 +1,6 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { namehash } from "ethers";
+import { namehash, parseEther } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { AddrResolver__factory } from "../../types";
@@ -38,6 +39,44 @@ function _testSuite(): void {
         .connect(signer)
         .registerGuild(domain, admin, flatFeePolicy.getAddress(), openAuthPolicy.getAddress());
     });
+  });
+
+  it("An ENS name manager can technicaly transfer ownership of the name it manages", async function () {
+    const { ensRegistry, ensNameWrapper } = this.deployedContracts;
+    const { ensNameOwner, ensNode } = this.guildInfo;
+
+    // Create a random account that will be a "manager" of this ENS name
+    const ensNameManager = ethers.Wallet.createRandom(ethers.provider);
+    await setBalance(await ensNameManager.getAddress(), parseEther("100000000"));
+
+    // Make that account a manager
+    await asAccount(ensNameOwner, async (signer) => {
+      if (this.usingNameWrapper) {
+        await ensNameWrapper.connect(signer).setApprovalForAll(ensNameManager.getAddress(), true);
+      } else {
+        await ensRegistry.connect(signer).setApprovalForAll(ensNameManager.getAddress(), true);
+      }
+    });
+
+    // Create a random account that we will attempt to transfer ownership of the name to
+    const randomRecipientAddress = await ethers.Wallet.createRandom().getAddress();
+
+    // transfer ownership of the name to that random account
+    if (this.usingNameWrapper) {
+      await ensNameWrapper
+        .connect(ensNameManager)
+        .safeTransferFrom(ensNameOwner, randomRecipientAddress, ensNode, 1, "0x");
+    } else {
+      await ensRegistry.connect(ensNameManager).setOwner(ensNode, randomRecipientAddress);
+    }
+
+    // check that the manager successfully transferred the ENS name ownership, even though it wasn't
+    // itself an owner
+    if (this.usingNameWrapper) {
+      await expect(ensNameWrapper.ownerOf(ensNode)).to.eventually.eq(randomRecipientAddress);
+    } else {
+      await expect(ensRegistry.owner(ensNode)).to.eventually.eq(randomRecipientAddress);
+    }
   });
 
   it("Original domain owner still retains domain ownership after guild registration", async function () {

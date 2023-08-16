@@ -424,7 +424,12 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
     function setFallbackResolver(
         bytes32 guildEnsNode,
         address fallbackResolver
-    ) public onlyGuildAdmin(guildEnsNode) requireGuildRegistered(guildEnsNode) {
+    )
+        public
+        override(ENSGuildsHumanized, IENSGuilds)
+        onlyGuildAdmin(guildEnsNode)
+        requireGuildRegistered(guildEnsNode)
+    {
         _guildsResolver.setPassthroughTarget(guildEnsNode, fallbackResolver);
     }
 
