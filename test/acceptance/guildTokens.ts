@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { asAccount } from "../utils";
 import { findTransferSingleEvent } from "../utils/erc1155";
 
-export function testNFTFeatures(): void {
-  describe("NFT Features", function () {
+export function testGuildTokenFeatures(): void {
+  describe("Guild Tokens", function () {
     beforeEach("Setup guild", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, domain, admin } = this.guildInfo;
@@ -19,7 +19,7 @@ export function testNFTFeatures(): void {
       });
     });
 
-    it("Minter receives guild tag NFT", async function () {
+    it("Minter receives guild token", async function () {
       const { ensGuilds } = this.deployedContracts;
       const { ensNode } = this.guildInfo;
       const { minter } = this.addresses;
@@ -43,11 +43,11 @@ export function testNFTFeatures(): void {
       expect(tokenBalance).eq(1n);
     });
 
-    it("Guild admin can set NFT collection metadata", async function () {
+    it("Guild admin can set token collection metadata", async function () {
       const { ensGuilds } = this.deployedContracts;
       const { ensNode, admin } = this.guildInfo;
       const { minter } = this.addresses;
-      const metadataURITemplate = "https://test-domain/{id}.json";
+      const metadataURI = "https://test-domain.json";
 
       const tagToMint = "test";
 
@@ -58,7 +58,7 @@ export function testNFTFeatures(): void {
 
       // guild admin updates metadata URI for their guild's NFTs
       await asAccount(admin, async (signer) => {
-        await ensGuilds.connect(signer).setGuildTokenUriTemplate(ensNode, metadataURITemplate);
+        await ensGuilds.connect(signer).setGuildTokenUri(ensNode, metadataURI);
       });
 
       // look for the event that was logged for the new token mint
@@ -68,7 +68,7 @@ export function testNFTFeatures(): void {
 
       // look up the metadata for that token
       const observedURI = await ensGuilds.uri(tokenId);
-      expect(observedURI).to.eq(metadataURITemplate);
+      expect(observedURI).to.eq(metadataURI);
     });
 
     it("ENSGuilds supports ERC1155 and ERC1155Metadata_URI interface", async function () {
@@ -83,7 +83,7 @@ export function testNFTFeatures(): void {
       await expect(ensGuilds.supportsInterface("0x0e89341c")).to.eventually.be.true;
     });
 
-    it("Tag owner cannot transfer their tag NFT", async function () {
+    it("Tag owner cannot transfer their guild token", async function () {
       const { ensGuilds } = this.deployedContracts;
       const { ensNode } = this.guildInfo;
       const { minter, unauthorizedThirdParty } = this.addresses;
