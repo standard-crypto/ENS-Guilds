@@ -93,7 +93,7 @@
     "hardhat:node": "hardhat node",
     "hardhat:clean": "hardhat clean",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check && yarn cspell:check",
-    "lint:sol": "solhint --max-warnings 200 \"contracts/**/*.sol\"",
+    "lint:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --ignore-path ./.eslintignore --ext .js,.ts .",
     "cspell:check": "cspell '**'",
     "postinstall": "husky install && DOTENV_CONFIG_PATH=./.env.example yarn typechain",
