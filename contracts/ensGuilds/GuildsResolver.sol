@@ -8,8 +8,6 @@ import "../ensWildcardResolvers/WildcardResolverBase.sol";
 import "../libraries/ENSByteUtils.sol";
 import "./interfaces/IENSGuilds.sol";
 
-import "hardhat/console.sol";
-
 contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
     using NameEncoder for string;
 
@@ -93,7 +91,6 @@ contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
         string calldata
     ) internal pure override returns (string memory) {
         // ENSGuilds doesn't set text records for Guild tags
-        console.log("inside GuildsResolver _resolveWildcardTextRecord - return empty string");
         return "";
     }
 
