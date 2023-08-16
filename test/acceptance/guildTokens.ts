@@ -4,7 +4,7 @@ import { asAccount } from "../utils";
 import { findTransferSingleEvent } from "../utils/erc1155";
 
 export function testGuildTokenFeatures(): void {
-  describe.only("Guild Tokens", function () {
+  describe("Guild Tokens", function () {
     beforeEach("Setup guild", async function () {
       const { ensGuilds, flatFeePolicy, openAuthPolicy } = this.deployedContracts;
       const { ensNameOwner, domain, admin } = this.guildInfo;
