@@ -43,7 +43,7 @@ describe("Acceptance Tests - Use Cases", function () {
         "Erc721WildcardResolver",
         erc721WildcardResolverDeployment.address,
       ),
-      digidaigakuResolver: await DigidaigakuResolver__factory.connect(digidaigakuDeployment.address, ethers.provider),
+      digidaigakuResolver: DigidaigakuResolver__factory.connect(digidaigakuDeployment.address, ethers.provider),
     };
 
     // Setup basic info for a guild that is / will be registered
