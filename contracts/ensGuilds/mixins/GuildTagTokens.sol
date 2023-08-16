@@ -9,16 +9,12 @@ abstract contract GuildTagTokens is ERC1155 {
 
     error GuildsTokenTransferNotAllowed();
 
-    uint256 internal constant GUILD_ID_MASK = uint256(~uint128(0)) << 128;
-
     struct GuildTokenInfo {
-        Counters.Counter tokenIdTracker;
-        string templateURI;
-        mapping(bytes32 => uint256) guildTagsToTokenIds;
+        string metadataUri;
     }
 
-    // maps the top 128 bits of each guild's GuildID (ensNode) to its metadataURI and token ID counter
-    mapping(bytes16 => GuildTokenInfo) private guilds;
+    // maps each guild's GuildID (ensNode) to its metadataURI
+    mapping(bytes32 => GuildTokenInfo) private guilds;
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
         return ERC1155.supportsInterface(interfaceId);
@@ -29,53 +25,30 @@ abstract contract GuildTagTokens is ERC1155 {
      * @param tokenId The token whose URI is returned
      */
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        // calculate truncated guildHash from first 128 bits of tokenId
-        uint256 truncatedGuildHashUint = tokenId & GUILD_ID_MASK;
-        bytes16 truncatedGuildHash = bytes16(bytes32(truncatedGuildHashUint));
-
         // return guild-specific URI if exists
-        string storage guildTemplateURI = guilds[truncatedGuildHash].templateURI;
-        if (bytes(guildTemplateURI).length != 0) {
-            return guildTemplateURI;
+        string storage guildMetadataURI = guilds[bytes32(tokenId)].metadataUri;
+        if (bytes(guildMetadataURI).length != 0) {
+            return guildMetadataURI;
         }
 
         // return default URI shared by all guilds
         return ERC1155.uri(tokenId);
     }
 
-    function _mintNewGuildToken(bytes32 guildHash, bytes32 tagHash, address to) internal {
-        bytes16 truncatedGuildHash = bytes16(guildHash);
-
-        uint256 tokenCounterCurrent = guilds[truncatedGuildHash].tokenIdTracker.current();
-        require(tokenCounterCurrent < type(uint128).max, "tokenCounterOverflow");
-
-        guilds[truncatedGuildHash].tokenIdTracker.increment();
-
-        uint256 truncatedGuildHashUint = uint256(guildHash) & GUILD_ID_MASK;
-        uint256 fullTokenId = truncatedGuildHashUint + tokenCounterCurrent;
-
-        bytes memory emptyData;
-        _mint(to, fullTokenId, 1, emptyData);
-
-        guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash] = fullTokenId;
+    function _mintNewGuildToken(bytes32 guildHash, address to) internal {
+        _mint(to, uint256(guildHash), 1, "");
     }
 
-    function _burnGuildToken(bytes32 guildHash, bytes32 tagHash, address tagOwner) internal {
-        bytes16 truncatedGuildHash = bytes16(guildHash);
-        uint256 tokenId = guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash];
-
-        _burn(tagOwner, tokenId, 1);
+    function _burnGuildToken(bytes32 guildHash, address tagOwner) internal {
+        _burn(tagOwner, uint256(guildHash), 1);
     }
 
-    function _transferGuildToken(bytes32 guildHash, bytes32 tagHash, address from, address to) internal {
-        bytes16 truncatedGuildHash = bytes16(guildHash);
-        uint256 tokenId = guilds[truncatedGuildHash].guildTagsToTokenIds[tagHash];
-        _safeTransferFrom(from, to, tokenId, 1, "");
+    function _transferGuildToken(bytes32 guildHash, address from, address to) internal {
+        _safeTransferFrom(from, to, uint256(guildHash), 1, "");
     }
 
-    function _setGuildTokenURITemplate(bytes32 guildHash, string calldata templateURI) internal {
-        bytes16 truncatedGuildHash = bytes16(guildHash);
-        guilds[truncatedGuildHash].templateURI = templateURI;
+    function _setGuildTokenURI(bytes32 guildHash, string calldata metadataURI) internal {
+        guilds[guildHash].metadataUri = metadataURI;
     }
 
     /**

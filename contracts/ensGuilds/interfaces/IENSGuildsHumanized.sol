@@ -26,7 +26,7 @@ interface IENSGuildsHumanized {
 
     function updateGuildTagsAuthPolicy(string calldata guildEnsName, address tagsAuthPolicy) external;
 
-    function setGuildTokenUriTemplate(string calldata guildEnsName, string calldata uriTemplate) external;
+    function setGuildTokenUri(string calldata guildEnsName, string calldata uri) external;
 
     function setGuildActive(string calldata guildEnsName, bool active) external;
 

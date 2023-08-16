@@ -101,11 +101,11 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
      * @notice Sets the metadata URI template string for fetching metadata for a guild's tag NFTs.
      * May only be called by the guild's registered admin.
      * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
-     * @param uriTemplate The ERC1155 metadata URL template
+     * @param uri The ERC1155 metadata URL template
      */
-    function setGuildTokenUriTemplate(string calldata guildEnsName, string calldata uriTemplate) external override {
+    function setGuildTokenUri(string calldata guildEnsName, string calldata uri) external override {
         bytes32 guildEnsNode = bytes(guildEnsName).namehash();
-        setGuildTokenUriTemplate(guildEnsNode, uriTemplate);
+        setGuildTokenUri(guildEnsNode, uri);
     }
 
     /**
@@ -154,7 +154,7 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
 
     function updateGuildTagsAuthPolicy(bytes32, address) public virtual;
 
-    function setGuildTokenUriTemplate(bytes32, string calldata) public virtual;
+    function setGuildTokenUri(bytes32, string calldata) public virtual;
 
     function setGuildActive(bytes32, bool) public virtual;
 
