@@ -44,12 +44,7 @@ export function testDigidaigaku(): void {
           .registerGuild(digisDomain, admin, flatFeePolicy.getAddress(), allowlistAuthPolicy.getAddress());
       });
 
-      // 3. Name owner configures DigidaigakuResolver to resolve digidaigaku.eth names using Digis token contract
-      await asAccount(digisDomainOwner, async (signer) => {
-        await digidaigakuResolver.connect(signer).setTokenContract(digisDomain, digisTokenContract, originalResolver);
-      });
-
-      // 4. Guild admin registers DigidaigakuResolver as the fallback resolver for the digidaigaku.eth guild
+      // 3. Guild admin registers DigidaigakuResolver as the fallback resolver for the digidaigaku.eth guild
       await asAccount(admin, async (signer) => {
         await ensGuilds.connect(signer).setFallbackResolver(digisHash, digidaigakuResolver.getAddress());
       });

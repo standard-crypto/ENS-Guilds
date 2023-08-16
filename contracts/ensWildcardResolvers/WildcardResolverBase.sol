@@ -116,6 +116,8 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
                 (result) = abi.decode(encodedResult, (address));
                 // Catch OffchainLookup and override sender param
             } catch (bytes memory err) {
+                // The first 4 bytes of the ABI encoded error represent the error's signature
+                // Slice those 4 bytes and get the data from the OffchainLookup error
                 (
                     address sender,
                     string[] memory urls,

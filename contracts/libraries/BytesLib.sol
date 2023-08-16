@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// https://gist.github.com/rmeissner/76d6345796909ee41fb9f36fdaa4d15f
 
 pragma solidity ^0.8.4;
 

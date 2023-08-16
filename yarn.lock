@@ -10412,8 +10412,8 @@ __metadata:
   linkType: hard
 
 "solhint@npm:^3.3.7":
-  version: 3.5.1
-  resolution: "solhint@npm:3.5.1"
+  version: 3.4.1
+  resolution: "solhint@npm:3.4.1"
   dependencies:
     "@solidity-parser/parser": ^0.16.0
     ajv: ^6.12.6
@@ -10429,7 +10429,7 @@ __metadata:
     lodash: ^4.17.21
     pluralize: ^8.0.0
     prettier: ^2.8.3
-    semver: ^7.5.2
+    semver: ^6.3.0
     strip-ansi: ^6.0.1
     table: ^6.8.1
     text-table: ^0.2.0
@@ -10438,7 +10438,7 @@ __metadata:
       optional: true
   bin:
     solhint: solhint.js
-  checksum: ae24b8b95c65df3a075a26a26ce92b1a41297c738e43444df77c1be81e1be44e1838b151970de0b5164c94b17a96e981758d634473d3b574ab5dca2109176559
+  checksum: 4f81b5bac126c6b07ac36be887c0b120263b5628671d8433c5a20ed9f8168ec6224a706456f1b625c0b9e15143427d229eff497dfea94eca398b63b727c8f7bc
   languageName: node
   linkType: hard
 

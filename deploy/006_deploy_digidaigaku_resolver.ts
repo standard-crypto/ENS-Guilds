@@ -17,15 +17,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const ens = await ethers.getContractAt("ENS", ensRegistry);
   const ensDomainOwner = await ens.owner(namehash("standard-crypto.eth"));
+  const digiOffchainUrl = "https://storage.googleapis.com/digidagiaku-by-name/{data}.json";
+  const digiContractAddress = "0xd1258DB6Ac08eB0e625B75b371C023dA478E94A9";
 
   // Digidaigaku
   await deploy("DigidaigakuResolver", {
     ...baseDeployArgs,
-    // TODO: don't use a stub here
-    args: [ensRegistry /* _ens */, ensNameWrapper /* wrapperAddress */, ensDomainOwner],
+    args: [
+      ensRegistry /* _ens */,
+      ensNameWrapper /* wrapperAddress */,
+      ensDomainOwner,
+      digiContractAddress,
+      digiOffchainUrl,
+    ],
   });
 
   return true;
 };
-func.id = "006_deploy_offchain_retrieval";
+func.id = "006_deploy_digidaigaku_resolver";
 export default func;

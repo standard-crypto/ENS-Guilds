@@ -1,56 +1,77 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./Erc721WildcardResolver.sol";
+import "./WildcardResolverBase.sol";
 import "../libraries/StringParsing.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "../ensGuilds/GuildsResolver.sol";
+import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DigidaigakuResolver is Erc721WildcardResolver {
+contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
     using StringParsing for bytes;
     using Strings for string;
     using Strings for address;
     using Strings for uint256;
 
+    string public url;
+    IERC721 digidaigakuContract;
+
     constructor(
         ENS _ensRegistry,
         INameWrapper _ensNameWrapper,
-        address reverseRecordOwner
-    ) Erc721WildcardResolver(_ensRegistry, _ensNameWrapper, reverseRecordOwner) {
+        address reverseRecordOwner,
+        address tokenContract,
+        string memory _url
+    ) WildcardResolverBase(_ensRegistry, _ensNameWrapper) ReverseClaimer(_ensRegistry, reverseRecordOwner) {
+        digidaigakuContract = IERC721(tokenContract);
+        url = _url;
         return;
+    }
+
+    function setUrl(string memory new_url) public onlyOwner {
+        url = new_url;
     }
 
     function _resolveWildcardEthAddr(
         bytes calldata childUtf8Encoded,
         bytes calldata parentDnsEncoded
     ) internal view virtual override returns (address) {
-        IERC721 tokenContract = tokens[parentDnsEncoded];
-
-        // No NFT contract registered for this address
-        if (address(tokenContract) == address(0)) {
-            return address(0);
-        }
-
         // Extract tokenId from child name
         (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
         // No token, try resolving using name
         if (!valid) {
             string[] memory urls = new string[](1);
-            urls[0] = string(
-                abi.encodePacked(
-                    "https://storage.googleapis.com/digidagiaku-by-name/",
-                    childUtf8Encoded,
-                    ".json#{data}"
-                )
-            );
-            bytes memory callData = abi.encode(parentDnsEncoded);
+            urls[0] = url;
+            bytes memory extraData = abi.encode(parentDnsEncoded);
 
-            revert OffchainLookup(address(this), urls, callData, this.resolveByNameCallback.selector, callData);
+            revert OffchainLookup(
+                address(this),
+                urls,
+                childUtf8Encoded,
+                this.resolveByNameCallback.selector,
+                extraData
+            );
         }
 
+        return resolveOwnerAddress(tokenId);
+    }
+
+    function resolveByNameCallback(
+        bytes calldata response,
+        bytes calldata extraData
+    ) public view returns (bytes memory) {
+        // Get tokenId from offchain response
+        uint256 tokenId = abi.decode(response, (uint256));
+        return abi.encode(resolveOwnerAddress(tokenId));
+    }
+
+    function resolveOwnerAddress(uint256 tokenId) internal view returns (address) {
         // Lookup token owner
         address tokenOwner;
-        try tokenContract.ownerOf(tokenId) returns (address _tokenOwner) {
+        try digidaigakuContract.ownerOf(tokenId) returns (address _tokenOwner) {
             tokenOwner = _tokenOwner;
         } catch {
             tokenOwner = address(0);
@@ -58,26 +79,71 @@ contract DigidaigakuResolver is Erc721WildcardResolver {
         return tokenOwner;
     }
 
-    function resolveByNameCallback(
+    function _resolveWildcardTextRecord(
+        bytes calldata childUtf8Encoded,
+        bytes calldata parentDnsEncoded,
+        string calldata key
+    ) internal view virtual override returns (string memory) {
+        // Extract tokenId from child name
+        (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
+        // No token, try resolving using name
+        if (!valid) {
+            string[] memory urls = new string[](1);
+            // urls[0] = "https://storage.googleapis.com/digidagiaku-by-name/{data}.json";
+            urls[0] = url;
+
+            revert OffchainLookup(
+                address(this),
+                urls,
+                childUtf8Encoded,
+                this.resolveTextByNameCallback.selector,
+                abi.encode(key)
+            );
+        }
+
+        return resolveTextRecord(key, tokenId);
+    }
+
+    function resolveTextByNameCallback(
         bytes calldata response,
         bytes calldata extraData
-    ) public view returns (bytes memory) {
-        bytes memory parentDnsEncoded = abi.decode(extraData, (bytes));
-        IERC721 tokenContract = tokens[parentDnsEncoded];
+    ) public view returns (string memory) {
+        // Get tokenId from offchain response
+        uint256 tokenId = abi.decode(response, (uint256));
+        // Get text key from extraData
+        string memory key = abi.decode(extraData, (string));
+        return resolveTextRecord(key, tokenId);
+    }
 
-        // No NFT contract registered for this address
-        if (address(tokenContract) == address(0)) {
-            return abi.encode(0);
+    function resolveTextRecord(string memory key, uint256 tokenId) internal view returns (string memory) {
+        // Don't bother returning anything if this tokenId has never been minted
+        // solhint-disable-next-line no-empty-blocks
+        try digidaigakuContract.ownerOf(tokenId) {} catch {
+            return "";
         }
-        uint256 digi = abi.decode(response, (uint256));
 
-        // Lookup token owner
-        address tokenOwner;
-        try tokenContract.ownerOf(digi) returns (address _tokenOwner) {
-            tokenOwner = _tokenOwner;
-        } catch {
-            tokenOwner = address(0);
+        if (key.equal("avatar")) {
+            // Standard described here:
+            // https://docs.ens.domains/ens-improvement-proposals/ensip-12-avatar-text-records
+            return
+                string.concat("eip155:1/erc721:", address(digidaigakuContract).toHexString(), "/", tokenId.toString());
+        } else if (key.equal("url")) {
+            string memory url;
+            try IERC721Metadata(address(digidaigakuContract)).tokenURI(tokenId) returns (string memory _url) {
+                url = _url;
+            } catch {
+                url = "";
+            }
+            return url;
         }
-        return abi.encode(tokenOwner);
+
+        // unsupported key
+        return "";
+    }
+
+    function isAuthorised(bytes32 node) internal view virtual override returns (bool) {
+        address owner = _nodeOwner(node);
+        address sender = _msgSender();
+        return sender == owner;
     }
 }
