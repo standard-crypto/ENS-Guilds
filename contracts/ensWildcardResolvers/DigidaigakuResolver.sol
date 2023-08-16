@@ -89,7 +89,6 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
         // No token, try resolving using name
         if (!valid) {
             string[] memory urls = new string[](1);
-            // urls[0] = "https://storage.googleapis.com/digidagiaku-by-name/{data}.json";
             urls[0] = url;
 
             revert OffchainLookup(
