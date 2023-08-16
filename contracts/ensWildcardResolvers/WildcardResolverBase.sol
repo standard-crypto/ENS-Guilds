@@ -12,6 +12,8 @@ import "../libraries/ENSByteUtils.sol";
 import "../libraries/BytesLib.sol";
 import "./PassthroughResolver.sol";
 
+import "hardhat/console.sol";
+
 abstract contract WildcardResolverBase is IExtendedResolver, Context, PassthroughResolver {
     using ENSByteUtils for address;
     using ENSByteUtils for bytes;
@@ -87,6 +89,7 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
         bytes calldata dnsEncodedName,
         bytes calldata resolverCalldata
     ) private view returns (address result) {
+        console.log("inside WildcardResolverBase _resolveEthAddr");
         // Check if the caller is asking for a record on the parent name itself (non-wildcard query)
         (bool isParentName, bytes32 ensNode) = _isParentName(dnsEncodedName);
 
@@ -138,6 +141,7 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
 
     // Callback to contract that initially reverted OffchainLookup
     function resolveCallback(bytes calldata response, bytes calldata extraData) public returns (bytes memory) {
+        console.log("inside resolveCallback");
         (address inner, bytes4 innerCallbackFunction, bytes memory innerExtraData) = abi.decode(
             extraData,
             (address, bytes4, bytes)
@@ -156,6 +160,7 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
         string calldata key,
         bytes calldata resolverCalldata
     ) private view returns (string memory result) {
+        console.log("inside WildcardResolverBase _resolveTextRecord");
         // Check if the caller is asking for a record on the parent name itself (non-wildcard query)
         (bool isParentName, bytes32 ensNode) = _isParentName(dnsEncodedName);
         if (isParentName) {
@@ -171,8 +176,30 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
         // that as a final option
         address passthrough = getPassthroughTarget(ensNode);
         if (bytes(result).length == 0 && passthrough.supportsInterface(type(IExtendedResolver).interfaceId)) {
-            bytes memory encodedResult = IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata);
-            (result) = abi.decode(encodedResult, (string));
+            // bytes memory encodedResult = IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata);
+            try IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata) returns (
+                bytes memory encodedResult
+            ) {
+                (result) = abi.decode(encodedResult, (string));
+                // Catch OffchainLookup and override sender param
+            } catch (bytes memory err) {
+                // The first 4 bytes of the ABI encoded error represent the error's signature
+                // Slice those 4 bytes and get the data from the OffchainLookup error
+                (
+                    address sender,
+                    string[] memory urls,
+                    bytes memory callData,
+                    bytes4 callbackFunction,
+                    bytes memory extraData
+                ) = abi.decode(BytesLib.slice(err, 4, err.length - 4), (address, string[], bytes, bytes4, bytes));
+                revert OffchainLookup(
+                    address(this),
+                    urls,
+                    callData,
+                    this.resolveCallback.selector,
+                    abi.encode(sender, callbackFunction, extraData)
+                );
+            }
         }
     }
 

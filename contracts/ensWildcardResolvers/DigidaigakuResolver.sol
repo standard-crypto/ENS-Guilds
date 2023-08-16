@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "hardhat/console.sol";
+
 contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
     using StringParsing for bytes;
     using Strings for string;
@@ -84,6 +86,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
         bytes calldata parentDnsEncoded,
         string calldata key
     ) internal view virtual override returns (string memory) {
+        console.log("inside Digis _resolveWildcardTextRecord");
         // Extract tokenId from child name
         (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
         // No token, try resolving using name
@@ -107,15 +110,17 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
     function resolveTextByNameCallback(
         bytes calldata response,
         bytes calldata extraData
-    ) public view returns (string memory) {
+    ) public view returns (bytes memory) {
+        console.log("inside resolveTextByNameCallback");
         // Get tokenId from offchain response
         uint256 tokenId = abi.decode(response, (uint256));
         // Get text key from extraData
         string memory key = abi.decode(extraData, (string));
-        return resolveTextRecord(key, tokenId);
+        return abi.encode(resolveTextRecord(key, tokenId));
     }
 
     function resolveTextRecord(string memory key, uint256 tokenId) internal view returns (string memory) {
+        console.log("inside resolveTextRecord with key and tokenId ", key, tokenId);
         // Don't bother returning anything if this tokenId has never been minted
         // solhint-disable-next-line no-empty-blocks
         try digidaigakuContract.ownerOf(tokenId) {} catch {

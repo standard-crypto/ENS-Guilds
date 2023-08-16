@@ -3,7 +3,7 @@ import { type BytesLike, namehash } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { type ENS, type TestERC721, TestERC721__factory } from "../../../types";
-import { resolveAddr } from "../../../utils";
+import { resolveAddr, resolveText } from "../../../utils";
 import { asAccount } from "../../utils";
 
 export function testDigidaigaku(): void {
@@ -25,7 +25,6 @@ export function testDigidaigaku(): void {
       digisHash = namehash(digisDomain);
       ens = await ethers.getContractAt("ENS", ensRegistry);
       digisDomainOwner = await ens.owner(namehash(digisDomain));
-      const originalResolver = await ensRegistry.resolver(digisHash);
 
       // connect to digis token contract
       digisContract = TestERC721__factory.connect(digisTokenContract, ensGuilds.runner);
@@ -67,6 +66,21 @@ export function testDigidaigaku(): void {
       // Check that addie.digidaigaku.eth resolves to the address of the owner
       const resolvedAddr = await resolveAddr(ens, `${digiName}.${digisDomain}`, { enableCcip: true });
       expect(resolvedAddr).to.eq(digiOwner);
+    });
+
+    it("tries to resolve a text record with a token id", async function () {
+      const digiId = 438;
+      const expectedUrlTxtRecord = `https://digidaigaku.com/metadata/${digiId}.json`;
+      const urlTxtRecord = await resolveText(ens, `${digiId}.${digisDomain}`, "url");
+      expect(urlTxtRecord).to.eq(expectedUrlTxtRecord);
+    });
+
+    it("tries to resolve a text record with a name", async function () {
+      const digiName = "addie";
+      const digiId = 523;
+      const expectedUrlAvatarRecord = `eip155:1/erc721:0xd1258db6ac08eb0e625b75b371c023da478e94a9/${digiId}`;
+      const avatarTxtRecord = await resolveText(ens, `${digiName}.${digisDomain}`, "avatar", { enableCcip: true });
+      expect(avatarTxtRecord).to.eq(expectedUrlAvatarRecord);
     });
   });
 }
