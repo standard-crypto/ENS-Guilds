@@ -75,7 +75,7 @@ export function testDigidaigaku(): void {
       expect(urlTxtRecord).to.eq(expectedUrlTxtRecord);
     });
 
-    it("tries to resolve a text record with a name", async function () {
+    it("tries to resolve a text record with a name [ @skip-on-coverage ]", async function () {
       const digiName = "addie";
       const digiId = 523;
       const expectedUrlAvatarRecord = `eip155:1/erc721:0xd1258db6ac08eb0e625b75b371c023da478e94a9/${digiId}`;
