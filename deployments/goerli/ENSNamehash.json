@@ -1,0 +1,40 @@
+{
+  "address": "0x667d1a4A6d18a4D107FCB7543aA8691fE1C4fF23",
+  "abi": [],
+  "transactionHash": "0x465b0d7d6f4aa2ad1f6401053cfede84171eab97787f8e88232aa42172c4c8fe",
+  "receipt": {
+    "to": null,
+    "from": "0xa7d3aFFC0328aC54403c3B1Ea209bD91F452a046",
+    "contractAddress": "0x667d1a4A6d18a4D107FCB7543aA8691fE1C4fF23",
+    "transactionIndex": 28,
+    "gasUsed": "63360",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xa1d3b59d290818d49a4face6ee5b94f0a499ac2729a0f068900485055392fa3b",
+    "transactionHash": "0x465b0d7d6f4aa2ad1f6401053cfede84171eab97787f8e88232aa42172c4c8fe",
+    "logs": [],
+    "blockNumber": 9535741,
+    "cumulativeGasUsed": "2569034",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "add0a899e7b1c12e84f38c3f1f2b39c9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/ENSNamehash.sol\":\"ENSNamehash\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"contracts/libraries/ENSNamehash.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// Source: https://github.com/JonahGroendal/ens-namehash/blob/master/contracts/ENSNamehash.sol\\n\\npragma solidity ^0.8.4;\\n\\n/*\\n * @dev Solidity implementation of the ENS namehash algorithm.\\n *\\n * Warning! Does not normalize or validate names before hashing.\\n */\\nlibrary ENSNamehash {\\n    function namehash(bytes memory domain) internal pure returns (bytes32) {\\n        return namehash(domain, 0);\\n    }\\n\\n    function namehash(bytes memory domain, uint i) internal pure returns (bytes32) {\\n        if (domain.length <= i) return 0x0000000000000000000000000000000000000000000000000000000000000000;\\n\\n        uint len = LabelLength(domain, i);\\n\\n        return keccak256(abi.encodePacked(namehash(domain, i + len + 1), keccak(domain, i, len)));\\n    }\\n\\n    function LabelLength(bytes memory domain, uint i) private pure returns (uint) {\\n        uint len;\\n        while (i + len != domain.length && domain[i + len] != 0x2e) {\\n            len++;\\n        }\\n        return len;\\n    }\\n\\n    function keccak(bytes memory data, uint offset, uint len) private pure returns (bytes32 ret) {\\n        require(offset + len <= data.length);\\n        assembly {\\n            ret := keccak256(add(add(data, 32), offset), len)\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x2e0ef9e175164347b4c80c0f6d2e03212cabbcae8f36e8ced03f66042aca011a\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x602d6037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

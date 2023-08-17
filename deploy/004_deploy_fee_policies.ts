@@ -2,6 +2,8 @@ import { namehash } from "ethers";
 import { type DeployFunction } from "hardhat-deploy/types";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
+import { getLibraries } from "./000_deploy_libraries";
+
 // Deploys a copy of all the contracts
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts, ethers } = hre;
@@ -12,7 +14,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     autoMine: hre.network.tags.test,
-    deterministicDeployment: !hre.network.tags.test,
+    deterministicDeployment: false,
+    libraries: await getLibraries(deployments),
   };
 
   const ensGuildsDeployment = await deployments.get("ENSGuilds");
