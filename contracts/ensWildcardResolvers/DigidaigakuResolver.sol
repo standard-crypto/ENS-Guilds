@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./WildcardResolverBase.sol";
-import "../libraries/StringParsing.sol";
-import "../ensGuilds/GuildsResolver.sol";
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import { WildcardResolverBase } from "./WildcardResolverBase.sol";
+import { StringParsing } from "../libraries/StringParsing.sol";
+import { INameWrapper } from "../ensGuilds/GuildsResolver.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
     using StringParsing for bytes;
@@ -17,7 +18,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
     using Strings for uint256;
 
     string public url;
-    IERC721 digidaigakuContract;
+    IERC721 public digidaigakuContract;
 
     constructor(
         ENS _ensRegistry,
@@ -31,8 +32,8 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
         return;
     }
 
-    function setUrl(string memory new_url) public onlyOwner {
-        url = new_url;
+    function setUrl(string memory newUrl) public onlyOwner {
+        url = newUrl;
     }
 
     function _resolveWildcardEthAddr(
