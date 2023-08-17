@@ -61,7 +61,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
 
     function resolveByNameCallback(
         bytes calldata response,
-        bytes calldata extraData
+        bytes calldata extraData // solhint-disable-line no-unused-vars
     ) public view returns (bytes memory) {
         // Get tokenId from offchain response
         uint256 tokenId = abi.decode(response, (uint256));
@@ -81,7 +81,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
 
     function _resolveWildcardTextRecord(
         bytes calldata childUtf8Encoded,
-        bytes calldata parentDnsEncoded,
+        bytes calldata parentDnsEncoded, // solhint-disable-line no-unused-vars
         string calldata key
     ) internal view virtual override returns (string memory) {
         // Extract tokenId from child name
