@@ -4,23 +4,12 @@ import type { ContractTransactionResponse } from "ethers";
 import { namehash, parseEther } from "ethers";
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
-import { IENSGuilds__factory } from "../../types";
-import { asAccount } from "../utils";
-import { testAdminControls } from "./adminControls";
-import { testDomainOwnerControls } from "./domainOwnerControls";
-import { testEnsRecords } from "./ensRecords";
-import { testGuildDeregistration } from "./guildDeregistration";
-import { testGuildRegistration } from "./guildRegistration";
-import { testGuildTokenFeatures } from "./guildTokens";
-import { testMintAuthorization } from "./mintAuthorization";
-import { testMintFees } from "./mintFees";
-import { testNameWrapperSupport } from "./nameWrapperSupport";
-import { testTagRevocation } from "./tagRevocation";
-import { testTagTransfers } from "./tagTransfers";
-import "./type-annotations";
-import { testWildcardResolution } from "./wildcardResolution";
+import { DigidaigakuResolver__factory, IENSGuilds__factory } from "../../../types";
+import { asAccount } from "../../utils";
+import { testDigidaigaku } from "./digidaigaku";
+import { testNounsIntegration } from "./nouns";
 
-describe("Acceptance Tests - Contracts", function () {
+describe("Acceptance Tests - Use Cases", function () {
   beforeEach("Base acceptance test setup", async function () {
     await deployments.fixture();
 
@@ -33,6 +22,7 @@ describe("Acceptance Tests - Contracts", function () {
     const openAuthPolicyDeployment = await deployments.get("OpenTagsAuthPolicy");
     const flatFeePolicyDeployment = await deployments.get("FlatFeePolicy");
     const erc721WildcardResolverDeployment = await deployments.get("Erc721WildcardResolver");
+    const digidaigakuDeployment = await deployments.get("DigidaigakuResolver");
 
     const ensGuildsImpl = await ethers.getContractAt("ENSGuilds", ensGuildsDeployment.address);
 
@@ -53,6 +43,7 @@ describe("Acceptance Tests - Contracts", function () {
         "Erc721WildcardResolver",
         erc721WildcardResolverDeployment.address,
       ),
+      digidaigakuResolver: DigidaigakuResolver__factory.connect(digidaigakuDeployment.address, ethers.provider),
     };
 
     // Setup basic info for a guild that is / will be registered
@@ -99,17 +90,6 @@ describe("Acceptance Tests - Contracts", function () {
       });
     };
   });
-
-  testGuildRegistration.bind(this)();
-  testMintAuthorization.bind(this)();
-  testEnsRecords.bind(this)();
-  testMintFees.bind(this)();
-  testGuildTokenFeatures.bind(this)();
-  testAdminControls.bind(this)();
-  testDomainOwnerControls.bind(this)();
-  testGuildDeregistration.bind(this)();
-  testTagRevocation.bind(this)();
-  testTagTransfers.bind(this)();
-  testWildcardResolution.bind(this)();
-  testNameWrapperSupport.bind(this)();
+  testNounsIntegration.bind(this)();
+  testDigidaigaku.bind(this)();
 });
