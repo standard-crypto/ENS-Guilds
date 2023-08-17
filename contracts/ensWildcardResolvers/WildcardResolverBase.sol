@@ -171,7 +171,6 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
         // that as a final option
         address passthrough = getPassthroughTarget(ensNode);
         if (bytes(result).length == 0 && passthrough.supportsInterface(type(IExtendedResolver).interfaceId)) {
-            // bytes memory encodedResult = IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata);
             try IExtendedResolver(passthrough).resolve(dnsEncodedName, resolverCalldata) returns (
                 bytes memory encodedResult
             ) {
