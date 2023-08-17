@@ -45,14 +45,13 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
         if (!valid) {
             string[] memory urls = new string[](1);
             urls[0] = url;
-            bytes memory extraData = abi.encode(parentDnsEncoded);
 
             revert OffchainLookup(
                 address(this),
                 urls,
                 childUtf8Encoded,
                 this.resolveByNameCallback.selector,
-                extraData
+                parentDnsEncoded
             );
         }
 
