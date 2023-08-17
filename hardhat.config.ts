@@ -125,6 +125,9 @@ const config: HardhatUserConfig = {
     nounsTokenContract: {
       default: "0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03",
     },
+    digisTokenContract: {
+      default: "0xd1258DB6Ac08eB0e625B75b371C023dA478E94A9",
+    },
   },
   networks: {
     hardhat: {

@@ -3,12 +3,12 @@ import { expect } from "chai";
 import { type BytesLike, namehash, parseEther } from "ethers";
 import { ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
-import { type ENS } from "../../types";
-import { type NounsToken, NounsToken__factory } from "../../types/ethers-contracts";
-import { type NounsAuctionHouse } from "../../types/ethers-contracts/NounsAuctionHouse";
-import { NounsAuctionHouse__factory } from "../../types/ethers-contracts/factories/NounsAuctionHouse__factory";
-import { ensLabelHash, resolveAddr, resolveText } from "../../utils";
-import { asAccount, fastForward } from "../utils";
+import { type ENS } from "../../../types";
+import { type NounsToken, NounsToken__factory } from "../../../types/ethers-contracts";
+import { type NounsAuctionHouse } from "../../../types/ethers-contracts/NounsAuctionHouse";
+import { NounsAuctionHouse__factory } from "../../../types/ethers-contracts/factories/NounsAuctionHouse__factory";
+import { ensLabelHash, resolveAddr, resolveText } from "../../../utils";
+import { asAccount, fastForward } from "../../utils";
 
 export function testNounsIntegration(): void {
   let nounsDomain: string;
