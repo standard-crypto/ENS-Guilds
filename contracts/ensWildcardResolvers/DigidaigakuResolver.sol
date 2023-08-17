@@ -38,7 +38,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
 
     function _resolveWildcardEthAddr(
         bytes calldata childUtf8Encoded,
-        bytes calldata parentDnsEncoded
+        bytes calldata parentDnsEncoded // solhint-disable-line no-unused-vars
     ) internal view virtual override returns (address) {
         // Extract tokenId from child name
         (bool valid, uint256 tokenId) = childUtf8Encoded.parseUint256();
@@ -47,13 +47,7 @@ contract DigidaigakuResolver is WildcardResolverBase, ReverseClaimer, Ownable {
             string[] memory urls = new string[](1);
             urls[0] = url;
 
-            revert OffchainLookup(
-                address(this),
-                urls,
-                childUtf8Encoded,
-                this.resolveByNameCallback.selector,
-                parentDnsEncoded
-            );
+            revert OffchainLookup(address(this), urls, childUtf8Encoded, this.resolveByNameCallback.selector, "");
         }
 
         return resolveOwnerAddress(tokenId);
