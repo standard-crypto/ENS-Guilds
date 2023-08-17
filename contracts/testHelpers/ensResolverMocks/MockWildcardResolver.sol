@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ExtendedResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ExtendedResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/ExtendedResolver.sol";
+import { IExtendedResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
 
 contract MockWildcardResolver is ExtendedResolver, ERC165 {
     mapping(bytes32 => address) private addresses;

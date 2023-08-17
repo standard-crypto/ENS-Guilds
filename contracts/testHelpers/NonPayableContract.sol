@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 contract NonPayableContract {
     // solhint-disable-next-line payable-fallback
     fallback() external {
+        // solhint-disable-next-line custom-errors
         revert("This contract is not payable!");
     }
 }

@@ -5,12 +5,13 @@ pragma solidity ^0.8.4;
 
 library BytesLib {
     function slice(bytes memory _bytes, uint256 _start, uint256 _length) internal pure returns (bytes memory) {
-        require(_length + 31 >= _length, "slice_overflow");
-        require(_bytes.length >= _start + _length, "slice_outOfBounds");
+        require(_length + 31 >= _length, "slice_overflow"); // solhint-disable-line custom-errors
+        require(_bytes.length >= _start + _length, "slice_outOfBounds"); // solhint-disable-line custom-errors
 
         bytes memory tempBytes;
 
         // Check length is 0. `iszero` return 1 for `true` and 0 for `false`.
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             switch iszero(_length)
             case 0 {

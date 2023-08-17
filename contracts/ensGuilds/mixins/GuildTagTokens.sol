@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 abstract contract GuildTagTokens is ERC1155 {
-    using Counters for Counters.Counter;
-
     error GuildsTokenTransferNotAllowed();
 
     struct GuildTokenInfo {

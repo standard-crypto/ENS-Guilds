@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import { NameEncoder } from "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { INameWrapper } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 
-import "../ensWildcardResolvers/WildcardResolverBase.sol";
+import { WildcardResolverBase } from "../ensWildcardResolvers/WildcardResolverBase.sol";
 
 contract StubWildcardResolverBase is WildcardResolverBase {
     using NameEncoder for string;

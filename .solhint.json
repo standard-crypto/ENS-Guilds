@@ -13,6 +13,9 @@
         "endOfLine": "auto"
       }
     ],
-    "reason-string": ["warn", { "maxLength": 64 }]
+    "reason-string": ["warn", { "maxLength": 64 }],
+    "no-global-import": ["error"],
+    "no-unused-import": ["error"],
+    "immutable-vars-naming": ["error", { "immutablesAsConstants": false }]
   }
 }

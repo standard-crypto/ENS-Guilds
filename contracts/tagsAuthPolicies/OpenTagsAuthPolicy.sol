@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import "./ITagsAuthPolicy.sol";
+import { ITagsAuthPolicy } from "./ITagsAuthPolicy.sol";
 
 contract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165, ReverseClaimer {
     function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {

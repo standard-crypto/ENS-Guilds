@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../../ensGuilds/interfaces/IENSGuilds.sol";
+import { IENSGuilds } from "../../ensGuilds/interfaces/IENSGuilds.sol";
 
 /**
  * ClaimGuildTagReentrancyAttacker is a contract that exposes an apparently

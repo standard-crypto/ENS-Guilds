@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import "@openzeppelin/contracts/interfaces/IERC165.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 
-import "./FeePolicyBase.sol";
-import "../ensGuilds/interfaces/IENSGuilds.sol";
+import { FeePolicyBase } from "./FeePolicyBase.sol";
+import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
+import { IFeePolicy } from "./IFeePolicy.sol"; // solhint-disable-line no-unused-import
 
 /**
  * @title FlatFeePolicy
@@ -30,7 +31,7 @@ contract FlatFeePolicy is Context, FeePolicyBase, ReverseClaimer {
         address _ensGuilds,
         address reverseRecordOwner
     ) ReverseClaimer(_ensRegistry, reverseRecordOwner) {
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = IENSGuilds(_ensGuilds);
     }
@@ -44,7 +45,7 @@ contract FlatFeePolicy is Context, FeePolicyBase, ReverseClaimer {
      */
     function setFlatFee(bytes32 guildHash, address feeToken, uint256 fee, address feePaidTo) external {
         // caller must be guild admin
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(ensGuilds.guildAdmin(guildHash) == _msgSender());
 
         guildFees[guildHash] = FeeInfo({ feeToken: feeToken, fee: fee, feePaidTo: feePaidTo });

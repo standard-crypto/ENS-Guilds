@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../interfaces/IENSGuilds.sol";
-import "../interfaces/IENSGuildsHumanized.sol";
-import "../../libraries/ENSNamehash.sol";
+import { IENSGuildsHumanized } from "../interfaces/IENSGuildsHumanized.sol";
+import { ENSNamehash } from "../../libraries/ENSNamehash.sol";
 
 abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     using ENSNamehash for bytes;
@@ -138,6 +137,18 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
         transferGuildAdmin(guildEnsNode, newAdmin);
     }
 
+    /**
+     * @notice Registers a resolver for the guild's root ENS name that will
+     * answer queries about the parent name itself, or any child names that are
+     * not Guild tags
+     * @param guildEnsName The guild's full domain name (e.g. 'my-guild.eth')
+     * @param fallbackResolver The fallback resolver
+     */
+    function setFallbackResolver(string calldata guildEnsName, address fallbackResolver) external override {
+        bytes32 guildEnsNode = bytes(guildEnsName).namehash();
+        setFallbackResolver(guildEnsNode, fallbackResolver);
+    }
+
     // Original versions
 
     function deregisterGuild(bytes32) public virtual;
@@ -161,4 +172,6 @@ abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     function guildAdmin(bytes32) public view virtual returns (address);
 
     function transferGuildAdmin(bytes32, address) public virtual;
+
+    function setFallbackResolver(bytes32 guildEnsNode, address fallbackResolver) public virtual;
 }

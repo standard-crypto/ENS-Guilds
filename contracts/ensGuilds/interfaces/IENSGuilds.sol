@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
+import { IERC1155MetadataURI } from "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 
 interface IENSGuilds is IERC1155MetadataURI {
     /** Events */
@@ -110,14 +109,10 @@ interface IENSGuilds is IERC1155MetadataURI {
     /**
      * @notice Attempts to revoke multiple guild tags
      * @param guildEnsNode The ENS namehash of the guild's domain
-     * @param tagHashes ENS namehashes of all tags to revoke
+     * @param tags tags to revoke
      * @param extraData Additional arguments necessary for assessing whether a tag may be revoked
      */
-    function revokeGuildTagsBatch(
-        bytes32 guildEnsNode,
-        string[] calldata tagHashes,
-        bytes[] calldata extraData
-    ) external;
+    function revokeGuildTagsBatch(bytes32 guildEnsNode, string[] calldata tags, bytes[] calldata extraData) external;
 
     /**
      * @notice Updates the FeePolicy for an existing guild. May only be called by the guild's registered admin.

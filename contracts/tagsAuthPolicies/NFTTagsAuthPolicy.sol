@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
-import "../libraries/StringParsing.sol";
-import "./BaseTagsAuthPolicy.sol";
+import { StringParsing } from "../libraries/StringParsing.sol";
+import { BaseTagsAuthPolicy } from "./BaseTagsAuthPolicy.sol";
+import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
+import { ITagsAuthPolicy } from "./ITagsAuthPolicy.sol"; // solhint-disable-line no-unused-import
 
 /**
  * @title NFTTagsAuthPolicy
@@ -60,7 +63,7 @@ contract NFTTagsAuthPolicy is BaseTagsAuthPolicy, ReverseClaimer {
         } else if (tokenContract.supportsInterface(type(IERC1155).interfaceId)) {
             guilds[guildEnsNode].tokenStandard = TokenStandard.ERC1155;
         } else {
-            // solhint-disable-next-line reason-string
+            // solhint-disable-next-line reason-string, custom-errors
             revert();
         }
 

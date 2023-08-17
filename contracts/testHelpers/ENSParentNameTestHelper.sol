@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../libraries/ENSParentName.sol";
+import { ENSParentName } from "../libraries/ENSParentName.sol";
 
 contract ENSParentNameTestHelper {
     using ENSParentName for bytes;

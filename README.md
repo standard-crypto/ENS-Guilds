@@ -269,8 +269,7 @@ for their particular guild.
 ## Risk Surface
 
 The ENSGuilds contract, as a manager of each Guild's name, is limited to CRUD operations on the Guild's top-level name
-and all sub-names. As a manager, it cannot change the owner of the top-level ENS name, nor edit the set of other
-managers.
+and all sub-names.
 
 The guild name's owner is the ultimate authority, retaining the ability to revoke the ENSGuild contract's authorization
 or reset back to the original resolver for the Guild's name.
@@ -282,6 +281,10 @@ simplicity, or separate the name owner from the admin for a more granular separa
 There is a nuance in the ENS Registry's delegation system in that approving a contract as a manager will authorize it to
 make changes to _all_ names owned by the caller. It is therefore recommended to not co-mingle ownership of multiple
 top-level ENS names in the same account.
+
+Furthermore, the ENS registry system technically allows a name _manager_ to transfer ownership of the name it manages,
+even though the manager is not itself the _owner_. Only audit and careful code review can guarantee that the ENS Guilds
+contracts will not inadvertently transfer ownership of a guild's name.
 
 ## Decentralization and Governance
 

@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol";
+import {
+    AddrResolver,
+    IAddressResolver
+} from "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 contract MockAddressResolver is AddrResolver {
     function addr(bytes32 node) public view override returns (address payable) {
