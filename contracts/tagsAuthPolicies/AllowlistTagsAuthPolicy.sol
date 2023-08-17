@@ -6,6 +6,7 @@ import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 
 import { BaseTagsAuthPolicy } from "./BaseTagsAuthPolicy.sol";
 import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
+import { ITagsAuthPolicy } from "./ITagsAuthPolicy.sol"; // solhint-disable-line no-unused-import
 
 /**
  * @title AllowlistTagsAuthPolicy

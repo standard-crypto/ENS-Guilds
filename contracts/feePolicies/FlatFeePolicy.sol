@@ -8,6 +8,7 @@ import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 
 import { FeePolicyBase } from "./FeePolicyBase.sol";
 import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
+import { IFeePolicy } from "./IFeePolicy.sol"; // solhint-disable-line no-unused-import
 
 /**
  * @title FlatFeePolicy
