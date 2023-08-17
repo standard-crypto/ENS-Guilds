@@ -1,6 +1,22 @@
 {
-  "address": "0xA232CAe91476FF52A7A5FfeEB27d38e2933a94C6",
+  "address": "0xEE9cB128ddA916266D696807a8C7E41894Ae6cB6",
   "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract ENS",
+          "name": "_ensRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "reverseRecordOwner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
     {
       "inputs": [
         {
@@ -37,7 +53,85 @@
           "type": "bool"
         }
       ],
-      "stateMutability": "view",
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "canRevokeTag",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "transferredBy",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "currentOwner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "canTransferTag",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -71,12 +165,73 @@
       "name": "onTagClaimed",
       "outputs": [
         {
-          "internalType": "bytes32",
+          "internalType": "string",
           "name": "tagToRevoke",
-          "type": "bytes32"
+          "type": "string"
         }
       ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "onTagRevoked",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "onTagTransferred",
+      "outputs": [],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -97,48 +252,84 @@
       ],
       "stateMutability": "view",
       "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        },
-        {
-          "internalType": "bytes",
-          "name": "",
-          "type": "bytes"
-        }
-      ],
-      "name": "tagCanBeRevoked",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     }
   ],
-  "args": [],
+  "transactionHash": "0x0ffa385521758be60ff255100dfb96fe5362acaef046c41c68f91ca84093c35c",
+  "receipt": {
+    "to": null,
+    "from": "0xa7d3aFFC0328aC54403c3B1Ea209bD91F452a046",
+    "contractAddress": "0xEE9cB128ddA916266D696807a8C7E41894Ae6cB6",
+    "transactionIndex": 29,
+    "gasUsed": "454471",
+    "logsBloom": "0x00000008000000000000080000000000000000000000000000000000000000000000000000000000008000000000000000000000000010000000000000020000000000000000000040000000008000000000000000000000000000000000000000010000000020000000000000000000000000000000000000000000000000000800010000000000000000000000100000000000000000200000000000000000000000000000040000000010000000000004000000000000008000040000000000000080000004000000010000005000000000000000000000000200000000000000000000000000000001000100000000000000001000000000000000000000",
+    "blockHash": "0x7ff641acd54bc54a2e389da998a4cf5048d02ad932ea3f858696ba6f5489c50c",
+    "transactionHash": "0x0ffa385521758be60ff255100dfb96fe5362acaef046c41c68f91ca84093c35c",
+    "logs": [
+      {
+        "transactionIndex": 29,
+        "blockNumber": 9535756,
+        "transactionHash": "0x0ffa385521758be60ff255100dfb96fe5362acaef046c41c68f91ca84093c35c",
+        "address": "0x4f7A657451358a22dc397d5eE7981FfC526cd856",
+        "topics": [
+          "0x6ada868dd3058cf77a48a74489fd7963688e5464b2b0fa957ace976243270e92",
+          "0x000000000000000000000000ee9cb128dda916266d696807a8c7e41894ae6cb6",
+          "0x16c93c4f968e1be4fc13337bca01fb005c3572bf43ec2d6a6c8dfbc75c5f78da"
+        ],
+        "data": "0x",
+        "logIndex": 52,
+        "blockHash": "0x7ff641acd54bc54a2e389da998a4cf5048d02ad932ea3f858696ba6f5489c50c"
+      },
+      {
+        "transactionIndex": 29,
+        "blockNumber": 9535756,
+        "transactionHash": "0x0ffa385521758be60ff255100dfb96fe5362acaef046c41c68f91ca84093c35c",
+        "address": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+        "topics": [
+          "0xce0457fe73731f824cc272376169235128c118b49d344817417c6d108d155e82",
+          "0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2",
+          "0xc8d0ac5a44f10eb1ab64c71f6984a1051ce353d76475a024843090c718655e0c"
+        ],
+        "data": "0x000000000000000000000000e72285aee8ad0b545dd6287aab9ebe8237d4e7cf",
+        "logIndex": 53,
+        "blockHash": "0x7ff641acd54bc54a2e389da998a4cf5048d02ad932ea3f858696ba6f5489c50c"
+      },
+      {
+        "transactionIndex": 29,
+        "blockNumber": 9535756,
+        "transactionHash": "0x0ffa385521758be60ff255100dfb96fe5362acaef046c41c68f91ca84093c35c",
+        "address": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+        "topics": [
+          "0x335721b01866dc23fbee8b6b2c7b1e14d6f05c28cd35a2c934239f94095602a0",
+          "0x16c93c4f968e1be4fc13337bca01fb005c3572bf43ec2d6a6c8dfbc75c5f78da"
+        ],
+        "data": "0x000000000000000000000000d7a4f6473f32ac2af804b3686ae8f1932bc35750",
+        "logIndex": 54,
+        "blockHash": "0x7ff641acd54bc54a2e389da998a4cf5048d02ad932ea3f858696ba6f5489c50c"
+      }
+    ],
+    "blockNumber": 9535756,
+    "cumulativeGasUsed": "5982222",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+    "0xE72285aee8Ad0b545DD6287Aab9EbE8237D4e7Cf"
+  ],
   "numDeployments": 1,
-  "solcInputHash": "3a32f099b226e81e32ffbca8f8873f42",
-  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"canClaimTag\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onTagClaimed\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"tagToRevoke\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceID\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"tagCanBeRevoked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/tagsAuthPolicies/OpenTagsAuthPolicy.sol\":\"OpenTagsAuthPolicy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"contracts/tagsAuthPolicies/ITagsAuthPolicy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @title TagsAuthPolicy\\n * @notice An interface for Guilds to implement that will control authorization for minting tags within that guild\\n */\\ninterface ITagsAuthPolicy is IERC165 {\\n    /**\\n     * @notice Checks whether a certain address (claimant) may claim a given guild tag\\n     * @param guildHash The ENS namehash of the guild's domain\\n     * @param tag The tag being claimed (e.g. 'foo' for foo.my-guild.eth)\\n     * @param claimant The address attempting to claim the tag (not necessarily the address that will receive it)\\n     * @param recipient The address that would receive the tag\\n     * @param extraClaimArgs [Optional] Any guild-specific additional arguments required\\n     */\\n    function canClaimTag(\\n        bytes32 guildHash,\\n        string calldata tag,\\n        address claimant,\\n        address recipient,\\n        bytes calldata extraClaimArgs\\n    ) external view returns (bool);\\n\\n    /**\\n     * @dev Called by ENSGuilds once a tag has been claimed.\\n     * Provided for auth policies to update local state, such as erasing an address from an allowlist after that\\n     * address has successfully minted a tag.\\n     * @param guildHash The ENS namehash of the guild's domain\\n     * @param tag The tag being claimed (e.g. 'foo' for foo.my-guild.eth)\\n     * @param claimant The address that claimed the tag (not necessarily the address that received it)\\n     * @param recipient The address that received receive the tag\\n     * @param extraClaimArgs [Optional] Any guild-specific additional arguments required\\n     * @return tagHashToRevoke The ENS namehash of any tag that should be revoked as a consequence of the given tag\\n     * being claimed. Returns zero if no tag should be revoked.\\n     */\\n    function onTagClaimed(\\n        bytes32 guildHash,\\n        string calldata tag,\\n        address claimant,\\n        address recipient,\\n        bytes calldata extraClaimArgs\\n    ) external returns (bytes32 tagHashToRevoke);\\n\\n    /**\\n     * @notice Checks whether a given guild tag is eligible to be revoked\\n     * @param revokedBy The address that would attempt to revoke it\\n     * @param guildHash The ENS namehash of the guild's domain\\n     * @param tag The tag being revoked (e.g. 'foo' for foo.my-guild.eth)\\n     * @param extraRevokeArgs Any additional arguments necessary for assessing whether a tag may be revoked\\n     */\\n    function tagCanBeRevoked(\\n        address revokedBy,\\n        bytes32 guildHash,\\n        string calldata tag,\\n        bytes calldata extraRevokeArgs\\n    ) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xc102bd8b8ad396612893f2fce271d56e7b80388ab2df80ee24934d62baf8af89\",\"license\":\"MIT\"},\"contracts/tagsAuthPolicies/OpenTagsAuthPolicy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport \\\"@openzeppelin/contracts/utils/introspection/ERC165.sol\\\";\\n\\nimport \\\"./ITagsAuthPolicy.sol\\\";\\n\\ncontract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165 {\\n    function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {\\n        return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);\\n    }\\n\\n    function canClaimTag(\\n        bytes32,\\n        string calldata,\\n        address,\\n        address,\\n        bytes calldata\\n    ) external view virtual override returns (bool) {\\n        return true;\\n    }\\n\\n    function onTagClaimed(\\n        bytes32,\\n        string calldata,\\n        address,\\n        address,\\n        bytes calldata\\n    ) external virtual override returns (bytes32 tagToRevoke) {\\n        return 0;\\n    }\\n\\n    function tagCanBeRevoked(\\n        address,\\n        bytes32,\\n        string calldata,\\n        bytes calldata\\n    ) external view virtual override returns (bool) {\\n        return false;\\n    }\\n}\\n\",\"keccak256\":\"0x8f50d83943d41e8529c511388c884f6aeb1c568e0011fbafd6f0ea2983439932\",\"license\":\"MIT\"}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b506102e6806100206000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c806301ffc9a7146100515780630910b77f1461007957806329593e5a146100945780632cad1767146100bd575b600080fd5b61006461005f36600461010e565b6100d7565b60405190151581526020015b60405180910390f35b6100646100873660046101b1565b6001979650505050505050565b6100af6100a23660046101b1565b6000979650505050505050565b604051908152602001610070565b6100646100cb36600461024f565b60009695505050505050565b60006001600160e01b031982166306724f2160e11b148061010857506301ffc9a760e01b6001600160e01b03198316145b92915050565b60006020828403121561012057600080fd5b81356001600160e01b03198116811461013857600080fd5b9392505050565b60008083601f84011261015157600080fd5b50813567ffffffffffffffff81111561016957600080fd5b60208301915083602082850101111561018157600080fd5b9250929050565b803573ffffffffffffffffffffffffffffffffffffffff811681146101ac57600080fd5b919050565b600080600080600080600060a0888a0312156101cc57600080fd5b87359650602088013567ffffffffffffffff808211156101eb57600080fd5b6101f78b838c0161013f565b909850965086915061020b60408b01610188565b955061021960608b01610188565b945060808a013591508082111561022f57600080fd5b5061023c8a828b0161013f565b989b979a50959850939692959293505050565b6000806000806000806080878903121561026857600080fd5b61027187610188565b955060208701359450604087013567ffffffffffffffff8082111561029557600080fd5b6102a18a838b0161013f565b909650945060608901359150808211156102ba57600080fd5b506102c789828a0161013f565b979a969950949750929593949250505056fea164736f6c6343000811000a",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c806301ffc9a7146100515780630910b77f1461007957806329593e5a146100945780632cad1767146100bd575b600080fd5b61006461005f36600461010e565b6100d7565b60405190151581526020015b60405180910390f35b6100646100873660046101b1565b6001979650505050505050565b6100af6100a23660046101b1565b6000979650505050505050565b604051908152602001610070565b6100646100cb36600461024f565b60009695505050505050565b60006001600160e01b031982166306724f2160e11b148061010857506301ffc9a760e01b6001600160e01b03198316145b92915050565b60006020828403121561012057600080fd5b81356001600160e01b03198116811461013857600080fd5b9392505050565b60008083601f84011261015157600080fd5b50813567ffffffffffffffff81111561016957600080fd5b60208301915083602082850101111561018157600080fd5b9250929050565b803573ffffffffffffffffffffffffffffffffffffffff811681146101ac57600080fd5b919050565b600080600080600080600060a0888a0312156101cc57600080fd5b87359650602088013567ffffffffffffffff808211156101eb57600080fd5b6101f78b838c0161013f565b909850965086915061020b60408b01610188565b955061021960608b01610188565b945060808a013591508082111561022f57600080fd5b5061023c8a828b0161013f565b989b979a50959850939692959293505050565b6000806000806000806080878903121561026857600080fd5b61027187610188565b955060208701359450604087013567ffffffffffffffff8082111561029557600080fd5b6102a18a838b0161013f565b909650945060608901359150808211156102ba57600080fd5b506102c789828a0161013f565b979a969950949750929593949250505056fea164736f6c6343000811000a",
+  "solcInputHash": "add0a899e7b1c12e84f38c3f1f2b39c9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract ENS\",\"name\":\"_ensRegistry\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"reverseRecordOwner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"canClaimTag\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"canRevokeTag\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"transferredBy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"currentOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"canTransferTag\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onTagClaimed\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"tagToRevoke\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"name\":\"onTagRevoked\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"onTagTransferred\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceID\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/tagsAuthPolicies/OpenTagsAuthPolicy.sol\":\"OpenTagsAuthPolicy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"@ensdomains/ens-contracts/contracts/registry/ENS.sol\":{\"content\":\"pragma solidity >=0.8.4;\\n\\ninterface ENS {\\n    // Logged when the owner of a node assigns a new owner to a subnode.\\n    event NewOwner(bytes32 indexed node, bytes32 indexed label, address owner);\\n\\n    // Logged when the owner of a node transfers ownership to a new account.\\n    event Transfer(bytes32 indexed node, address owner);\\n\\n    // Logged when the resolver for a node changes.\\n    event NewResolver(bytes32 indexed node, address resolver);\\n\\n    // Logged when the TTL of a node changes\\n    event NewTTL(bytes32 indexed node, uint64 ttl);\\n\\n    // Logged when an operator is added or removed.\\n    event ApprovalForAll(\\n        address indexed owner,\\n        address indexed operator,\\n        bool approved\\n    );\\n\\n    function setRecord(\\n        bytes32 node,\\n        address owner,\\n        address resolver,\\n        uint64 ttl\\n    ) external;\\n\\n    function setSubnodeRecord(\\n        bytes32 node,\\n        bytes32 label,\\n        address owner,\\n        address resolver,\\n        uint64 ttl\\n    ) external;\\n\\n    function setSubnodeOwner(\\n        bytes32 node,\\n        bytes32 label,\\n        address owner\\n    ) external returns (bytes32);\\n\\n    function setResolver(bytes32 node, address resolver) external;\\n\\n    function setOwner(bytes32 node, address owner) external;\\n\\n    function setTTL(bytes32 node, uint64 ttl) external;\\n\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    function owner(bytes32 node) external view returns (address);\\n\\n    function resolver(bytes32 node) external view returns (address);\\n\\n    function ttl(bytes32 node) external view returns (uint64);\\n\\n    function recordExists(bytes32 node) external view returns (bool);\\n\\n    function isApprovedForAll(\\n        address owner,\\n        address operator\\n    ) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x7cb1158c7d268b63de1468e28e2711b28d686e2628ddb22da2149cd93ddeafda\"},\"@ensdomains/ens-contracts/contracts/reverseRegistrar/IReverseRegistrar.sol\":{\"content\":\"pragma solidity >=0.8.4;\\n\\ninterface IReverseRegistrar {\\n    function setDefaultResolver(address resolver) external;\\n\\n    function claim(address owner) external returns (bytes32);\\n\\n    function claimForAddr(\\n        address addr,\\n        address owner,\\n        address resolver\\n    ) external returns (bytes32);\\n\\n    function claimWithResolver(\\n        address owner,\\n        address resolver\\n    ) external returns (bytes32);\\n\\n    function setName(string memory name) external returns (bytes32);\\n\\n    function setNameForAddr(\\n        address addr,\\n        address owner,\\n        address resolver,\\n        string memory name\\n    ) external returns (bytes32);\\n\\n    function node(address addr) external pure returns (bytes32);\\n}\\n\",\"keccak256\":\"0x83adfcf6da72b1bcd1e3ac387afe5fc7fdf7f2ac28b7601544d2ca4b9d45d159\"},\"@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity >=0.8.17 <0.9.0;\\n\\nimport {ENS} from \\\"../registry/ENS.sol\\\";\\nimport {IReverseRegistrar} from \\\"../reverseRegistrar/IReverseRegistrar.sol\\\";\\n\\ncontract ReverseClaimer {\\n    bytes32 constant ADDR_REVERSE_NODE =\\n        0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;\\n\\n    constructor(ENS ens, address claimant) {\\n        IReverseRegistrar reverseRegistrar = IReverseRegistrar(\\n            ens.owner(ADDR_REVERSE_NODE)\\n        );\\n        reverseRegistrar.claim(claimant);\\n    }\\n}\\n\",\"keccak256\":\"0x78a28627241535b595f6fff476a1fa7acc90c80684fe7784734920fc8af6fc22\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"contracts/tagsAuthPolicies/ITagsAuthPolicy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport { IERC165 } from \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @title TagsAuthPolicy\\n * @notice An interface for Guilds to implement that will control authorization for minting tags within that guild\\n */\\ninterface ITagsAuthPolicy is IERC165 {\\n    /**\\n     * @notice Checks whether a certain address (claimant) may claim a given guild tag that has been revoked or\\n     * has never been claimed\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag being claimed (e.g. 'foo' for foo.my-guild.eth)\\n     * @param claimant The address attempting to claim the tag (not necessarily the address that will receive it)\\n     * @param recipient The address that would receive the tag\\n     * @param extraClaimArgs [Optional] Any guild-specific additional arguments required\\n     */\\n    function canClaimTag(\\n        bytes32 guildEnsNode,\\n        string calldata tag,\\n        address claimant,\\n        address recipient,\\n        bytes calldata extraClaimArgs\\n    ) external view returns (bool);\\n\\n    /**\\n     * @dev Called by ENSGuilds once a tag has been claimed.\\n     * Provided for auth policies to update local state, such as erasing an address from an allowlist after that\\n     * address has successfully minted a tag.\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag being claimed (e.g. 'foo' for foo.my-guild.eth)\\n     * @param claimant The address that claimed the tag (not necessarily the address that received it)\\n     * @param recipient The address that received receive the tag\\n     * @param extraClaimArgs [Optional] Any guild-specific additional arguments required\\n     * @return tagToRevoke Any tag that should be revoked as a consequence of the given tag\\n     * being claimed. Returns empty string if no tag should be revoked.\\n     */\\n    function onTagClaimed(\\n        bytes32 guildEnsNode,\\n        string calldata tag,\\n        address claimant,\\n        address recipient,\\n        bytes calldata extraClaimArgs\\n    ) external returns (string memory tagToRevoke);\\n\\n    /**\\n     * @notice Checks whether a given guild tag is eligible to be revoked\\n     * @param revokedBy The address that would attempt to revoke it\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag being revoked (e.g. 'foo' for foo.my-guild.eth)\\n     * @param extraRevokeArgs Any additional arguments necessary for assessing whether a tag may be revoked\\n     */\\n    function canRevokeTag(\\n        address revokedBy,\\n        bytes32 guildEnsNode,\\n        string calldata tag,\\n        bytes calldata extraRevokeArgs\\n    ) external view returns (bool);\\n\\n    /**\\n     * @notice Called by ENSGuilds once a tag has been revoked.\\n     * @param revokedBy The address that revoked it\\n     * @param revokedFrom The address who owned it when it was revoked\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag being revoked (e.g. 'foo' for foo.my-guild.eth)\\n     */\\n    function onTagRevoked(address revokedBy, address revokedFrom, bytes32 guildEnsNode, string memory tag) external;\\n\\n    /**\\n     * @notice Checks whether a tag can be transferred. Implementations may trust that `currentOwner` is the\\n     * owner of the given tag.\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag being revoked (e.g. 'foo' for foo.my-guild.eth)\\n     * @param transferredBy The address initiating the transfer. May be different than the currentOwner, such\\n     * as an admin or a marketplace contract\\n     * @param currentOwner The address currently owning the given tag\\n     * @param newOwner The address that would receive the tag\\n     * @param extraTransferArgs Any additional arguments necessary for assessing whether a tag may be transferred\\n     */\\n    function canTransferTag(\\n        bytes32 guildEnsNode,\\n        string calldata tag,\\n        address transferredBy,\\n        address currentOwner,\\n        address newOwner,\\n        bytes calldata extraTransferArgs\\n    ) external view returns (bool);\\n\\n    /**\\n     * @notice Called by ENSGuilds once a tag has been transferred\\n     * @param guildEnsNode The ENS namehash of the guild's domain\\n     * @param tag The tag that was transferred\\n     * @param transferredBy The address initiating the transfer\\n     * @param prevOwner The address that previously owned the tag\\n     * @param newOwner The address that received the tag\\n     */\\n    function onTagTransferred(\\n        bytes32 guildEnsNode,\\n        string calldata tag,\\n        address transferredBy,\\n        address prevOwner,\\n        address newOwner\\n    ) external;\\n}\\n\",\"keccak256\":\"0xc676e612890e85f7cfa4a6e0e60129d9d77c224525d890f11f8eeb27c350d8b5\",\"license\":\"MIT\"},\"contracts/tagsAuthPolicies/OpenTagsAuthPolicy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport { ReverseClaimer } from \\\"@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol\\\";\\nimport { ENS } from \\\"@ensdomains/ens-contracts/contracts/registry/ENS.sol\\\";\\nimport { ERC165 } from \\\"@openzeppelin/contracts/utils/introspection/ERC165.sol\\\";\\nimport { IERC165 } from \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\n\\nimport { ITagsAuthPolicy } from \\\"./ITagsAuthPolicy.sol\\\";\\n\\ncontract OpenTagsAuthPolicy is ITagsAuthPolicy, ERC165, ReverseClaimer {\\n    function supportsInterface(bytes4 interfaceID) public view virtual override(IERC165, ERC165) returns (bool) {\\n        return interfaceID == type(ITagsAuthPolicy).interfaceId || super.supportsInterface(interfaceID);\\n    }\\n\\n    // solhint-disable-next-line no-empty-blocks\\n    constructor(ENS _ensRegistry, address reverseRecordOwner) ReverseClaimer(_ensRegistry, reverseRecordOwner) {}\\n\\n    function canClaimTag(\\n        bytes32,\\n        string calldata,\\n        address,\\n        address,\\n        bytes calldata\\n    ) external pure virtual override returns (bool) {\\n        return true;\\n    }\\n\\n    function onTagClaimed(\\n        bytes32,\\n        string calldata,\\n        address,\\n        address,\\n        bytes calldata\\n    ) external virtual override returns (string memory tagToRevoke) {\\n        return \\\"\\\";\\n    }\\n\\n    function canRevokeTag(\\n        address,\\n        bytes32,\\n        string calldata,\\n        bytes calldata\\n    ) external pure virtual override returns (bool) {\\n        return false;\\n    }\\n\\n    function canTransferTag(\\n        bytes32,\\n        string calldata,\\n        address transferredBy,\\n        address currentOwner,\\n        address,\\n        bytes calldata\\n    ) external pure returns (bool) {\\n        return transferredBy == currentOwner;\\n    }\\n\\n    function onTagRevoked(address, address, bytes32, string memory) external pure virtual override {\\n        return;\\n    }\\n\\n    function onTagTransferred(bytes32, string calldata, address, address, address) external pure override {\\n        return;\\n    }\\n}\\n\",\"keccak256\":\"0x1ac4b2c49f78ed8f0c815313f65e9e16dcce478e3f19121b78c36ca69f2e63fc\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516107c53803806107c583398101604081905261002f91610151565b6040516302571be360e01b81527f91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e26004820152829082906000906001600160a01b038416906302571be390602401602060405180830381865afa15801561009a573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906100be919061018b565b604051630f41a04d60e11b81526001600160a01b03848116600483015291925090821690631e83409a906024016020604051808303816000875af115801561010a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012e91906101af565b5050505050506101c8565b6001600160a01b038116811461014e57600080fd5b50565b6000806040838503121561016457600080fd5b825161016f81610139565b602084015190925061018081610139565b809150509250929050565b60006020828403121561019d57600080fd5b81516101a881610139565b9392505050565b6000602082840312156101c157600080fd5b5051919050565b6105ee806101d76000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c80639609fb171161005b5780639609fb17146100fa578063acdbdda114610110578063d4f1d4e514610143578063fda41c101461015957600080fd5b806301ffc9a7146100825780630910b77f146100aa57806329593e5a146100c5575b600080fd5b6100956100903660046101aa565b610173565b60405190151581526020015b60405180910390f35b6100956100b836600461024d565b6001979650505050505050565b6100ed6100d336600461024d565b604080516020810190915260008152979650505050505050565b6040516100a191906102eb565b61010e61010836600461034f565b50505050565b005b61009561011e36600461042b565b50505073ffffffffffffffffffffffffffffffffffffffff9081169116149392505050565b61010e6101513660046104d9565b505050505050565b610095610167366004610557565b60009695505050505050565b60006001600160e01b031982166319e733b360e11b14806101a457506301ffc9a760e01b6001600160e01b03198316145b92915050565b6000602082840312156101bc57600080fd5b81356001600160e01b0319811681146101d457600080fd5b9392505050565b60008083601f8401126101ed57600080fd5b50813567ffffffffffffffff81111561020557600080fd5b60208301915083602082850101111561021d57600080fd5b9250929050565b803573ffffffffffffffffffffffffffffffffffffffff8116811461024857600080fd5b919050565b600080600080600080600060a0888a03121561026857600080fd5b87359650602088013567ffffffffffffffff8082111561028757600080fd5b6102938b838c016101db565b90985096508691506102a760408b01610224565b95506102b560608b01610224565b945060808a01359150808211156102cb57600080fd5b506102d88a828b016101db565b989b979a50959850939692959293505050565b600060208083528351808285015260005b81811015610318578581018301518582016040015282016102fc565b506000604082860101526040601f19601f8301168501019250505092915050565b634e487b7160e01b600052604160045260246000fd5b6000806000806080858703121561036557600080fd5b61036e85610224565b935061037c60208601610224565b925060408501359150606085013567ffffffffffffffff808211156103a057600080fd5b818701915087601f8301126103b457600080fd5b8135818111156103c6576103c6610339565b604051601f8201601f19908116603f011681019083821181831017156103ee576103ee610339565b816040528281528a602084870101111561040757600080fd5b82602086016020830137600060208483010152809550505050505092959194509250565b60008060008060008060008060c0898b03121561044757600080fd5b88359750602089013567ffffffffffffffff8082111561046657600080fd5b6104728c838d016101db565b909950975087915061048660408c01610224565b965061049460608c01610224565b95506104a260808c01610224565b945060a08b01359150808211156104b857600080fd5b506104c58b828c016101db565b999c989b5096995094979396929594505050565b60008060008060008060a087890312156104f257600080fd5b86359550602087013567ffffffffffffffff81111561051057600080fd5b61051c89828a016101db565b909650945061052f905060408801610224565b925061053d60608801610224565b915061054b60808801610224565b90509295509295509295565b6000806000806000806080878903121561057057600080fd5b61057987610224565b955060208701359450604087013567ffffffffffffffff8082111561059d57600080fd5b6105a98a838b016101db565b909650945060608901359150808211156105c257600080fd5b506105cf89828a016101db565b979a969950949750929593949250505056fea164736f6c6343000811000a",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c80639609fb171161005b5780639609fb17146100fa578063acdbdda114610110578063d4f1d4e514610143578063fda41c101461015957600080fd5b806301ffc9a7146100825780630910b77f146100aa57806329593e5a146100c5575b600080fd5b6100956100903660046101aa565b610173565b60405190151581526020015b60405180910390f35b6100956100b836600461024d565b6001979650505050505050565b6100ed6100d336600461024d565b604080516020810190915260008152979650505050505050565b6040516100a191906102eb565b61010e61010836600461034f565b50505050565b005b61009561011e36600461042b565b50505073ffffffffffffffffffffffffffffffffffffffff9081169116149392505050565b61010e6101513660046104d9565b505050505050565b610095610167366004610557565b60009695505050505050565b60006001600160e01b031982166319e733b360e11b14806101a457506301ffc9a760e01b6001600160e01b03198316145b92915050565b6000602082840312156101bc57600080fd5b81356001600160e01b0319811681146101d457600080fd5b9392505050565b60008083601f8401126101ed57600080fd5b50813567ffffffffffffffff81111561020557600080fd5b60208301915083602082850101111561021d57600080fd5b9250929050565b803573ffffffffffffffffffffffffffffffffffffffff8116811461024857600080fd5b919050565b600080600080600080600060a0888a03121561026857600080fd5b87359650602088013567ffffffffffffffff8082111561028757600080fd5b6102938b838c016101db565b90985096508691506102a760408b01610224565b95506102b560608b01610224565b945060808a01359150808211156102cb57600080fd5b506102d88a828b016101db565b989b979a50959850939692959293505050565b600060208083528351808285015260005b81811015610318578581018301518582016040015282016102fc565b506000604082860101526040601f19601f8301168501019250505092915050565b634e487b7160e01b600052604160045260246000fd5b6000806000806080858703121561036557600080fd5b61036e85610224565b935061037c60208601610224565b925060408501359150606085013567ffffffffffffffff808211156103a057600080fd5b818701915087601f8301126103b457600080fd5b8135818111156103c6576103c6610339565b604051601f8201601f19908116603f011681019083821181831017156103ee576103ee610339565b816040528281528a602084870101111561040757600080fd5b82602086016020830137600060208483010152809550505050505092959194509250565b60008060008060008060008060c0898b03121561044757600080fd5b88359750602089013567ffffffffffffffff8082111561046657600080fd5b6104728c838d016101db565b909950975087915061048660408c01610224565b965061049460608c01610224565b95506104a260808c01610224565b945060a08b01359150808211156104b857600080fd5b506104c58b828c016101db565b999c989b5096995094979396929594505050565b60008060008060008060a087890312156104f257600080fd5b86359550602087013567ffffffffffffffff81111561051057600080fd5b61051c89828a016101db565b909650945061052f905060408801610224565b925061053d60608801610224565b915061054b60808801610224565b90509295509295509295565b6000806000806000806080878903121561057057600080fd5b61057987610224565b955060208701359450604087013567ffffffffffffffff8082111561059d57600080fd5b6105a98a838b016101db565b909650945060608901359150808211156105c257600080fd5b506105cf89828a016101db565b979a969950949750929593949250505056fea164736f6c6343000811000a",
+  "libraries": {
+    "ERC165Checker": "0xE868e957bb5F053e84D2DC0C047776E0331E6218",
+    "StringParsing": "0x781E147ecE78D418635A6Ce630fe73B291Fe394e",
+    "Strings": "0x2F14B1439837DD741959AB598F907d8149E2e525",
+    "NameEncoder": "0xF42832b9758B65e97fc7Cc74b902fA9913B296AA",
+    "ENSNameHash": "0x667d1a4A6d18a4D107FCB7543aA8691fE1C4fF23",
+    "ENSByteUtils": "0x62a47aFC54D58873e2799AAF259560203Ff728E5",
+    "ENSParentName": "0x53FCA1B491D1f4Ce9be997636a90306D01DeAd06"
+  },
   "devdoc": {
     "kind": "dev",
     "methods": {},

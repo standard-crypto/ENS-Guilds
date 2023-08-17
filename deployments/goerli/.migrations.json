@@ -1,6 +1,9 @@
 {
-  "001_deploy_ens_guilds": 1688404081,
-  "002_deploy_auth_policies": 1688404082,
-  "002_deploy_fee_policies": 1688404082,
-  "004_deploy_wildcard_resolver": 1688404132
+  "000_deploy_libraries": 1692311544,
+  "001_deploy_guilds_resolver": 1692311558,
+  "002_deploy_ens_guilds": 1692311573,
+  "003_deploy_auth_policies": 1692311703,
+  "004_deploy_fee_policies": 1692311713,
+  "005_deploy_nft_wildcard_resolver": 1692311727,
+  "006_deploy_digidaigaku_resolver": 1692311785
 }

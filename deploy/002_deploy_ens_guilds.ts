@@ -3,6 +3,7 @@ import { type DeployFunction } from "hardhat-deploy/types";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { GuildsResolver__factory } from "../types";
+import { getLibraries } from "./000_deploy_libraries";
 
 // Deploys a copy of all the contracts
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -14,7 +15,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     autoMine: hre.network.tags.test,
-    deterministicDeployment: !hre.network.tags.test,
+    deterministicDeployment: false,
+    libraries: await getLibraries(deployments),
   };
 
   const guildsResolverDeployment = await deployments.get("GuildsResolver");
@@ -25,8 +27,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // ENSGuilds
   const ensGuildsDeployment = await deploy("ENSGuilds", {
     ...baseDeployArgs,
-    // TODO: don't use a stub here
-    args: ["stubMetadataUri", ensRegistry, ensNameWrapper, guildsResolverDeployment.address, ensDomainOwner],
+    args: [
+      "https://storage.googleapis.com/ens-guilds-xrdfqt4bpw4tkzxjn/default_metadata.json",
+      ensRegistry,
+      ensNameWrapper,
+      guildsResolverDeployment.address,
+      ensDomainOwner,
+    ],
   });
 
   // Initialize the GuildTagsResolver with the address of the base ENSGuilds contract
