@@ -3,13 +3,13 @@ pragma solidity ^0.8.4;
 
 // Source: https://etherscan.io/address/0x226159d592e2b063810a10ebf6dcbada94ed68b8#code
 
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IABIResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IContentHashResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IInterfaceResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IPubkeyResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ITextResolver.sol";
+import { IABIResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IABIResolver.sol";
+import { IAddrResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
+import { IContentHashResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IContentHashResolver.sol";
+import { IInterfaceResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IInterfaceResolver.sol";
+import { INameResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol";
+import { IPubkeyResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IPubkeyResolver.sol";
+import { ITextResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/ITextResolver.sol";
 
 interface IENSLegacyPublicResolver is
     IABIResolver,

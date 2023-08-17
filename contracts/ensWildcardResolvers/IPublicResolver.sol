@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IABIResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IContentHashResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IDNSRecordResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IDNSZoneResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IInterfaceResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IPubkeyResolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ITextResolver.sol";
+import { IABIResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IABIResolver.sol";
+import { IAddrResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddrResolver.sol";
+import { IAddressResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IAddressResolver.sol";
+import { IContentHashResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IContentHashResolver.sol";
+import { IDNSRecordResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IDNSRecordResolver.sol";
+import { IDNSZoneResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IDNSZoneResolver.sol";
+import { IInterfaceResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IInterfaceResolver.sol";
+import { INameResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/INameResolver.sol";
+import { IPubkeyResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IPubkeyResolver.sol";
+import { ITextResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/ITextResolver.sol";
 
 interface IPublicResolver is
     IABIResolver,

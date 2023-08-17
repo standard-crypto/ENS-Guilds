@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol";
+import { AddrResolver, IAddrResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 contract MockAddrResolver is AddrResolver {
     function isAuthorised(bytes32) internal pure override returns (bool) {

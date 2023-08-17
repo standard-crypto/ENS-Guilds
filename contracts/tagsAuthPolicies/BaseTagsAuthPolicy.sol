@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "./ITagsAuthPolicy.sol";
-import "../ensGuilds/interfaces/IENSGuilds.sol";
+import { ITagsAuthPolicy } from "./ITagsAuthPolicy.sol";
+import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
 
 /**
  * @title BaseTagsAuthPolicy
@@ -19,19 +20,19 @@ abstract contract BaseTagsAuthPolicy is ITagsAuthPolicy, ERC165, Context, Reentr
     IENSGuilds public immutable ensGuilds;
 
     constructor(IENSGuilds _ensGuilds) {
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
         ensGuilds = _ensGuilds;
     }
 
     modifier onlyEnsGuildsContract() {
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(_msgSender() == address(ensGuilds));
         _;
     }
 
     modifier onlyGuildAdmin(bytes32 guildEnsNode) {
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(ensGuilds.guildAdmin(guildEnsNode) == _msgSender());
         _;
     }

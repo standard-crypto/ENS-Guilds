@@ -1,9 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/ResolverBase.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "./IPublicResolver.sol";
+import { ResolverBase } from "@ensdomains/ens-contracts/contracts/resolvers/ResolverBase.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {
+    IPublicResolver,
+    IABIResolver,
+    IAddrResolver,
+    IAddressResolver,
+    IContentHashResolver,
+    IDNSRecordResolver,
+    IDNSZoneResolver,
+    IInterfaceResolver,
+    INameResolver,
+    IPubkeyResolver,
+    ITextResolver
+} from "./IPublicResolver.sol";
 
 /**
  * @dev PassthroughResolver is an ENS Resolver that forwards all calls to a

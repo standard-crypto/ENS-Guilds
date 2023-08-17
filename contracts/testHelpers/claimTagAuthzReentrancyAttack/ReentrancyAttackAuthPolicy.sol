@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import "../../tagsAuthPolicies/ITagsAuthPolicy.sol";
-import "./IClaimGuildTagReentrancyAttacker.sol";
+import { ITagsAuthPolicy } from "../../tagsAuthPolicies/ITagsAuthPolicy.sol";
+import { IClaimGuildTagReentrancyAttacker } from "./IClaimGuildTagReentrancyAttacker.sol";
 
 /**
  * ReentrancyAttackAuthPolicy is a dummy TagsAuthPolicy that includes logic in

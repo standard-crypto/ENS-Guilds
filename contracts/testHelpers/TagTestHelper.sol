@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ERC165, IERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
+import { ITagsAuthPolicy } from "../tagsAuthPolicies/ITagsAuthPolicy.sol";
 
 contract TagTestHelper is ITagsAuthPolicy, ERC165 {
     string private _onTagClaimedRetVal;

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
-import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { INameWrapper } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
+import { IExtendedResolver } from "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 
-import "../libraries/ENSParentName.sol";
-import "../libraries/ENSByteUtils.sol";
-import "./PassthroughResolver.sol";
+import { ENSParentName } from "../libraries/ENSParentName.sol";
+import { ENSByteUtils } from "../libraries/ENSByteUtils.sol";
+import { PassthroughResolver } from "./PassthroughResolver.sol";
 
 abstract contract WildcardResolverBase is IExtendedResolver, Context, PassthroughResolver {
     using ENSByteUtils for address;

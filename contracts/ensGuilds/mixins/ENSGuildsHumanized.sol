@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../interfaces/IENSGuilds.sol";
-import "../interfaces/IENSGuildsHumanized.sol";
-import "../../libraries/ENSNamehash.sol";
+import { IENSGuildsHumanized } from "../interfaces/IENSGuildsHumanized.sol";
+import { ENSNamehash } from "../../libraries/ENSNamehash.sol";
 
 abstract contract ENSGuildsHumanized is IENSGuildsHumanized {
     using ENSNamehash for bytes;

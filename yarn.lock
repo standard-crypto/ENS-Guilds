@@ -2055,7 +2055,7 @@ __metadata:
     prettier: ^2.8.0
     prettier-plugin-solidity: ^1.0.0
     shx: ^0.3.4
-    solhint: ^3.3.7
+    solhint: ^3.4.1
     solhint-plugin-prettier: ^0.0.5
     solidity-coverage: ^0.8.3
     ts-generator: ^0.1.1
@@ -10162,7 +10162,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.0.0, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8":
+"semver@npm:^7.0.0, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.2":
   version: 7.5.4
   resolution: "semver@npm:7.5.4"
   dependencies:
@@ -10396,9 +10396,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"solhint@npm:^3.3.7":
-  version: 3.4.1
-  resolution: "solhint@npm:3.4.1"
+"solhint@npm:^3.4.1":
+  version: 3.6.1
+  resolution: "solhint@npm:3.6.1"
   dependencies:
     "@solidity-parser/parser": ^0.16.0
     ajv: ^6.12.6
@@ -10414,7 +10414,7 @@ __metadata:
     lodash: ^4.17.21
     pluralize: ^8.0.0
     prettier: ^2.8.3
-    semver: ^6.3.0
+    semver: ^7.5.2
     strip-ansi: ^6.0.1
     table: ^6.8.1
     text-table: ^0.2.0
@@ -10423,7 +10423,7 @@ __metadata:
       optional: true
   bin:
     solhint: solhint.js
-  checksum: 4f81b5bac126c6b07ac36be887c0b120263b5628671d8433c5a20ed9f8168ec6224a706456f1b625c0b9e15143427d229eff497dfea94eca398b63b727c8f7bc
+  checksum: 82f37de46be4f5a78d9ed3818a5be1da06bf78906177b93bbe7c9ad86d880874a2869099db688b3d20b40ed77f312ddf0851f01a3e9672738f5826148aa9e086
   languageName: node
   linkType: hard
 

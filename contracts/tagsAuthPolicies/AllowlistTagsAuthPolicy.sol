@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./BaseTagsAuthPolicy.sol";
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+
+import { BaseTagsAuthPolicy } from "./BaseTagsAuthPolicy.sol";
+import { IENSGuilds } from "../ensGuilds/interfaces/IENSGuilds.sol";
 
 /**
  * @title AllowlistTagsAuthPolicy

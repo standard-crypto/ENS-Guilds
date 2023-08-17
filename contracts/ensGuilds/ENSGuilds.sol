@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import { INameWrapper, CAN_DO_EVERYTHING } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { ERC1155Holder } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import { ERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/ERC1155Receiver.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { INameWrapper } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 
-import "../feePolicies/IFeePolicy.sol";
-import "../tagsAuthPolicies/ITagsAuthPolicy.sol";
-import "../libraries/ENSNamehash.sol";
-import "./interfaces/IENSGuilds.sol";
-import "./mixins/GuildTagTokens.sol";
-import "./mixins/ENSGuildsHumanized.sol";
-import "./GuildsResolver.sol";
+import { IFeePolicy } from "../feePolicies/IFeePolicy.sol";
+import { ITagsAuthPolicy } from "../tagsAuthPolicies/ITagsAuthPolicy.sol";
+import { ENSNamehash } from "../libraries/ENSNamehash.sol";
+import { IENSGuilds } from "./interfaces/IENSGuilds.sol";
+import { GuildTagTokens } from "./mixins/GuildTagTokens.sol";
+import { ENSGuildsHumanized } from "./mixins/ENSGuildsHumanized.sol";
+import { GuildsResolver } from "./GuildsResolver.sol";
 
 contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Holder, ReentrancyGuard, ReverseClaimer {
     struct GuildInfo {
@@ -243,7 +245,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         address[] calldata recipients,
         bytes[] calldata extraClaimArgs
     ) external payable override {
-        for (uint i = 0; i < tags.length; i++) {
+        for (uint256 i = 0; i < tags.length; i++) {
             claimGuildTag(guildEnsNode, tags[i], recipients[i], extraClaimArgs[i]);
         }
     }
@@ -317,7 +319,7 @@ contract ENSGuilds is IENSGuilds, ENSGuildsHumanized, GuildTagTokens, ERC1155Hol
         string[] calldata tags,
         bytes[] calldata extraData
     ) external override {
-        for (uint i = 0; i < tags.length; i++) {
+        for (uint256 i = 0; i < tags.length; i++) {
             revokeGuildTag(guildHash, tags[i], extraData[i]);
         }
     }

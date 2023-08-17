@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { NameEncoder } from "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { INameWrapper } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 
-import "../ensWildcardResolvers/WildcardResolverBase.sol";
-import "../libraries/ENSByteUtils.sol";
-import "./interfaces/IENSGuilds.sol";
+import { WildcardResolverBase } from "../ensWildcardResolvers/WildcardResolverBase.sol";
+import { IENSGuilds } from "./interfaces/IENSGuilds.sol";
 
 contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
     using NameEncoder for string;
@@ -20,7 +21,7 @@ contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
     mapping(bytes32 => uint256) private _guildRecordVersions;
 
     modifier onlyEnsGuildsContract() {
-        // solhint-disable-next-line reason-string
+        // solhint-disable-next-line reason-string, custom-errors
         require(_msgSender() == address(ensGuilds));
         _;
     }
@@ -34,10 +35,10 @@ contract GuildsResolver is WildcardResolverBase, ReverseClaimer {
     }
 
     function initialize(IENSGuilds _ensGuilds) external {
-        // solhint-disable reason-string
+        // solhint-disable reason-string, custom-errors
         require(address(ensGuilds) == address(0));
         require(_ensGuilds.supportsInterface(type(IENSGuilds).interfaceId));
-        // solhint-enable reason-string
+        // solhint-enable reason-string, custom-errors
 
         ensGuilds = _ensGuilds;
     }

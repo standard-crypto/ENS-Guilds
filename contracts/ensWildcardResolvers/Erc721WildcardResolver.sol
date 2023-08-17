@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
-import "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "../libraries/ENSNamehash.sol";
-import "../libraries/StringParsing.sol";
-import "./WildcardResolverBase.sol";
+import { NameEncoder } from "@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol";
+import { ReverseClaimer } from "@ensdomains/ens-contracts/contracts/reverseRegistrar/ReverseClaimer.sol";
+import { ENS } from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import { INameWrapper } from "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+
+import { ENSNamehash } from "../libraries/ENSNamehash.sol";
+import { StringParsing } from "../libraries/StringParsing.sol";
+import { WildcardResolverBase } from "./WildcardResolverBase.sol";
 
 contract Erc721WildcardResolver is WildcardResolverBase, ReverseClaimer {
     using ENSNamehash for bytes;
