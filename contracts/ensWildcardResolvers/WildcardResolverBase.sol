@@ -143,6 +143,7 @@ abstract contract WildcardResolverBase is IExtendedResolver, Context, Passthroug
             extraData,
             (address, bytes4, bytes)
         );
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory data) = inner.call(
             abi.encodeWithSelector(innerCallbackFunction, response, innerExtraData)
         );

@@ -41,7 +41,7 @@ function _testSuite(): void {
     });
   });
 
-  it("An ENS name manager can technicaly transfer ownership of the name it manages", async function () {
+  it("An ENS name manager can technically transfer ownership of the name it manages", async function () {
     const { ensRegistry, ensNameWrapper } = this.deployedContracts;
     const { ensNameOwner, ensNode } = this.guildInfo;
 
