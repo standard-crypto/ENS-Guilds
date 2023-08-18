@@ -1,0 +1,40 @@
+{
+  "address": "0x2b1D7EE297A345fF0C57B3c3B0F34b59951756b1",
+  "abi": [],
+  "transactionHash": "0xcd5d5ceca0f4fcfb9ff35cbb75b878cf1d1de3d11a842d841528e6f7f949189e",
+  "receipt": {
+    "to": null,
+    "from": "0xB6a6c32CCe5B5E963277A66019309EBf13f59F12",
+    "contractAddress": "0x2b1D7EE297A345fF0C57B3c3B0F34b59951756b1",
+    "transactionIndex": 83,
+    "gasUsed": "63360",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x2e595f4e9ba54aae85aff248f3b2e2f374319bd93af8b7c03e63f580faf390d3",
+    "transactionHash": "0xcd5d5ceca0f4fcfb9ff35cbb75b878cf1d1de3d11a842d841528e6f7f949189e",
+    "logs": [],
+    "blockNumber": 17937687,
+    "cumulativeGasUsed": "6021785",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "173e5a1cf0bdf9c98b940070d342aae3",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol\":\"NameEncoder\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"@ensdomains/ens-contracts/contracts/utils/NameEncoder.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.13;\\n\\nimport {BytesUtils} from \\\"../wrapper/BytesUtils.sol\\\";\\n\\nlibrary NameEncoder {\\n    using BytesUtils for bytes;\\n\\n    function dnsEncodeName(\\n        string memory name\\n    ) internal pure returns (bytes memory dnsName, bytes32 node) {\\n        uint8 labelLength = 0;\\n        bytes memory bytesName = bytes(name);\\n        uint256 length = bytesName.length;\\n        dnsName = new bytes(length + 2);\\n        node = 0;\\n        if (length == 0) {\\n            dnsName[0] = 0;\\n            return (dnsName, node);\\n        }\\n\\n        // use unchecked to save gas since we check for an underflow\\n        // and we check for the length before the loop\\n        unchecked {\\n            for (uint256 i = length - 1; i >= 0; i--) {\\n                if (bytesName[i] == \\\".\\\") {\\n                    dnsName[i + 1] = bytes1(labelLength);\\n                    node = keccak256(\\n                        abi.encodePacked(\\n                            node,\\n                            bytesName.keccak(i + 1, labelLength)\\n                        )\\n                    );\\n                    labelLength = 0;\\n                } else {\\n                    labelLength += 1;\\n                    dnsName[i + 1] = bytesName[i];\\n                }\\n                if (i == 0) {\\n                    break;\\n                }\\n            }\\n        }\\n\\n        node = keccak256(\\n            abi.encodePacked(node, bytesName.keccak(0, labelLength))\\n        );\\n\\n        dnsName[0] = bytes1(labelLength);\\n        return (dnsName, node);\\n    }\\n}\\n\",\"keccak256\":\"0x63fd5f360cef8c9b8b8cfdff20d3f0e955b4c8ac7dfac758788223c61678aad1\",\"license\":\"MIT\"},\"@ensdomains/ens-contracts/contracts/wrapper/BytesUtils.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity ~0.8.17;\\n\\nlibrary BytesUtils {\\n    /*\\n     * @dev Returns the keccak-256 hash of a byte range.\\n     * @param self The byte string to hash.\\n     * @param offset The position to start hashing at.\\n     * @param len The number of bytes to hash.\\n     * @return The hash of the byte range.\\n     */\\n    function keccak(\\n        bytes memory self,\\n        uint256 offset,\\n        uint256 len\\n    ) internal pure returns (bytes32 ret) {\\n        require(offset + len <= self.length);\\n        assembly {\\n            ret := keccak256(add(add(self, 32), offset), len)\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the ENS namehash of a DNS-encoded name.\\n     * @param self The DNS-encoded name to hash.\\n     * @param offset The offset at which to start hashing.\\n     * @return The namehash of the name.\\n     */\\n    function namehash(\\n        bytes memory self,\\n        uint256 offset\\n    ) internal pure returns (bytes32) {\\n        (bytes32 labelhash, uint256 newOffset) = readLabel(self, offset);\\n        if (labelhash == bytes32(0)) {\\n            require(offset == self.length - 1, \\\"namehash: Junk at end of name\\\");\\n            return bytes32(0);\\n        }\\n        return\\n            keccak256(abi.encodePacked(namehash(self, newOffset), labelhash));\\n    }\\n\\n    /**\\n     * @dev Returns the keccak-256 hash of a DNS-encoded label, and the offset to the start of the next label.\\n     * @param self The byte string to read a label from.\\n     * @param idx The index to read a label at.\\n     * @return labelhash The hash of the label at the specified index, or 0 if it is the last label.\\n     * @return newIdx The index of the start of the next label.\\n     */\\n    function readLabel(\\n        bytes memory self,\\n        uint256 idx\\n    ) internal pure returns (bytes32 labelhash, uint256 newIdx) {\\n        require(idx < self.length, \\\"readLabel: Index out of bounds\\\");\\n        uint256 len = uint256(uint8(self[idx]));\\n        if (len > 0) {\\n            labelhash = keccak(self, idx + 1, len);\\n        } else {\\n            labelhash = bytes32(0);\\n        }\\n        newIdx = idx + len + 1;\\n    }\\n}\\n\",\"keccak256\":\"0xf862cd86d749158a554e3cb517efa9097331ec0cf7225117f21e96fb50c67edb\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x602d6037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

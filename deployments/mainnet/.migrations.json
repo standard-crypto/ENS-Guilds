@@ -1,0 +1,9 @@
+{
+  "000_deploy_libraries": 1692313502,
+  "001_deploy_guilds_resolver": 1692333961,
+  "002_deploy_ens_guilds": 1692333978,
+  "003_deploy_auth_policies": 1692334105,
+  "004_deploy_fee_policies": 1692334118,
+  "005_deploy_nft_wildcard_resolver": 1692335126,
+  "006_deploy_digidaigaku_resolver": 1692335161
+}

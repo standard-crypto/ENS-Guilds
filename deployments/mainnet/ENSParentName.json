@@ -1,0 +1,40 @@
+{
+  "address": "0xeE1CcD12e954bFD828EEb4Ca3B76cfE4cbc42C76",
+  "abi": [],
+  "transactionHash": "0xe9c49d2e3fae0556f2e2dd8be952bd20d20fe1e02b179611d638c74691f99d80",
+  "receipt": {
+    "to": null,
+    "from": "0xB6a6c32CCe5B5E963277A66019309EBf13f59F12",
+    "contractAddress": "0xeE1CcD12e954bFD828EEb4Ca3B76cfE4cbc42C76",
+    "transactionIndex": 47,
+    "gasUsed": "63360",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xe7fde10a9fb74679d7942a5c6e221750e35a0f2ac5fbb2192736e186686e6f5a",
+    "transactionHash": "0xe9c49d2e3fae0556f2e2dd8be952bd20d20fe1e02b179611d638c74691f99d80",
+    "logs": [],
+    "blockNumber": 17937690,
+    "cumulativeGasUsed": "4195394",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "173e5a1cf0bdf9c98b940070d342aae3",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/ENSParentName.sol\":\"ENSParentName\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[]},\"sources\":{\"contracts/libraries/ENSParentName.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.4;\\n\\nlibrary ENSParentName {\\n    /**\\n     * @dev Finds the parent name of a given ENS name, or the empty string if there is no parent.\\n     *      Assumes the given name is already a well-formed ENS name, and does not check for invalid input.\\n     * @param name A DNS-encoded name, e.g. 0x03666f6f03626172047465737400 for the name `foo.bar.test`\\n     * @return child The UTF8-encoded child label, e.g. 0x666f6f for `foo`\\n     * @return parent The DNS-encoded parent, e.g. 03626172047465737400 for `bar.test`\\n     */\\n    function splitParentChildNames(\\n        bytes calldata name\\n    ) internal pure returns (bytes calldata child, bytes calldata parent) {\\n        uint8 labelLength = uint8(name[0]);\\n        return (name[1:labelLength + 1], name[labelLength + 1:]);\\n    }\\n}\\n\",\"keccak256\":\"0x8dc36dc3f1ff0ddc7a73a7f9c410999571fc9c4ea0157b294993f4f215ba2b5f\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x602d6037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000811000a",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
