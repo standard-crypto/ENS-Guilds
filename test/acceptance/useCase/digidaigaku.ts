@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { type BytesLike, namehash } from "ethers";
-import { ethers, getNamedAccounts } from "hardhat";
+import { ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 
 import { type ENS, type TestERC721, TestERC721__factory } from "../../../types";
 import { resolveAddr, resolveText } from "../../../utils";
@@ -66,6 +66,37 @@ export function testDigidaigaku(): void {
       // Check that addie.digidaigaku.eth resolves to the address of the owner
       const resolvedAddr = await resolveAddr(ens, `${digiName}.${digisDomain}`, { enableCcip: true });
       expect(resolvedAddr).to.eq(digiOwner);
+    });
+
+    it("tries to resolve a transferred Digi with a token id", async function () {
+      const digiId = 438;
+      const digiOwner = await digisContract.ownerOf(digiId);
+      const [digiTransferRecipient] = await getUnnamedAccounts();
+
+      // Transfer the Digi to a new account
+      await asAccount(digiOwner, async (signer) => {
+        await digisContract.connect(signer).transferFrom(digiOwner, digiTransferRecipient, digiId);
+      });
+
+      // Check that 438.digidaigaku.eth resolves to the address of the recipient
+      const resolvedAddr = await resolveAddr(ens, `${digiId}.${digisDomain}`);
+      expect(resolvedAddr).to.eq(digiTransferRecipient);
+    });
+
+    it("tries to resolve a transferred Digi with a name [ @skip-on-coverage ]", async function () {
+      const digiId = 523;
+      const digiName = "addie";
+      const digiOwner = await digisContract.ownerOf(digiId);
+      const [digiTransferRecipient] = await getUnnamedAccounts();
+
+      // Transfer the Digi to a new account
+      await asAccount(digiOwner, async (signer) => {
+        await digisContract.connect(signer).transferFrom(digiOwner, digiTransferRecipient, digiId);
+      });
+
+      // Check that addie.digidaigaku.eth resolves to the address of the recipient
+      const resolvedAddr = await resolveAddr(ens, `${digiName}.${digisDomain}`, { enableCcip: true });
+      expect(resolvedAddr).to.eq(digiTransferRecipient);
     });
 
     it("tries to resolve a text record with a token id", async function () {
